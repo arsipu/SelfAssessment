@@ -1,222 +1,130 @@
 <template>
-  <div class="login-wrapper">
-    <div class="login-card">
-      <div class="login-header">
-        <span class="brand-logo">SA</span>
-        <h1 class="brand-name">SelfAssessment</h1>
-        <p class="brand-sub">Portal Admin</p>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div class="w-full max-w-sm">
+
+      <!-- Logo / Brand -->
+      <div class="text-center mb-8">
+        <div class="w-10 h-10 bg-gray-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="6" r="3" stroke="white" stroke-width="1.5"/>
+            <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 class="text-lg font-medium text-gray-900">Self Assessment</h1>
+        <p class="text-sm text-gray-400 mt-1">Masuk ke panel admin</p>
       </div>
 
-      <form class="login-form" @submit.prevent="handleLogin">
-        <div class="field">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="admin@example.com"
-            autocomplete="email"
+      <!-- Card -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+        <form @submit.prevent="handleLogin" class="space-y-4">
+
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-xs font-medium text-gray-600 mb-1.5">
+              Username
+            </label>
+            <input
+              v-model="username"
+              id="username"
+              type="text"
+              required
+              placeholder="username"
+              class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-300 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-xs font-medium text-gray-600 mb-1.5">
+              Kata sandi
+            </label>
+            <div class="relative">
+              <input
+                v-model="password"
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                required
+                placeholder="••••••••"
+                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-300 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors pr-10"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                tabindex="-1"
+              >
+                <svg v-if="!showPassword" class="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                  <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <svg v-else class="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 2l12 12M6.5 6.6A2 2 0 0 0 9.4 9.5M4.2 4.3C2.8 5.3 1.8 6.7 1 8c1.3 2.3 3.8 5 7 5 1.3 0 2.5-.4 3.5-1M6 3.2C6.6 3.1 7.3 3 8 3c3.2 0 5.7 2.7 7 5-.5.9-1.2 1.9-2 2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+          >
+            <div v-if="errorMessage" class="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">
+              <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 5v3M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <p class="text-xs text-red-600 leading-relaxed">{{ errorMessage }}</p>
+            </div>
+          </transition>
+
+          <!-- Submit -->
+          <button
+            type="submit"
             :disabled="isLoading"
-            required
-          />
-        </div>
+            class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          >
+            <svg v-if="isLoading" class="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="28" stroke-dashoffset="10"/>
+            </svg>
+            {{ isLoading ? 'Memproses...' : 'Masuk' }}
+          </button>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            :disabled="isLoading"
-            required
-          />
-        </div>
+        </form>
+      </div>
 
-        <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
+      <!-- Back to home -->
+      <div class="text-center mt-5">
+        <router-link to="/" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          ← Kembali ke beranda
+        </router-link>
+      </div>
 
-        <button type="submit" class="btn-login" :disabled="isLoading">
-          <span v-if="isLoading" class="spinner" />
-          <span>{{ isLoading ? 'Masuk...' : 'Masuk' }}</span>
-        </button>
-      </form>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/authStore'
+import { useUserStore } from '@/stores/user'
 
-const router = useRouter()
-const authStore = useAuthStore()
-
-const email = ref('')
+const username = ref('')
 const password = ref('')
-const errorMsg = ref('')
+const errorMessage = ref(null)
 const isLoading = ref(false)
+const showPassword = ref(false)
 
-async function handleLogin() {
-  errorMsg.value = ''
+const handleLogin = async () => {
   isLoading.value = true
-  try {
-    await authStore.login(email.value, password.value)
-    router.push('/admin/dashboard')
-  } catch (err) {
-    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
-      errorMsg.value = 'Email atau password salah.'
-    } else {
-      errorMsg.value = err.message || 'Terjadi kesalahan, coba lagi.'
-    }
-  } finally {
-    isLoading.value = false
-  }
+  errorMessage.value = null
+  const userStore = useUserStore()
+
+  await userStore.login(username.value + '@gmail.com', password.value).catch((err) => {
+    console.log(err)
+    errorMessage.value = 'Username atau kata sandi salah. Coba lagi.'
+  })
+
+  isLoading.value = false
 }
 </script>
-
-<style scoped>
-.login-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f4ff;
-  padding: 24px;
-}
-
-.login-card {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
-  padding: 40px 36px;
-  width: 100%;
-  max-width: 400px;
-}
-
-/* Header */
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.brand-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  background: #1d4ed8;
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 14px;
-  margin-bottom: 12px;
-}
-
-.brand-name {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 4px;
-}
-
-.brand-sub {
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-
-/* Form */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.field input {
-  padding: 10px 14px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.15s;
-  background: #f9fafb;
-}
-
-.field input:focus {
-  border-color: #1d4ed8;
-  background: #fff;
-}
-
-.field input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Error */
-.error-msg {
-  font-size: 0.85rem;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin: 0;
-}
-
-/* Button */
-.btn-login {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px;
-  background: #1d4ed8;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-top: 4px;
-}
-
-.btn-login:hover:not(:disabled) {
-  background: #1e40af;
-}
-
-.btn-login:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Spinner */
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-</style>

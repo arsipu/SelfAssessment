@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "../stores/authStore.js";
+import { useUserStore } from "../stores/user.js";
 
 import BerandaView from "../pages/dashboard/BerandaView.vue";
 import Holland from "../pages/dashboard/Holland.vue";
@@ -11,7 +11,7 @@ import Hello from "../pages/Hello.vue";
 
 const routes = [
 	// Public
-	{ path: "/", name: "beranda", component: Hello },
+	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/holland", name: "holland", component: Holland },
 	{ path: "/workreadiness", name: "workreadiness", component: WorkReadiness },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
@@ -46,33 +46,28 @@ const router = createRouter({
 	routes,
 });
 
-// Navigation Guard
-// router.beforeEach(async (to) => {
-// 	const authStore = useAuthStore();
-
-// 	// Tunggu sampai auth state selesai dicek (init() di App.vue)
-// 	if (authStore.loading) {
-// 		await new Promise((resolve) => {
-// 			const unwatch = setInterval(() => {
-// 				if (!authStore.loading) {
-// 					clearInterval(unwatch);
-// 					resolve();
-// 				}
-// 			}, 50);
-// 		});
-// 	}
-
-// 	// Halaman login: kalau udah login sebagai admin, langsung ke dashboard
-// 	if (to.meta.guestOnly && authStore.isAdmin) {
-// 		return { name: "admin-dashboard" };
-// 	}
-
-// 	// Halaman admin: kalau belum login / bukan admin, redirect ke login
-// 	if (to.meta.requiresAdmin) {
-// 		if (!authStore.isLoggedIn || !authStore.isAdmin) {
-// 			return { name: "login" };
-// 		}
-// 	}
-// });
+router.beforeEach(async (to) => {
+  const userStore = useUserStore();
+ 
+  // Tunggu auth state selesai
+  await userStore.listenToAuthState();
+ 
+  const user = userStore.user;
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role !== 'user';   // sesuaikan kondisi role admin kamu
+ 
+  // Halaman login: kalau udah login sebagai admin, redirect ke dashboard
+  if (to.meta.guestOnly && isLoggedIn && isAdmin) {
+    return { name: 'admin-dashboard' };
+  }
+ 
+  // Halaman admin: kalau belum login atau bukan admin, redirect ke login
+  if (to.meta.requiresAdmin) {
+    if (!isLoggedIn || !isAdmin) {
+      userStore.returnUrl = to.fullPath;  // simpan tujuan awal
+      return { name: 'login' };
+    }
+  }
+});
 
 export default router;
