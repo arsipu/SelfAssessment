@@ -1,31 +1,32 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useUserStore } from "../stores/user.js";
+import { useUserStore } from '@/stores/user';
 
-import BerandaView from "../pages/dashboard/BerandaView.vue";
-import Holland from "../pages/holland/Holland.vue";
+import BerandaView from '@/pages/dashboard/BerandaView.vue';
+import Holland from '@/pages/holland/Holland.vue';
 
-import WorkReadiness from "../pages/workreadiness/WorkReadiness.vue";
-import WorkReadinessForm from "../pages/workreadiness/WorkReadinessForm.vue";
-import WorkReadinessQuestions from "../pages/workreadiness/WorkReadinessQuestions.vue";
+import Likert from '@/pages/likert/Likert.vue';
+import LikertForm from '@/pages/likert/LikertForm.vue';
+import LikertQuestions from '@/pages/likert/LikertQuestions.vue';
 
-// import AdminDashboardView from "../pages/admin/AdminDashboardView.vue";
-import AdminLayout from "../pages/admin/AdminLayout.vue";
-import AdminOverview from "../pages/admin/AdminOverview.vue";
-import AdminWorkReadiness from "../pages/admin/AdminWorkReadiness.vue";
-import AdminSetting from "../pages/admin/AdminSetting.vue";
+import AdminLayout from '@/pages/admin/AdminLayout.vue';
+import AdminOverview from '@/pages/admin/AdminOverview.vue';
+import AdminSetting from '@/pages/admin/AdminSetting.vue';
 
-import TentangKamiView from "../pages/dashboard/TentangKamiView.vue";
-import LoginView from "../pages/login/LoginPage.vue";
+import AdminLikert from '@/pages/admin/likert/AdminLikert.vue';
+import AdminLikertQuestions from '@/pages/admin/likert/AdminLikertQuestions.vue';
+
+import TentangKamiView from '@/pages/dashboard/TentangKamiView.vue';
+import LoginView from '@/pages/login/LoginPage.vue';
 
 const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/holland", name: "holland", component: Holland },
-	{ path: "/workreadiness", name: "workreadiness", component: WorkReadiness },
+	{ path: "/likert", name: "likert", component: Likert },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
-	{path: "/workreadiness-form", name: "workreadiness-form", component: WorkReadinessForm},
-	{path: "/workreadiness-questions", name: "workreadiness-questions", component: WorkReadinessQuestions},
+	{path: "/likert-form", name: "likert-form", component: LikertForm},
+	{path: "/likert-questions", name: "likert-questions", component: LikertQuestions},
 
 	// Auth
 	{
@@ -34,20 +35,6 @@ const routes = [
 		component: LoginView,
 		meta: { guestOnly: true },
 	},
-
-	
-	// // Admin (protected)
-	// {
-	// 	path: "/admin",
-	// 	meta: { requiresAdmin: true },
-	// 	children: [
-	// 		{
-	// 			path: "dashboard",
-	// 			name: "admin-dashboard",
-	// 			component: AdminDashboardView,
-	// 		},
-	// 	],
-	// },
 	
 	// Admin (protected)
 	{
@@ -66,9 +53,14 @@ const routes = [
                 component: AdminOverview,
             },
             {
-                path: "work-readiness",
-                name: "admin-work-readiness",
-                component: AdminWorkReadiness,
+                path: "likert",
+                name: "admin-likert",
+                component: AdminLikert,
+            },
+            {
+                path: "likert/:id",
+                name: "admin-likert-questions",
+                component: AdminLikertQuestions,
             },
             {
                 path: "setting",

@@ -51,7 +51,7 @@ const userName = computed(() => userStore.user?.displayName ?? 'Admin')
 
 const toggleInstruments = ref([
   { name: 'Holland RIASEC', sub: '36 butir soal', active: true },
-  { name: 'Work Readiness Scale', sub: '28 butir soal', active: true },
+  { name: 'Likert Scale', sub: '28 butir soal', active: true },
   { name: 'Minat Bakat (MBTI)', sub: '40 butir soal', active: false },
 ])
 </script>

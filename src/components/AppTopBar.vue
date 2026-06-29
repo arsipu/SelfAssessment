@@ -62,7 +62,7 @@
             </router-link>
 
             <router-link
-              to="/workreadiness"
+              to="/likert"
               @click="dropdownOpen = false"
               class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
             >
@@ -73,7 +73,7 @@
                 </svg>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-800">Work Readiness</p>
+                <p class="text-sm font-medium text-gray-800">Likert</p>
                 <p class="text-xs text-gray-400">28 butir soal</p>
               </div>
             </router-link>

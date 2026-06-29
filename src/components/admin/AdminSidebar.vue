@@ -68,8 +68,8 @@ const navItems = [
     name: 'admin-overview'
   },
   {
-    label: 'Work Readiness',
-    name: 'admin-work-readiness'
+    label: 'Likert',
+    name: 'admin-likert'
   },
   {
     label: 'Pengaturan',

@@ -8,7 +8,7 @@
         <span class="inline-block text-xs font-medium text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full mb-3">
           Instrumen
         </span>
-        <h1 class="text-2xl font-medium text-gray-900 mb-2">Work Readiness Scale</h1>
+        <h1 class="text-2xl font-medium text-gray-900 mb-2">Likert Scale</h1>
         <p class="text-sm text-gray-500 leading-relaxed">
           Instrumen untuk mengukur sejauh mana kesiapan seseorang dalam memasuki dunia kerja,
           mencakup aspek pengetahuan, sikap, dan keterampilan yang dibutuhkan.
@@ -72,7 +72,7 @@
       <!-- CTA -->
       <div class="flex items-center gap-3">
         <router-link
-          to="/workreadiness-form"
+          to="/likert-form"
           class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           Mulai asesmen

@@ -125,13 +125,13 @@ const riasec = [
 const activities = [
   { icon: 'check_circle', color: 'bg-green-100 text-green-700', text: 'Rizky Ananda menyelesaikan RIASEC', time: '2 menit lalu' },
   { icon: 'person_add', color: 'bg-blue-100 text-blue-700', text: 'Responden baru terdaftar', time: '15 menit lalu' },
-  { icon: 'download', color: 'bg-yellow-100 text-yellow-700', text: 'Laporan Work Readiness diekspor', time: '1 jam lalu' },
-  { icon: 'check_circle', color: 'bg-green-100 text-green-700', text: 'Siti Rahma menyelesaikan Work Readiness', time: '2 jam lalu' },
+  { icon: 'download', color: 'bg-yellow-100 text-yellow-700', text: 'Laporan Likert diekspor', time: '1 jam lalu' },
+  { icon: 'check_circle', color: 'bg-green-100 text-green-700', text: 'Siti Rahma menyelesaikan Likert', time: '2 jam lalu' },
 ]
 
 const instruments = [
   { name: 'Holland RIASEC', sub: '36 butir soal', status: 'Aktif' },
-  { name: 'Work Readiness Scale', sub: '28 butir soal', status: 'Aktif' },
+  { name: 'Likert Scale', sub: '28 butir soal', status: 'Aktif' },
   { name: 'Minat Bakat (MBTI)', sub: '40 butir soal', status: 'Draft' },
   { name: 'Kesiapan Kerja Lanjutan', sub: '–', status: 'Baru' },
 ]

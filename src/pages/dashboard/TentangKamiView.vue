@@ -72,7 +72,7 @@ const instruments = [
   },
   {
     code: 'WRS',
-    name: 'Work Readiness Scale',
+    name: 'Likert Scale',
     desc: 'Instrumen terstandar untuk mengukur kesiapan memasuki dunia kerja dari aspek pengetahuan, sikap, keterampilan, dan kemampuan adaptasi.',
     color: 'bg-blue-100 text-blue-700',
   },

@@ -3,7 +3,7 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
 
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Work Readiness Scale</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Likert Scale</h1>
         <p class="text-sm text-gray-500 mt-1">Skala Kesiapan Kerja (Caballero)</p>
       </div>
 
@@ -96,6 +96,6 @@ const responden = ref({
 
 function goToKuesioner() {
   // store.setResponden(responden.value)
-  router.push({ name: 'workreadiness-questions' })
+  router.push({ name: 'likert-questions' })
 }
 </script>

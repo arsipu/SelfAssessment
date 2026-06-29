@@ -58,14 +58,14 @@ const stats = [
 
 const recentRespondents = [
   { name: 'Rizky Ananda', initials: 'RA', instrument: 'Holland RIASEC', done: true },
-  { name: 'Siti Rahma', initials: 'SR', instrument: 'Work Readiness', done: true },
+  { name: 'Siti Rahma', initials: 'SR', instrument: 'Likert', done: true },
   { name: 'Budi Santoso', initials: 'BS', instrument: 'Holland RIASEC', done: false },
-  { name: 'Dewi Lestari', initials: 'DL', instrument: 'Work Readiness', done: false },
+  { name: 'Dewi Lestari', initials: 'DL', instrument: 'Likert', done: false },
   { name: 'Agus Firmansyah', initials: 'AF', instrument: 'Holland RIASEC', done: true },
 ]
 
 const instrumentProgress = [
   { name: 'Holland RIASEC', done: 112, total: 150, color: '#7F77DD' },
-  { name: 'Work Readiness Scale', done: 71, total: 98, color: '#378ADD' },
+  { name: 'Likert Scale', done: 71, total: 98, color: '#378ADD' },
 ]
 </script>
