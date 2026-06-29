@@ -72,7 +72,7 @@
       <!-- CTA -->
       <div class="flex items-center gap-3">
         <router-link
-          to="/workreadiness/mulai"
+          to="/workreadiness-form"
           class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           Mulai asesmen

@@ -56,17 +56,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Kontak -->
-      <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <h2 class="text-sm font-medium text-gray-800 mb-4">Kontak</h2>
-        <div class="space-y-3">
-          <div v-for="contact in contacts" :key="contact.label" class="flex items-center gap-3 text-sm">
-            <span class="w-20 text-gray-400 shrink-0">{{ contact.label }}</span>
-            <span class="text-gray-700">{{ contact.value }}</span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -94,11 +83,5 @@ const team = [
   { name: 'Anggota Tim', role: 'UI/UX Designer', initials: 'AT', color: 'bg-gray-100 text-gray-700' },
   { name: 'Anggota Tim', role: 'Data Analyst', initials: 'AT', color: 'bg-gray-100 text-gray-700' },
   { name: 'Anggota Tim', role: 'Content Writer', initials: 'AT', color: 'bg-gray-100 text-gray-700' },
-]
-
-const contacts = [
-  { label: 'Email', value: 'halo@selfassessment.id' },
-  { label: 'Institusi', value: 'Universitas Terbuka' },
-  { label: 'Program', value: 'Sistem Informasi' },
 ]
 </script>

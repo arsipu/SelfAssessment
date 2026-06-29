@@ -108,7 +108,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const username = ref('')
 const password = ref('')
 const errorMessage = ref(null)
@@ -120,11 +122,23 @@ const handleLogin = async () => {
   errorMessage.value = null
   const userStore = useUserStore()
 
-  await userStore.login(username.value + '@gmail.com', password.value).catch((err) => {
-    console.log(err)
+  try {
+    await userStore.login(username.value + '@gmail.com', password.value)
+    
+    router.push({ name: 'admin-overview' }) 
+    
+  } catch (err) {
+    console.error(err)
     errorMessage.value = 'Username atau kata sandi salah. Coba lagi.'
-  })
+  } finally {
+    isLoading.value = false
+  }
+  
+  // await userStore.login(username.value + '@gmail.com', password.value).catch((err) => {
+  //   console.log(err)
+  //   errorMessage.value = 'Username atau kata sandi salah. Coba lagi.'
+  // })
 
-  isLoading.value = false
+  // isLoading.value = false
 }
 </script>

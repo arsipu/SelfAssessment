@@ -2,12 +2,20 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "../stores/user.js";
 
 import BerandaView from "../pages/dashboard/BerandaView.vue";
-import Holland from "../pages/dashboard/Holland.vue";
-import WorkReadiness from "../pages/dashboard/WorkReadiness.vue";
+import Holland from "../pages/holland/Holland.vue";
+
+import WorkReadiness from "../pages/workreadiness/WorkReadiness.vue";
+import WorkReadinessForm from "../pages/workreadiness/WorkReadinessForm.vue";
+import WorkReadinessQuestions from "../pages/workreadiness/WorkReadinessQuestions.vue";
+
+// import AdminDashboardView from "../pages/admin/AdminDashboardView.vue";
+import AdminLayout from "../pages/admin/AdminLayout.vue";
+import AdminOverview from "../pages/admin/AdminOverview.vue";
+import AdminWorkReadiness from "../pages/admin/AdminWorkReadiness.vue";
+import AdminSetting from "../pages/admin/AdminSetting.vue";
+
 import TentangKamiView from "../pages/dashboard/TentangKamiView.vue";
 import LoginView from "../pages/login/LoginPage.vue";
-import AdminDashboardView from "../pages/admin/AdminDashboardView.vue";
-import Hello from "../pages/Hello.vue";
 
 const routes = [
 	// Public
@@ -15,6 +23,9 @@ const routes = [
 	{ path: "/holland", name: "holland", component: Holland },
 	{ path: "/workreadiness", name: "workreadiness", component: WorkReadiness },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
+
+	{path: "/workreadiness-form", name: "workreadiness-form", component: WorkReadinessForm},
+	{path: "/workreadiness-questions", name: "workreadiness-questions", component: WorkReadinessQuestions},
 
 	// Auth
 	{
@@ -24,17 +35,47 @@ const routes = [
 		meta: { guestOnly: true },
 	},
 
+	
+	// // Admin (protected)
+	// {
+	// 	path: "/admin",
+	// 	meta: { requiresAdmin: true },
+	// 	children: [
+	// 		{
+	// 			path: "dashboard",
+	// 			name: "admin-dashboard",
+	// 			component: AdminDashboardView,
+	// 		},
+	// 	],
+	// },
+	
 	// Admin (protected)
 	{
 		path: "/admin",
-		meta: { requiresAdmin: true },
-		children: [
-			{
-				path: "dashboard",
-				name: "admin-dashboard",
-				component: AdminDashboardView,
-			},
-		],
+        component: AdminLayout, // Jadikan layout sebagai parent component
+        meta: { requiresAdmin: true },
+        children: [
+            // Redirect '/admin' langsung ke '/admin/dashboard'
+            { 
+                path: "", 
+                redirect: { name: "admin-overview" } 
+            },
+            {
+                path: "dashboard",
+                name: "admin-overview",
+                component: AdminOverview,
+            },
+            {
+                path: "work-readiness",
+                name: "admin-work-readiness",
+                component: AdminWorkReadiness,
+            },
+            {
+                path: "setting",
+                name: "admin-setting",
+                component: AdminSetting,
+            },
+        ],
 	},
 
 	// Fallback
@@ -58,7 +99,7 @@ router.beforeEach(async (to) => {
  
   // Halaman login: kalau udah login sebagai admin, redirect ke dashboard
   if (to.meta.guestOnly && isLoggedIn && isAdmin) {
-    return { name: 'admin-dashboard' };
+    return { name: 'admin-overview' };
   }
  
   // Halaman admin: kalau belum login atau bukan admin, redirect ke login
