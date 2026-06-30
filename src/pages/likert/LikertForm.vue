@@ -3,8 +3,8 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
 
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Likert Scale</h1>
-        <p class="text-sm text-gray-500 mt-1">Skala Kesiapan Kerja (Caballero)</p>
+        <h1 class="text-2xl font-bold text-gray-900">{{ likertStore.currentLikert?.name }}</h1>
+        <p class="text-sm text-gray-500 mt-1">{{ likertStore.currentLikert?.description }}</p>
       </div>
 
       <!-- <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800 leading-relaxed mb-8">
@@ -82,20 +82,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-// import { useAssessmentStore } from '@/stores/assessmentStore'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useLikertStore } from '@/stores/likert'
 
+const route = useRoute()
 const router = useRouter()
-// const store = useAssessmentStore()
+const likertStore = useLikertStore()
+
+const likertId = route.params.id
 
 const responden = ref({
   nama: '', kelas: '', sekolah: '', jurusan: '',
   usia: '', jenisKelamin: '', pkl: ''
 })
 
+onMounted(async () => {
+  await likertStore.getLikertById(likertId)
+})
+
 function goToKuesioner() {
-  // store.setResponden(responden.value)
-  router.push({ name: 'likert-questions' })
+  likertStore.setRespondent({ ...responden.value })
+  router.push({ name: 'likert-questions', params: { id: likertId } })
 }
 </script>

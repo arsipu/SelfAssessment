@@ -42,6 +42,7 @@
               <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-16">No</th>
               <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Formulir</th>
               <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Deskripsi</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-32">Status</th>
               <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-40">Aksi</th>
             </tr>
           </thead>
@@ -61,6 +62,39 @@
                 </button>
               </td>
               <td class="px-5 py-3 text-sm text-gray-500 max-w-xs truncate">{{ likert.description }}</td>
+              <td class="px-5 py-3">
+                <div class="relative inline-block">
+                  <button
+                    @click="toggleStatusMenu(likert.id)"
+                    :class="statusBadgeClass(likert.status)"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(likert.status)"></span>
+                    {{ statusLabel(likert.status) }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <!-- Dropdown -->
+                  <div
+                    v-if="openStatusMenuId === likert.id"
+                    v-click-outside="closeStatusMenu"
+                    class="absolute z-10 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+                  >
+                    <button
+                      v-for="s in statusOptions"
+                      :key="s.value"
+                      @click="changeStatus(likert.id, s.value)"
+                      class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                      :class="{ 'bg-gray-50 font-medium': likert.status === s.value }"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full" :class="s.dot"></span>
+                      {{ s.label }}
+                    </button>
+                  </div>
+                </div>
+              </td>
               <td class="px-5 py-3">
                 <div class="flex items-center gap-2">
                   <button
@@ -193,11 +227,55 @@ const form = ref({ name: '', description: '' })
 
 const isFormValid = computed(() => form.value.name.trim() !== '')
 
+const openStatusMenuId = ref(null)
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft', dot: 'bg-gray-400' },
+  { value: 'published', label: 'Published', dot: 'bg-green-500' },
+  { value: 'archived', label: 'Archived', dot: 'bg-red-400' },
+]
+
 onMounted(async () => {
   console.log('Mounted')
   await likertStore.fetchLikerts()
   console.log('Likerts:', likerts.value)
 })
+
+const statusLabel = (status) => {
+  return statusOptions.find((s) => s.value === status)?.label || 'Draft'
+}
+
+const statusDotClass = (status) => {
+  return statusOptions.find((s) => s.value === status)?.dot || 'bg-gray-400'
+}
+
+const statusBadgeClass = (status) => {
+  switch (status) {
+    case 'published':
+      return 'bg-green-50 text-green-700 hover:bg-green-100'
+    case 'archived':
+      return 'bg-red-50 text-red-700 hover:bg-red-100'
+    default:
+      return 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+  }
+}
+
+const toggleStatusMenu = (id) => {
+  openStatusMenuId.value = openStatusMenuId.value === id ? null : id
+}
+
+const closeStatusMenu = () => {
+  openStatusMenuId.value = null
+}
+
+const changeStatus = async (id, status) => {
+  closeStatusMenu()
+  try {
+    await likertStore.updateLikertStatus(id, status)
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 const goToQuestions = (id) => {
   router.push({ name: 'admin-likert-questions', params: { id } })

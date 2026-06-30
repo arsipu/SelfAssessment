@@ -7,6 +7,7 @@ import Holland from '@/pages/holland/Holland.vue';
 import Likert from '@/pages/likert/Likert.vue';
 import LikertForm from '@/pages/likert/LikertForm.vue';
 import LikertQuestions from '@/pages/likert/LikertQuestions.vue';
+import LikertResult from '@/pages/likert/LikertResult.vue';
 
 import AdminLayout from '@/pages/admin/AdminLayout.vue';
 import AdminOverview from '@/pages/admin/AdminOverview.vue';
@@ -22,11 +23,13 @@ const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/holland", name: "holland", component: Holland },
-	{ path: "/likert", name: "likert", component: Likert },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
-	{path: "/likert-form", name: "likert-form", component: LikertForm},
-	{path: "/likert-questions", name: "likert-questions", component: LikertQuestions},
+
+    { path: "/likert", name: "likert", component: Likert },
+    { path: "/likert-form/:id", name: "likert-form", component: LikertForm },
+    { path: "/likert-questions/:id", name: "likert-questions", component: LikertQuestions },
+    { path: "/likert-result/:id", name: "likert-result", component: LikertResult },
 
 	// Auth
 	{

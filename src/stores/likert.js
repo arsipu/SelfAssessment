@@ -17,6 +17,16 @@ export const useLikertStore = defineStore('likert', () => {
   const currentLikert = ref(null)
   const questions = ref([])
   const loading = ref(false)
+  const respondent = ref(null)
+  const lastResult = ref(null) // { totalScore } untuk halaman hasil
+
+  const setRespondent = (data) => {
+    respondent.value = data
+  }
+
+  const setLastResult = (data) => {
+    lastResult.value = data
+  }
 
   // ── Likert (surveys) ──────────────────────────────────────
 
@@ -52,7 +62,13 @@ export const useLikertStore = defineStore('likert', () => {
   const addLikert = async ({ name, description }) => {
     console.log('Adding likert:', name)
     try {
-      const ref = await addDoc(collection(db, 'likert'), { name, description })
+      const ref = await addDoc(collection(db, 'likert'), { 
+        name,
+        description,
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
       console.log('Likert added with ID:', ref.id)
       await fetchLikerts()
       return ref.id
@@ -65,7 +81,11 @@ export const useLikertStore = defineStore('likert', () => {
   const updateLikert = async (likertId, { name, description }) => {
     console.log('Updating likert:', likertId)
     try {
-      await updateDoc(doc(db, 'likert', likertId), { name, description })
+      await updateDoc(doc(db, 'likert', likertId), { 
+        name, 
+        description,
+        updatedAt: serverTimestamp(),
+      })
       console.log('Likert updated:', likertId)
       await fetchLikerts()
     } catch (error) {
@@ -86,6 +106,15 @@ export const useLikertStore = defineStore('likert', () => {
     }
   }
 
+  const updateLikertStatus = async (id, status) => {
+    await updateDoc(doc(db, 'likert', id), {
+      status,
+      updatedAt: serverTimestamp(),
+    })
+
+    await fetchLikerts()
+  }
+
   // ── Questions (subcollection) ─────────────────────────────
 
   const fetchQuestions = async (likertId) => {
@@ -103,15 +132,24 @@ export const useLikertStore = defineStore('likert', () => {
     return questions.value
   }
 
-  const addQuestion = async (likertId, { question, category, favorable }) => {
+  const addQuestion = async (likertId, { question, categoryId, favorable }) => {
     console.log('Adding question to likert:', likertId)
     try {
       const ref = await addDoc(collection(db, 'likert', likertId, 'questions'), {
         question,
-        category,
+        categoryId,
         favorable,
         updatedAt: serverTimestamp(),
       })
+
+      // update lokal
+      questions.value.push({
+        id: ref.id,
+        question,
+        categoryId,
+        favorable,
+      })
+
       console.log('Question added with ID:', ref.id)
       await fetchQuestions(likertId)
       return ref.id
@@ -121,15 +159,20 @@ export const useLikertStore = defineStore('likert', () => {
     }
   }
 
-  const updateQuestion = async (likertId, questionId, { question, category, favorable }) => {
+  const updateQuestion = async (likertId, questionId, { question, categoryId, favorable }) => {
     console.log('Updating question:', questionId)
     try {
       await updateDoc(doc(db, 'likert', likertId, 'questions', questionId), {
         question,
-        category,
+        categoryId,
         favorable,
         updatedAt: serverTimestamp(),
       })
+
+      // update lokal
+      const idx = questions.value.findIndex(q => q.id === questionId)
+      if (idx !== -1) questions.value[idx] = { ...questions.value[idx], question, categoryId, favorable }
+
       console.log('Question updated:', questionId)
       await fetchQuestions(likertId)
     } catch (error) {
@@ -142,6 +185,9 @@ export const useLikertStore = defineStore('likert', () => {
     console.log('Deleting question:', questionId)
     try {
       await deleteDoc(doc(db, 'likert', likertId, 'questions', questionId))
+
+      // filter lokal
+      questions.value = questions.value.filter(q => q.id !== questionId)
       console.log('Question deleted:', questionId)
       await fetchQuestions(likertId)
     } catch (error) {
@@ -149,6 +195,29 @@ export const useLikertStore = defineStore('likert', () => {
       throw error
     }
   }
+
+
+  const submitAnswers = async (likertId, respondentData, submissionResult, totalScore) => {
+  try {
+    const ref = await addDoc(collection(db, 'likert', likertId, 'submissions'), {
+      name: respondentData.nama,
+      class: respondentData.kelas,
+      school: respondentData.sekolah,
+      major: respondentData.jurusan,
+      age: respondentData.usia,
+      gender: respondentData.jenisKelamin,
+      internship: respondentData.pkl,
+      submission: submissionResult,
+      totalScore,
+      createdAt: serverTimestamp(),
+    })
+    console.log('Submission saved:', ref.id)
+    return ref.id
+  } catch (error) {
+    console.error('Error submitting answers:', error)
+    throw error
+  }
+}
 
   return {
     likerts,
@@ -164,5 +233,9 @@ export const useLikertStore = defineStore('likert', () => {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    respondent,
+    setRespondent,
+    submitAnswers,
+    updateLikertStatus,
   }
 })

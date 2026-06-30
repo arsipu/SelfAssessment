@@ -6,12 +6,9 @@
 
       <!-- Header -->
       <div class="mb-6">
-        <router-link to="/likert-form" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+        <!-- <router-link to="/likert-form" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
           ← Kembali
-        </router-link>
-        <!-- <button @click="goBack" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            ← Kembali
-        </button> -->
+        </router-link> -->
         <h1 class="text-xl font-medium text-gray-900 mt-3">Likert Scale</h1>
         <p class="text-sm text-gray-400 mt-1">
           Berikan tanda pada kolom yang paling sesuai dengan diri Anda.
@@ -32,9 +29,8 @@
         </div>
       </div>
 
-      <!-- Dimensi sections -->
+      <!-- Category sections -->
       <div v-for="section in sections" :key="section.key" class="mb-6">
-        <!-- Section header -->
         <div class="flex items-center gap-3 mb-3">
           <div class="h-px flex-1 bg-gray-200"></div>
           <div class="flex items-center gap-2 shrink-0">
@@ -44,20 +40,17 @@
           <div class="h-px flex-1 bg-gray-200"></div>
         </div>
 
-        <!-- Question cards -->
         <div class="space-y-3">
           <div
-            v-for="q in section.questions"
+            v-for="(q, i) in section.questions"
             :key="q.id"
-            class="bg-white border rounded-xl p-4 transition-colors"
-            :class="answers[q.id] ? 'border-gray-200' : 'border-gray-200'"
+            class="bg-white border rounded-xl p-4 transition-colors border-gray-200"
           >
             <div class="flex items-start gap-3 mb-3">
-              <span class="text-xs font-medium text-gray-400 mt-0.5 w-6 shrink-0">{{ q.id }}.</span>
-              <p class="text-sm text-gray-800 leading-relaxed">{{ q.text }}</p>
+              <span class="text-xs font-medium text-gray-400 mt-0.5 w-6 shrink-0">{{ i + 1 }}.</span>
+              <p class="text-sm text-gray-800 leading-relaxed">{{ q.question }}</p>
             </div>
 
-            <!-- Scale buttons -->
             <div class="flex gap-2 pl-9">
               <button
                 v-for="opt in scaleOptions"
@@ -94,17 +87,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import AppTopBar from '@/components/AppTopBar.vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useLikertStore } from '@/stores/likert'
+import { useLikertCategoryStore } from '@/stores/likert-category'
 
+const route = useRoute()
 const router = useRouter()
+const likertId = route.params.id
 
-const goBack = () => {
-  router.back()
-}
+const likertStore = useLikertStore()
+const { questions } = storeToRefs(likertStore)
 
-// ─── Scale options ───────────────────────────────────────────────
+const categoryStore = useLikertCategoryStore()
+const { categories } = storeToRefs(categoryStore)
+
 const scaleOptions = [
   { value: 'SS', label: 'SS' },
   { value: 'S',  label: 'S'  },
@@ -112,140 +110,69 @@ const scaleOptions = [
   { value: 'STS', label: 'STS' },
 ]
 
-// ─── Questions (nanti diganti fetch dari Firestore) ───────────────
-// Struktur tiap soal: { id, text, dimension, favorable }
-const questions = [
-  // Personal Characteristics (1-22) — mostly Unfavorable
-  { id: 1,  text: 'Saya mudah memasukkan perasaan pribadi ketika menghadapi masalah.', dimension: 'personal', favorable: false },
-  { id: 2,  text: 'Saya tidak tahan terhadap kritik dari orang lain.', dimension: 'personal', favorable: false },
-  { id: 3,  text: 'Saya mudah stres ketika harus mengerjakan banyak hal.', dimension: 'personal', favorable: false },
-  { id: 4,  text: 'Saya tidak menyukai kritik yang diberikan kepada saya.', dimension: 'personal', favorable: false },
-  { id: 5,  text: 'Saya merasa nyaman berbicara dengan guru, pembimbing, atau atasan.', dimension: 'personal', favorable: true },
-  { id: 6,  text: 'Saya kesulitan memulai tugas yang harus saya kerjakan.', dimension: 'personal', favorable: false },
-  { id: 7,  text: 'Saya kesulitan menghadapi banyak tuntutan dalam waktu yang sama.', dimension: 'personal', favorable: false },
-  { id: 8,  text: 'Saya mudah tersinggung.', dimension: 'personal', favorable: false },
-  { id: 9,  text: 'Saya tidak yakin kapan harus berbicara atau diam.', dimension: 'personal', favorable: false },
-  { id: 10, text: 'Saya tidak nyaman bertanya ketika tidak memahami sesuatu.', dimension: 'personal', favorable: false },
-  { id: 11, text: 'Saya mudah kewalahan ketika menghadapi tantangan.', dimension: 'personal', favorable: false },
-  { id: 12, text: 'Saya tidak suka jika cara kerja saya diubah.', dimension: 'personal', favorable: false },
-  { id: 13, text: 'Saya merasa kesal jika orang lain mengubah cara yang sudah saya atur.', dimension: 'personal', favorable: false },
-  { id: 14, text: 'Saya kesulitan menghadapi situasi sosial yang baru.', dimension: 'personal', favorable: false },
-  { id: 15, text: 'Saya kesulitan memahami ide atau konsep yang abstrak.', dimension: 'personal', favorable: false },
-  { id: 16, text: 'Saya ragu dapat mencapai tujuan yang telah saya tetapkan.', dimension: 'personal', favorable: false },
-  { id: 17, text: 'Saya cenderung menghakimi orang lain.', dimension: 'personal', favorable: false },
-  { id: 18, text: 'Saya merasa lebih unggul dibandingkan orang lain.', dimension: 'personal', favorable: false },
-  { id: 19, text: 'Saya kesulitan membangun kepercayaan dengan orang lain.', dimension: 'personal', favorable: false },
-  { id: 20, text: 'Saya kesulitan mengerjakan banyak hal sekaligus.', dimension: 'personal', favorable: false },
-  { id: 21, text: 'Saya tidak menyukai perubahan.', dimension: 'personal', favorable: false },
-  { id: 22, text: 'Saya tidak suka mempelajari hal-hal baru.', dimension: 'personal', favorable: false },
+onMounted(async () => {
+  if (!likertStore.respondent) {
+    router.push({ name: 'likert-form', params: { id: likertId } })
+    return
+  }
 
-  // Organisational Acumen (23-41) — all Favorable
-  { id: 23, text: 'Saya belajar dari teman atau rekan yang bekerja bersama saya.', dimension: 'organisational', favorable: true },
-  { id: 24, text: 'Saya belajar dari orang yang lebih berpengalaman.', dimension: 'organisational', favorable: true },
-  { id: 25, text: 'Saya menghargai pengalaman orang yang telah lama bekerja.', dimension: 'organisational', favorable: true },
-  { id: 26, text: 'Saya berusaha memahami aturan dan proses di sekolah maupun tempat kerja.', dimension: 'organisational', favorable: true },
-  { id: 27, text: 'Saya berusaha mempelajari sebanyak mungkin tentang organisasi atau tempat kerja.', dimension: 'organisational', favorable: true },
-  { id: 28, text: 'Saya menghormati teman dan rekan kerja.', dimension: 'organisational', favorable: true },
-  { id: 29, text: 'Saya mengikuti perkembangan dunia usaha dan industri.', dimension: 'organisational', favorable: true },
-  { id: 30, text: 'Saya bertanggung jawab atas keputusan dan tindakan saya.', dimension: 'organisational', favorable: true },
-  { id: 31, text: 'Saya menghormati guru, pembimbing, dan atasan.', dimension: 'organisational', favorable: true },
-  { id: 32, text: 'Saya memahami bahwa isu dunia dapat memengaruhi pekerjaan.', dimension: 'organisational', favorable: true },
-  { id: 33, text: 'Saya terbuka untuk belajar dan berkembang.', dimension: 'organisational', favorable: true },
-  { id: 34, text: 'Saya antusias mengerjakan pekerjaan yang diberikan.', dimension: 'organisational', favorable: true },
-  { id: 35, text: 'Saya selalu berusaha memperbaiki diri.', dimension: 'organisational', favorable: true },
-  { id: 36, text: 'Saya memahami bahwa nilai dan budaya memengaruhi organisasi.', dimension: 'organisational', favorable: true },
-  { id: 37, text: 'Saya menganggap umpan balik sebagai kesempatan belajar.', dimension: 'organisational', favorable: true },
-  { id: 38, text: 'Saya senang menyelesaikan tugas dan mencapai hasil.', dimension: 'organisational', favorable: true },
-  { id: 39, text: 'Saya tidak sabar untuk mulai bekerja dan mencoba hal baru.', dimension: 'organisational', favorable: true },
-  { id: 40, text: 'Saya bersedia memulai karier dari posisi awal.', dimension: 'organisational', favorable: true },
-  { id: 41, text: 'Saya percaya bahwa mendengarkan dan belajar lebih penting daripada menunjukkan kemampuan.', dimension: 'organisational', favorable: true },
+  await likertStore.fetchQuestions(likertId)
+  await categoryStore.fetchCategories()
+})
 
-  // Work Competence (42-56) — all Favorable
-  { id: 42, text: 'Saya percaya pada pengetahuan yang telah saya pelajari.', dimension: 'competence', favorable: true },
-  { id: 43, text: 'Saya memiliki pemahaman teori yang baik mengenai bidang saya.', dimension: 'competence', favorable: true },
-  { id: 44, text: 'Orang lain sering meminta ide atau saran dari saya.', dimension: 'competence', favorable: true },
-  { id: 45, text: 'Saya percaya diri dengan kemampuan teknis yang saya miliki.', dimension: 'competence', favorable: true },
-  { id: 46, text: 'Saya memahami kelebihan dan kekurangan diri saya.', dimension: 'competence', favorable: true },
-  { id: 47, text: 'Saya tetap tenang ketika berada di bawah tekanan.', dimension: 'competence', favorable: true },
-  { id: 48, text: 'Keberhasilan dalam pekerjaan sangat penting bagi saya.', dimension: 'competence', favorable: true },
-  { id: 49, text: 'Saya mampu menerapkan pengetahuan yang saya pelajari ke dunia kerja.', dimension: 'competence', favorable: true },
-  { id: 50, text: 'Saya mampu menghadapi banyak tuntutan pekerjaan.', dimension: 'competence', favorable: true },
-  { id: 51, text: 'Saya menetapkan standar yang tinggi untuk diri saya.', dimension: 'competence', favorable: true },
-  { id: 52, text: 'Saya mampu menganalisis dan memecahkan masalah yang rumit.', dimension: 'competence', favorable: true },
-  { id: 53, text: 'Saya memiliki minat dan semangat yang tinggi pada bidang yang saya pelajari.', dimension: 'competence', favorable: true },
-  { id: 54, text: 'Menjadi yang terbaik dalam bidang saya merupakan hal yang penting.', dimension: 'competence', favorable: true },
-  { id: 55, text: 'Saya teliti dan memperhatikan detail.', dimension: 'competence', favorable: true },
-  { id: 56, text: 'Saya memiliki pandangan hidup yang matang.', dimension: 'competence', favorable: true },
+// Palet warna dot, dipakai bergilir sesuai urutan kategori
+const dotColors = ['bg-rose-400', 'bg-blue-400', 'bg-purple-400', 'bg-teal-400', 'bg-amber-400', 'bg-emerald-400']
 
-  // Social Intelligence (57-64) — all Favorable
-  { id: 57, text: 'Saya mudah beradaptasi dengan situasi sosial yang berbeda.', dimension: 'social', favorable: true },
-  { id: 58, text: 'Saya mudah menjalin hubungan dengan orang lain.', dimension: 'social', favorable: true },
-  { id: 59, text: 'Saya memiliki sikap terbuka dan ramah.', dimension: 'social', favorable: true },
-  { id: 60, text: 'Saya dapat mengekspresikan diri dengan mudah.', dimension: 'social', favorable: true },
-  { id: 61, text: 'Saya mampu berbicara secara spontan di depan orang lain.', dimension: 'social', favorable: true },
-  { id: 62, text: 'Saya mudah menyesuaikan diri dengan situasi baru.', dimension: 'social', favorable: true },
-  { id: 63, text: 'Saya mampu memahami bahasa tubuh atau ekspresi orang lain.', dimension: 'social', favorable: true },
-  { id: 64, text: 'Saya mampu bekerja sama dalam kelompok.', dimension: 'social', favorable: true },
-]
+// Group pertanyaan per categoryId
+const sections = computed(() => {
+  const grouped = {}
+  for (const q of questions.value) {
+    if (!grouped[q.categoryId]) grouped[q.categoryId] = []
+    grouped[q.categoryId].push(q)
+  }
 
-// ─── Sections config ──────────────────────────────────────────────
-const sections = [
-  {
-    key: 'personal',
-    label: 'Personal Characteristics',
-    dot: 'bg-rose-400',
-    questions: questions.filter(q => q.dimension === 'personal'),
-  },
-  {
-    key: 'organisational',
-    label: 'Organisational Acumen',
-    dot: 'bg-blue-400',
-    questions: questions.filter(q => q.dimension === 'organisational'),
-  },
-  {
-    key: 'competence',
-    label: 'Work Competence',
-    dot: 'bg-purple-400',
-    questions: questions.filter(q => q.dimension === 'competence'),
-  },
-  {
-    key: 'social',
-    label: 'Social Intelligence',
-    dot: 'bg-teal-400',
-    questions: questions.filter(q => q.dimension === 'social'),
-  },
-]
+  return Object.keys(grouped).map((categoryId, index) => {
+    const cat = categories.value.find((c) => c.id === categoryId)
+    return {
+      key: categoryId,
+      label: cat?.name || 'Tanpa kategori',
+      dot: dotColors[index % dotColors.length],
+      questions: grouped[categoryId],
+    }
+  })
+})
 
-// ─── Answers state ────────────────────────────────────────────────
-// { [questionId]: 'SS' | 'S' | 'TS' | 'STS' }
 const answers = ref({})
-
-// ─── Computed ─────────────────────────────────────────────────────
 const answeredCount = computed(() => Object.keys(answers.value).length)
-const unansweredCount = computed(() => questions.length - answeredCount.value)
-const progressPct = computed(() => (answeredCount.value / questions.length) * 100)
+const unansweredCount = computed(() => questions.value.length - answeredCount.value)
+const progressPct = computed(() =>
+  questions.value.length ? (answeredCount.value / questions.value.length) * 100 : 0
+)
 
-// ─── Submit ───────────────────────────────────────────────────────
-// Skor: SS=4, S=3, TS=2, STS=1
-// Untuk unfavorable: SS=1, S=2, TS=3, STS=4 (reverse)
-const scoreMap     = { SS: 4, S: 3, TS: 2, STS: 1 }
-const scoreMapRev  = { SS: 1, S: 2, TS: 3, STS: 4 }
+const scoreMap = { SS: 4, S: 3, TS: 2, STS: 1 }
+const scoreMapRev = { SS: 1, S: 2, TS: 3, STS: 4 }
 
-const handleSubmit = () => {
-  const result = questions.map(q => {
+const handleSubmit = async () => {
+  const submissionResult = questions.value.map((q) => {
     const raw = answers.value[q.id]
-    const score = q.favorable ? scoreMap[raw] : scoreMapRev[raw]
-    return { id: q.id, dimension: q.dimension, favorable: q.favorable, raw, score }
+    const point = q.favorable ? scoreMap[raw] : scoreMapRev[raw]
+    return {
+      questionId: q.id,
+      categoryId: q.categoryId,
+      favorable: q.favorable ? 'favorable' : 'unfavorable',
+      answer: raw,
+      point,
+    }
   })
 
-  const totalScore = result.reduce((sum, r) => sum + r.score, 0)
+  const totalScore = submissionResult.reduce((sum, r) => sum + r.point, 0)
 
-  // TODO: kirim ke Firestore
-  console.log('Hasil:', result)
-  console.log('Total skor:', totalScore)
-
-  alert(`Jawaban terkirim!\nTotal skor: ${totalScore}`)
+  try {
+    await likertStore.submitAnswers(likertId, likertStore.respondent, submissionResult, totalScore)
+    likertStore.setLastResult({ totalScore })
+    router.push({ name: 'likert-result', params: { id: likertId } })
+  } catch (error) {
+    alert('Gagal menyimpan jawaban, coba lagi.')
+  }
 }
-
-
 </script>
