@@ -15,5 +15,4 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
-// import AdminTopbar from '@/components/admin/AdminTopbar.vue'
 </script>

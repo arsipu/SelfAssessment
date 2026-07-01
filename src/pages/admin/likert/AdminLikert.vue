@@ -211,6 +211,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert'
 import { storeToRefs } from 'pinia'
+import { DRAFT, PUBLISHED, ARCHIVED, statusText } from '@/apps/status'
 
 const router = useRouter()
 const likertStore = useLikertStore()
@@ -230,9 +231,9 @@ const isFormValid = computed(() => form.value.name.trim() !== '')
 const openStatusMenuId = ref(null)
 
 const statusOptions = [
-  { value: 'draft', label: 'Draft', dot: 'bg-gray-400' },
-  { value: 'published', label: 'Published', dot: 'bg-green-500' },
-  { value: 'archived', label: 'Archived', dot: 'bg-red-400' },
+  { value: DRAFT, label: statusText(DRAFT), dot: 'bg-gray-400' },
+  { value: PUBLISHED, label: statusText(PUBLISHED), dot: 'bg-green-500' },
+  { value: ARCHIVED, label: statusText(ARCHIVED), dot: 'bg-red-400' },
 ]
 
 onMounted(async () => {
@@ -242,7 +243,7 @@ onMounted(async () => {
 })
 
 const statusLabel = (status) => {
-  return statusOptions.find((s) => s.value === status)?.label || 'Draft'
+  return statusOptions.find((s) => s.value === status)?.label || statusText(status)
 }
 
 const statusDotClass = (status) => {
@@ -251,9 +252,9 @@ const statusDotClass = (status) => {
 
 const statusBadgeClass = (status) => {
   switch (status) {
-    case 'published':
+    case PUBLISHED:
       return 'bg-green-50 text-green-700 hover:bg-green-100'
-    case 'archived':
+    case ARCHIVED:
       return 'bg-red-50 text-red-700 hover:bg-red-100'
     default:
       return 'bg-gray-100 text-gray-600 hover:bg-gray-200'

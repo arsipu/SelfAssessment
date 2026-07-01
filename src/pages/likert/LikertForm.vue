@@ -99,10 +99,17 @@ const responden = ref({
 
 onMounted(async () => {
   await likertStore.getLikertById(likertId)
+
+  const saved = likertStore.initSession(likertId)
+  if (saved && saved.respondent) {
+    // udah pernah isi data diri sebelumnya -> langsung lempar ke kuesioner
+    router.push({ name: 'likert-questions', params: { id: likertId } })
+  }
 })
 
 function goToKuesioner() {
   likertStore.setRespondent({ ...responden.value })
+  likertStore.persistSession(likertId, {}) // answers masih kosong di awal
   router.push({ name: 'likert-questions', params: { id: likertId } })
 }
 </script>

@@ -12,6 +12,8 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 
+import { DRAFT } from '@/apps/status'
+
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
   const currentLikert = ref(null)
@@ -19,13 +21,93 @@ export const useLikertStore = defineStore('likert', () => {
   const loading = ref(false)
   const respondent = ref(null)
   const lastResult = ref(null) // { totalScore } untuk halaman hasil
+  const sessionId = ref(null)
 
   const setRespondent = (data) => {
     respondent.value = data
   }
 
-  const setLastResult = (data) => {
+  // const setLastResult = (data) => {
+  //   lastResult.value = data
+  // }
+
+  const STORAGE_PREFIX = 'likert_session_'
+
+  function getStorageKey(likertId) {
+    return `${STORAGE_PREFIX}${likertId}`
+  }
+
+  // generate / ambil sessionId & restore data yang tersimpan
+  const initSession = (likertId) => {
+    const key = getStorageKey(likertId)
+    const saved = localStorage.getItem(key)
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        sessionId.value = parsed.sessionId
+        respondent.value = parsed.respondent || null
+        return parsed // { sessionId, respondent, answers }
+      } catch (e) {
+        console.error('Gagal parse session tersimpan:', e)
+        localStorage.removeItem(key)
+      }
+    }
+
+    // belum ada sesi -> bikin baru
+    sessionId.value = crypto.randomUUID()
+    return null
+  }
+
+  // dipanggil tiap kali respondent atau answers berubah
+  const persistSession = (likertId, answers) => {
+    if (!sessionId.value) return
+    const key = getStorageKey(likertId)
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        sessionId: sessionId.value,
+        respondent: respondent.value,
+        answers,
+        updatedAt: Date.now(),
+      })
+    )
+  }
+
+  const clearSession = (likertId) => {
+    localStorage.removeItem(getStorageKey(likertId))
+    sessionId.value = null
+  }
+
+  const RESULT_PREFIX = 'likert_result_'
+
+  function getResultKey(likertId) {
+    return `${RESULT_PREFIX}${likertId}`
+  }
+
+  const setLastResult = (likertId, data) => {
     lastResult.value = data
+    localStorage.setItem(getResultKey(likertId), JSON.stringify(data))
+  }
+
+  const restoreLastResult = (likertId) => {
+    if (lastResult.value) return lastResult.value // udah ada di memory
+
+    const saved = localStorage.getItem(getResultKey(likertId))
+    if (saved) {
+      try {
+        lastResult.value = JSON.parse(saved)
+      } catch (e) {
+        console.error('Gagal parse hasil tersimpan:', e)
+        localStorage.removeItem(getResultKey(likertId))
+      }
+    }
+    return lastResult.value
+  }
+
+  const clearLastResult = (likertId) => {
+    lastResult.value = null
+    localStorage.removeItem(getResultKey(likertId))
   }
 
   // ── Likert (surveys) ──────────────────────────────────────
@@ -65,7 +147,7 @@ export const useLikertStore = defineStore('likert', () => {
       const ref = await addDoc(collection(db, 'likert'), { 
         name,
         description,
-        status: 'draft',
+        status: DRAFT,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
@@ -237,5 +319,13 @@ export const useLikertStore = defineStore('likert', () => {
     setRespondent,
     submitAnswers,
     updateLikertStatus,
+    lastResult,
+    sessionId,
+    initSession,
+    persistSession,
+    clearSession,
+    setLastResult,
+    restoreLastResult,
+    clearLastResult,
   }
 })

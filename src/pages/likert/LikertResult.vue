@@ -125,8 +125,10 @@ const category = computed(() => {
 })
 
 onMounted(async () => {
-  // Akses langsung tanpa lewat proses submit -> balik ke form
-  if (!likertStore.lastResult) {
+  const result = likertStore.restoreLastResult(likertId)
+
+  // Akses langsung tanpa pernah submit -> balik ke form
+  if (!result) {
     router.replace({ name: 'likert-form', params: { id: likertId } })
     return
   }

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from '@/stores/user';
+import { ROLE_ADMIN } from '@/apps/role.js';
 
 import BerandaView from '@/pages/dashboard/BerandaView.vue';
 import Holland from '@/pages/holland/Holland.vue';
@@ -90,7 +91,7 @@ router.beforeEach(async (to) => {
  
   const user = userStore.user;
   const isLoggedIn = !!user;
-  const isAdmin = user?.role !== 'user';   // sesuaikan kondisi role admin kamu
+  const isAdmin = user?.role === ROLE_ADMIN;   // sesuaikan kondisi role admin kamu
  
   // Halaman login: kalau udah login sebagai admin, redirect ke dashboard
   if (to.meta.guestOnly && isLoggedIn && isAdmin) {

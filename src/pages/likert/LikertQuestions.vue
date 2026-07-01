@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert'
@@ -103,6 +103,8 @@ const { questions } = storeToRefs(likertStore)
 const categoryStore = useLikertCategoryStore()
 const { categories } = storeToRefs(categoryStore)
 
+const answers = ref({})
+
 const scaleOptions = [
   { value: 'SS', label: 'SS' },
   { value: 'S',  label: 'S'  },
@@ -111,14 +113,35 @@ const scaleOptions = [
 ]
 
 onMounted(async () => {
-  if (!likertStore.respondent) {
+  const saved = likertStore.initSession(likertId)
+
+  if (!saved || !saved.respondent) {
+    // ga ada sesi & ga ada data diri -> balik ke form
     router.push({ name: 'likert-form', params: { id: likertId } })
     return
   }
 
+  // restore jawaban yang udah pernah diisi
+  if (saved.answers) {
+    answers.value = { ...saved.answers }
+  }
+
+
+  // if (!likertStore.respondent) {
+  //   router.push({ name: 'likert-form', params: { id: likertId } })
+  //   return
+  // }
+
   await likertStore.fetchQuestions(likertId)
   await categoryStore.fetchCategories()
 })
+
+// auto-save tiap kali jawaban berubah
+watch(
+  answers,
+  (newAnswers) => { likertStore.persistSession(likertId, newAnswers) },
+  { deep: true }
+)
 
 // Palet warna dot, dipakai bergilir sesuai urutan kategori
 const dotColors = ['bg-rose-400', 'bg-blue-400', 'bg-purple-400', 'bg-teal-400', 'bg-amber-400', 'bg-emerald-400']
@@ -142,7 +165,6 @@ const sections = computed(() => {
   })
 })
 
-const answers = ref({})
 const answeredCount = computed(() => Object.keys(answers.value).length)
 const unansweredCount = computed(() => questions.value.length - answeredCount.value)
 const progressPct = computed(() =>
@@ -169,7 +191,8 @@ const handleSubmit = async () => {
 
   try {
     await likertStore.submitAnswers(likertId, likertStore.respondent, submissionResult, totalScore)
-    likertStore.setLastResult({ totalScore })
+    likertStore.setLastResult(likertId, { totalScore })
+    likertStore.clearSession(likertId)
     router.push({ name: 'likert-result', params: { id: likertId } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')

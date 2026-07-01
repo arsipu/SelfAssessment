@@ -52,6 +52,7 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert'
+import { PUBLISHED } from '@/apps/status'
 
 import AppTopBar from '@/components/AppTopBar.vue'
 
@@ -60,7 +61,7 @@ const likertStore = useLikertStore()
 const { likerts, loading } = storeToRefs(likertStore)
 
 const publishedLikerts = computed(() =>
-  likerts.value.filter((l) => l.status === 'published')
+  likerts.value.filter((l) => l.status === PUBLISHED)
 )
 
 onMounted(async () => {

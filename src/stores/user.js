@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import router from '@/router'
 import { onAuthStateChanged } from 'firebase/auth'
+import { ROLE_ADMIN } from '@/apps/role.js'
 
 export const useUserStore = defineStore(
   'user',
@@ -69,11 +70,18 @@ export const useUserStore = defineStore(
         if (returnUrl.value && returnUrl.value !== '/login') {
           router.push(returnUrl.value)
         } else {
-          if (user.value.role === 'user') {
-            router.push('/')                  // user ke beranda publik
-          } else {
+
+          if (user.value.role === ROLE_ADMIN) {
             router.push('/admin/dashboard')   // admin/role lain ke admin dashboard
+          } else {
+            router.push('/')                  // user ke beranda publik
           }
+
+          // if (user.value.role === 'user') {
+          //   router.push('/')                  // user ke beranda publik
+          // } else {
+          //   router.push('/admin/dashboard')   // admin/role lain ke admin dashboard
+          // }
         }
       } catch (error) {
         console.error('Login error:', error)
