@@ -87,7 +87,7 @@ router.beforeEach(async (to) => {
   const userStore = useUserStore();
  
   // Tunggu auth state selesai
-  await userStore.listenToAuthState();
+//   await userStore.listenToAuthState();
  
   const user = userStore.user;
   const isLoggedIn = !!user;

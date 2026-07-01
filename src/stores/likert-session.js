@@ -1,0 +1,92 @@
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { useLikertStore } from './likert'
+
+export const useLikertSessionStore = defineStore(
+  'likertSession',
+  () => {
+    // sessions[likertId] = { submissionId, respondent, answers }
+    const sessions = ref({})
+    // results[likertId] = { totalScore, submissionId }
+    const results = ref({})
+
+    // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
+    const startSession = async (likertId, respondentData) => {
+      const likertStore = useLikertStore()
+      const submissionId = await likertStore.createSubmission(likertId, respondentData)
+
+      sessions.value[likertId] = {
+        submissionId,
+        respondent: respondentData,
+        answers: {},
+      }
+
+      // lazy clear: hasil lama buat likertId ini dianggap basi begitu sesi baru mulai
+      delete results.value[likertId]
+
+      return sessions.value[likertId]
+    }
+
+    const getSession = (likertId) => sessions.value[likertId] || null
+
+    // dipanggil tiap jawaban berubah (auto-save LOKAL aja, gak nulis ke Firestore tiap ketik)
+    const updateAnswers = async (likertId, answers, submissionResult) => {
+      const session = sessions.value[likertId]
+      if (!session) return
+
+      session.answers = answers // instan, buat UX & restore pas refresh
+
+      try {
+        const likertStore = useLikertStore()
+        await likertStore.updateSubmissionAnswers(likertId, session.submissionId, submissionResult)
+      } catch (error) {
+        // gagal sync ke Firestore -> jawaban tetap aman di local state,
+        // nanti bisa di-retry pas ada perubahan berikutnya
+        console.error('Gagal sync jawaban, tersimpan lokal dulu:', error)
+      }
+    }
+
+    // dipanggil pas submit kuesioner: tulis final ke Firestore, simpan hasil, bersihkan sesi
+    const finishSession = async (likertId, submissionResult, totalScore) => {
+      const session = sessions.value[likertId]
+      if (!session) throw new Error('Sesi tidak ditemukan')
+
+      const likertStore = useLikertStore()
+      await likertStore.completeSubmission(likertId, session.submissionId, submissionResult, totalScore)
+
+      results.value[likertId] = {
+        totalScore,
+        submissionId: session.submissionId,
+        respondentName: session.respondent?.nama || '-',
+      }
+
+      delete sessions.value[likertId]
+    }
+
+    const clearSession = (likertId) => {
+      delete sessions.value[likertId]
+    }
+
+    const getResult = (likertId) => results.value[likertId] || null
+
+    // opsional: dipanggil manual dari tombol "Selesai" kalau mau clear lebih cepat
+    const clearResult = (likertId) => {
+      delete results.value[likertId]
+    }
+
+    return {
+      sessions,
+      results,
+      startSession,
+      getSession,
+      updateAnswers,
+      finishSession,
+      clearSession,
+      getResult,
+      clearResult,
+    }
+  },
+  {
+    persist: true,
+  }
+)

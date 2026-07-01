@@ -85,10 +85,12 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert'
+import { useLikertSessionStore } from '@/stores/likert-session'
 
 const route = useRoute()
 const router = useRouter()
 const likertStore = useLikertStore()
+const likertSessionStore = useLikertSessionStore()
 
 const likertId = route.params.id
 
@@ -97,19 +99,28 @@ const responden = ref({
   usia: '', jenisKelamin: '', pkl: ''
 })
 
+const submitting = ref(false)
+
 onMounted(async () => {
   await likertStore.getLikertById(likertId)
 
-  const saved = likertStore.initSession(likertId)
-  if (saved && saved.respondent) {
-    // udah pernah isi data diri sebelumnya -> langsung lempar ke kuesioner
+  const saved = likertSessionStore.getSession(likertId)
+  if (saved) {
+    // udah pernah mulai sesi -> langsung lempar ke kuesioner
     router.push({ name: 'likert-questions', params: { id: likertId } })
   }
 })
 
-function goToKuesioner() {
-  likertStore.setRespondent({ ...responden.value })
-  likertStore.persistSession(likertId, {}) // answers masih kosong di awal
-  router.push({ name: 'likert-questions', params: { id: likertId } })
+async function goToKuesioner() {
+  if (submitting.value) return
+  submitting.value = true
+  try {
+    await likertSessionStore.startSession(likertId, { ...responden.value })
+    router.push({ name: 'likert-questions', params: { id: likertId } })
+  } catch (error) {
+    alert('Gagal memulai sesi, coba lagi.')
+  } finally {
+    submitting.value = false
+  }
 }
 </script>

@@ -243,6 +243,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert'
+import { useLikertQuestionsStore } from '@/stores/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert-category'
 import { storeToRefs } from 'pinia'
 
@@ -251,6 +252,7 @@ const router = useRouter()
 const likertId = route.params.id
 
 const likertStore = useLikertStore()
+const likertQuestionsStore = useLikertQuestionsStore()
 const categoryStore = useLikertCategoryStore()
 
 const { currentLikert, questions, loading } = storeToRefs(likertStore)
@@ -278,7 +280,7 @@ const deletingId = ref(null)
 onMounted(async () => {
   await Promise.all([
     likertStore.getLikertById(likertId),
-    likertStore.fetchQuestions(likertId),
+    likertQuestionsStore.fetchQuestions(likertId),
     categoryStore.fetchCategories(),
   ])
 })
@@ -304,7 +306,7 @@ const saveInline = async (categoryId) => {
   if (!inlineForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertStore.addQuestion(likertId, {
+    await likertQuestionsStore.addQuestion(likertId, {
       question: inlineForm.value.question.trim(),
       favorable: inlineForm.value.favorable,
       categoryId,
@@ -335,7 +337,7 @@ const saveEdit = async () => {
   if (!editForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertStore.updateQuestion(likertId, editingId.value, {
+    await likertQuestionsStore.updateQuestion(likertId, editingId.value, {
       question: editForm.value.question.trim(),
       favorable: editForm.value.favorable,
       categoryId: editForm.value.categoryId,
@@ -358,7 +360,7 @@ const openDeleteModal = (id) => {
 const confirmDelete = async () => {
   saving.value = true
   try {
-    await likertStore.deleteQuestion(likertId, deletingId.value)
+    await likertQuestionsStore.deleteQuestion(likertId, deletingId.value)
     showDeleteModal.value = false
     deletingId.value = null
   } catch (e) {

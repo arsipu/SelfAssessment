@@ -74,36 +74,71 @@
           {{ unansweredCount > 0 ? `${unansweredCount} soal belum dijawab` : 'Semua soal sudah dijawab ✓' }}
         </p>
         <button
-          @click="handleSubmit"
+          @click="showConfirmModal = true"
           :disabled="unansweredCount > 0"
           class="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Kirim jawaban
         </button>
       </div>
-
     </div>
+    <!-- Modal konfirmasi -->
+    <Transition name="fade">
+      <div
+        v-if="showConfirmModal"
+        class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
+        @click.self="showConfirmModal = false"
+      >
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
+          <h2 class="text-base font-semibold text-gray-900 mb-2">Kirim jawaban?</h2>
+          <p class="text-sm text-gray-500 leading-relaxed mb-6">
+            Pastikan semua jawaban sudah sesuai. Jawaban tidak bisa diubah lagi setelah dikirim.
+          </p>
+
+          <div class="flex gap-3">
+            <button
+              @click="showConfirmModal = false"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              @click="confirmSubmit"
+              :disabled="submitting"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
+              {{ submitting ? 'Mengirim...' : 'Ya, kirim' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert'
+import { useLikertQuestionsStore } from '@/stores/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert-category'
+import { useLikertSessionStore } from '@/stores/likert-session'
 
 const route = useRoute()
 const router = useRouter()
 const likertId = route.params.id
 
 const likertStore = useLikertStore()
-const { questions } = storeToRefs(likertStore)
+const likertQuestionsStore = useLikertQuestionsStore()
+const likertSessionStore = useLikertSessionStore()
+const { questions } = storeToRefs(likertQuestionsStore)
 
 const categoryStore = useLikertCategoryStore()
 const { categories } = storeToRefs(categoryStore)
 
 const answers = ref({})
+let session = null
 
 const scaleOptions = [
   { value: 'SS', label: 'SS' },
@@ -113,47 +148,58 @@ const scaleOptions = [
 ]
 
 onMounted(async () => {
-  const saved = likertStore.initSession(likertId)
+  session = likertSessionStore.getSession(likertId)
 
-  if (!saved || !saved.respondent) {
-    // ga ada sesi & ga ada data diri -> balik ke form
+  if (!session) {
+    // ga ada sesi -> balik ke form
     router.push({ name: 'likert-form', params: { id: likertId } })
     return
   }
 
-  // restore jawaban yang udah pernah diisi
-  if (saved.answers) {
-    answers.value = { ...saved.answers }
-  }
+  answers.value = { ...session.answers }
 
-
-  // if (!likertStore.respondent) {
-  //   router.push({ name: 'likert-form', params: { id: likertId } })
-  //   return
-  // }
-
-  await likertStore.fetchQuestions(likertId)
+  await likertQuestionsStore.fetchQuestions(likertId)
   await categoryStore.fetchCategories()
 })
 
-// auto-save tiap kali jawaban berubah
+
+let debounceTimer = null
+
+function buildSubmissionResult() {
+  return questions.value.map((q) => {
+    const raw = answers.value[q.id]
+    const point = raw ? (q.favorable ? scoreMap[raw] : scoreMapRev[raw]) : null
+    return {
+      questionId: q.id,
+      categoryId: q.categoryId,
+      favorable: q.favorable ? 'favorable' : 'unfavorable',
+      answer: raw ?? null,
+      point,
+    }
+  })
+}
+
 watch(
   answers,
-  (newAnswers) => { likertStore.persistSession(likertId, newAnswers) },
+  (newAnswers) => {
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      likertSessionStore.updateAnswers(likertId, newAnswers, buildSubmissionResult())
+    }, 800) // sesuaikan delay-nya sesuai selera
+  },
   { deep: true }
 )
 
-// Palet warna dot, dipakai bergilir sesuai urutan kategori
+onUnmounted(() => clearTimeout(debounceTimer))
+
 const dotColors = ['bg-rose-400', 'bg-blue-400', 'bg-purple-400', 'bg-teal-400', 'bg-amber-400', 'bg-emerald-400']
 
-// Group pertanyaan per categoryId
 const sections = computed(() => {
   const grouped = {}
   for (const q of questions.value) {
     if (!grouped[q.categoryId]) grouped[q.categoryId] = []
     grouped[q.categoryId].push(q)
   }
-
   return Object.keys(grouped).map((categoryId, index) => {
     const cat = categories.value.find((c) => c.id === categoryId)
     return {
@@ -190,12 +236,24 @@ const handleSubmit = async () => {
   const totalScore = submissionResult.reduce((sum, r) => sum + r.point, 0)
 
   try {
-    await likertStore.submitAnswers(likertId, likertStore.respondent, submissionResult, totalScore)
-    likertStore.setLastResult(likertId, { totalScore })
-    likertStore.clearSession(likertId)
+    await likertSessionStore.finishSession(likertId, submissionResult, totalScore)
     router.push({ name: 'likert-result', params: { id: likertId } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
+  }
+}
+
+const showConfirmModal = ref(false)
+const submitting = ref(false)
+
+async function confirmSubmit() {
+  if (submitting.value) return
+  submitting.value = true
+  try {
+    await handleSubmit()
+  } finally {
+    submitting.value = false
+    showConfirmModal.value = false
   }
 }
 </script>

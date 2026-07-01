@@ -61,6 +61,8 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert'
+import { useLikertSessionStore } from '@/stores/likert-session'
+
 import AppTopBar from '@/components/AppTopBar.vue'
 
 const route = useRoute()
@@ -68,6 +70,7 @@ const router = useRouter()
 const likertId = route.params.id
 
 const likertStore = useLikertStore()
+const likertSessionStore = useLikertSessionStore()
 
 // Norma hipotetik Work Readiness Scale (Caballero), 64 aitem, skor 1-4
 const categories = [
@@ -113,8 +116,8 @@ const categories = [
   },
 ]
 
-const result = computed(() => likertStore.lastResult)
-const respondentName = computed(() => likertStore.respondent?.nama || '-')
+const result = computed(() => likertSessionStore.getResult(likertId))
+const respondentName = computed(() => result.value?.respondentName || '-')
 
 const category = computed(() => {
   const score = result.value?.totalScore ?? 0
@@ -125,14 +128,10 @@ const category = computed(() => {
 })
 
 onMounted(async () => {
-  const result = likertStore.restoreLastResult(likertId)
-
-  // Akses langsung tanpa pernah submit -> balik ke form
-  if (!result) {
+  if (!result.value) {
     router.replace({ name: 'likert-form', params: { id: likertId } })
     return
   }
-
   if (!likertStore.currentLikert) {
     await likertStore.getLikertById(likertId)
   }

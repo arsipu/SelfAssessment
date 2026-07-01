@@ -12,103 +12,13 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 
-import { DRAFT } from '@/apps/status'
+import { DRAFT, SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
 
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
   const currentLikert = ref(null)
   const questions = ref([])
   const loading = ref(false)
-  const respondent = ref(null)
-  const lastResult = ref(null) // { totalScore } untuk halaman hasil
-  const sessionId = ref(null)
-
-  const setRespondent = (data) => {
-    respondent.value = data
-  }
-
-  // const setLastResult = (data) => {
-  //   lastResult.value = data
-  // }
-
-  const STORAGE_PREFIX = 'likert_session_'
-
-  function getStorageKey(likertId) {
-    return `${STORAGE_PREFIX}${likertId}`
-  }
-
-  // generate / ambil sessionId & restore data yang tersimpan
-  const initSession = (likertId) => {
-    const key = getStorageKey(likertId)
-    const saved = localStorage.getItem(key)
-
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        sessionId.value = parsed.sessionId
-        respondent.value = parsed.respondent || null
-        return parsed // { sessionId, respondent, answers }
-      } catch (e) {
-        console.error('Gagal parse session tersimpan:', e)
-        localStorage.removeItem(key)
-      }
-    }
-
-    // belum ada sesi -> bikin baru
-    sessionId.value = crypto.randomUUID()
-    return null
-  }
-
-  // dipanggil tiap kali respondent atau answers berubah
-  const persistSession = (likertId, answers) => {
-    if (!sessionId.value) return
-    const key = getStorageKey(likertId)
-    localStorage.setItem(
-      key,
-      JSON.stringify({
-        sessionId: sessionId.value,
-        respondent: respondent.value,
-        answers,
-        updatedAt: Date.now(),
-      })
-    )
-  }
-
-  const clearSession = (likertId) => {
-    localStorage.removeItem(getStorageKey(likertId))
-    sessionId.value = null
-  }
-
-  const RESULT_PREFIX = 'likert_result_'
-
-  function getResultKey(likertId) {
-    return `${RESULT_PREFIX}${likertId}`
-  }
-
-  const setLastResult = (likertId, data) => {
-    lastResult.value = data
-    localStorage.setItem(getResultKey(likertId), JSON.stringify(data))
-  }
-
-  const restoreLastResult = (likertId) => {
-    if (lastResult.value) return lastResult.value // udah ada di memory
-
-    const saved = localStorage.getItem(getResultKey(likertId))
-    if (saved) {
-      try {
-        lastResult.value = JSON.parse(saved)
-      } catch (e) {
-        console.error('Gagal parse hasil tersimpan:', e)
-        localStorage.removeItem(getResultKey(likertId))
-      }
-    }
-    return lastResult.value
-  }
-
-  const clearLastResult = (likertId) => {
-    lastResult.value = null
-    localStorage.removeItem(getResultKey(likertId))
-  }
 
   // ── Likert (surveys) ──────────────────────────────────────
 
@@ -197,109 +107,64 @@ export const useLikertStore = defineStore('likert', () => {
     await fetchLikerts()
   }
 
-  // ── Questions (subcollection) ─────────────────────────────
-
-  const fetchQuestions = async (likertId) => {
-    console.log('Fetching questions for likert:', likertId)
-    loading.value = true
-    try {
-      const snap = await getDocs(collection(db, 'likert', likertId, 'questions'))
-      questions.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      console.log('Questions fetched:', questions.value.length)
-    } catch (error) {
-      console.error('Error fetching questions:', error)
-    } finally {
-      loading.value = false
-    }
-    return questions.value
-  }
-
-  const addQuestion = async (likertId, { question, categoryId, favorable }) => {
-    console.log('Adding question to likert:', likertId)
-    try {
-      const ref = await addDoc(collection(db, 'likert', likertId, 'questions'), {
-        question,
-        categoryId,
-        favorable,
-        updatedAt: serverTimestamp(),
-      })
-
-      // update lokal
-      questions.value.push({
-        id: ref.id,
-        question,
-        categoryId,
-        favorable,
-      })
-
-      console.log('Question added with ID:', ref.id)
-      await fetchQuestions(likertId)
-      return ref.id
-    } catch (error) {
-      console.error('Error adding question:', error)
-      throw error
-    }
-  }
-
-  const updateQuestion = async (likertId, questionId, { question, categoryId, favorable }) => {
-    console.log('Updating question:', questionId)
-    try {
-      await updateDoc(doc(db, 'likert', likertId, 'questions', questionId), {
-        question,
-        categoryId,
-        favorable,
-        updatedAt: serverTimestamp(),
-      })
-
-      // update lokal
-      const idx = questions.value.findIndex(q => q.id === questionId)
-      if (idx !== -1) questions.value[idx] = { ...questions.value[idx], question, categoryId, favorable }
-
-      console.log('Question updated:', questionId)
-      await fetchQuestions(likertId)
-    } catch (error) {
-      console.error('Error updating question:', error)
-      throw error
-    }
-  }
-
-  const deleteQuestion = async (likertId, questionId) => {
-    console.log('Deleting question:', questionId)
-    try {
-      await deleteDoc(doc(db, 'likert', likertId, 'questions', questionId))
-
-      // filter lokal
-      questions.value = questions.value.filter(q => q.id !== questionId)
-      console.log('Question deleted:', questionId)
-      await fetchQuestions(likertId)
-    } catch (error) {
-      console.error('Error deleting question:', error)
-      throw error
-    }
-  }
-
-
-  const submitAnswers = async (likertId, respondentData, submissionResult, totalScore) => {
+  const updateSubmissionAnswers = async (likertId, submissionId, submissionResult) => {
   try {
-    const ref = await addDoc(collection(db, 'likert', likertId, 'submissions'), {
-      name: respondentData.nama,
-      class: respondentData.kelas,
-      school: respondentData.sekolah,
-      major: respondentData.jurusan,
-      age: respondentData.usia,
-      gender: respondentData.jenisKelamin,
-      internship: respondentData.pkl,
+    await updateDoc(doc(db, 'likert', likertId, 'submissions', submissionId), {
       submission: submissionResult,
-      totalScore,
-      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     })
-    console.log('Submission saved:', ref.id)
-    return ref.id
+    console.log('Answers synced to Firestore:', submissionId)
   } catch (error) {
-    console.error('Error submitting answers:', error)
+    console.error('Error syncing answers:', error)
     throw error
   }
 }
+
+  
+  // ── Submissions ────────────────────────────────────────────
+
+  // Dipanggil begitu form responden disubmit (belum ngerjain soal)
+  const createSubmission = async (likertId, respondentData) => {
+    console.log('Creating submission (in_progress) for likert:', likertId)
+    try {
+      const ref = await addDoc(collection(db, 'likert', likertId, 'submissions'), {
+        name: respondentData.nama,
+        class: respondentData.kelas,
+        school: respondentData.sekolah,
+        major: respondentData.jurusan,
+        age: respondentData.usia,
+        gender: respondentData.jenisKelamin,
+        internship: respondentData.pkl,
+        submission: [],
+        totalScore: null,
+        status: SUBMISSION_IN_PROGRESS,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+      console.log('Submission created:', ref.id)
+      return ref.id
+    } catch (error) {
+      console.error('Error creating submission:', error)
+      throw error
+    }
+  }
+
+  // Dipanggil pas user submit jawaban kuesioner
+  const completeSubmission = async (likertId, submissionId, submissionResult, totalScore) => {
+    console.log('Completing submission:', submissionId)
+    try {
+      await updateDoc(doc(db, 'likert', likertId, 'submissions', submissionId), {
+        submission: submissionResult,
+        totalScore,
+        status: SUBMISSION_COMPLETED,
+        updatedAt: serverTimestamp(),
+      })
+      console.log('Submission completed:', submissionId)
+    } catch (error) {
+      console.error('Error completing submission:', error)
+      throw error
+    }
+  }
 
   return {
     likerts,
@@ -311,21 +176,9 @@ export const useLikertStore = defineStore('likert', () => {
     addLikert,
     updateLikert,
     deleteLikert,
-    fetchQuestions,
-    addQuestion,
-    updateQuestion,
-    deleteQuestion,
-    respondent,
-    setRespondent,
-    submitAnswers,
     updateLikertStatus,
-    lastResult,
-    sessionId,
-    initSession,
-    persistSession,
-    clearSession,
-    setLastResult,
-    restoreLastResult,
-    clearLastResult,
+    createSubmission,
+    completeSubmission,
+    updateSubmissionAnswers,
   }
 })
