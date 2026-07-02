@@ -255,7 +255,8 @@ const likertStore = useLikertStore()
 const likertQuestionsStore = useLikertQuestionsStore()
 const categoryStore = useLikertCategoryStore()
 
-const { currentLikert, questions, loading } = storeToRefs(likertStore)
+const { currentLikert } = storeToRefs(likertStore)
+const { questions, loading } = storeToRefs(likertQuestionsStore)
 const { categories } = storeToRefs(categoryStore)
 
 // ── State ──────────────────────────────────────────────────

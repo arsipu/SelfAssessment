@@ -17,7 +17,6 @@ import { DRAFT, SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/stat
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
   const currentLikert = ref(null)
-  const questions = ref([])
   const loading = ref(false)
 
   // ── Likert (surveys) ──────────────────────────────────────
@@ -169,7 +168,6 @@ export const useLikertStore = defineStore('likert', () => {
   return {
     likerts,
     currentLikert,
-    questions,
     loading,
     fetchLikerts,
     getLikertById,
