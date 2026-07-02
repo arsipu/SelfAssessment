@@ -13,6 +13,9 @@
             Hasil {{ likertStore.currentLikert?.name || 'Kuesioner' }}
           </p>
           <h1 class="text-lg font-semibold text-gray-900">{{ respondentName }}</h1>
+          <p class="text-xs text-gray-400 mt-1 font-mono">
+            Kode: <span class="font-semibold text-gray-600">{{ result.code }}</span>
+          </p>
         </div>
 
         <div class="flex flex-col items-center mb-8">

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '../firebase/firebase-config'
+import { generateSessionCode } from '@/utils/code'
 import {
   collection,
   doc,
@@ -10,6 +11,9 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  collectionGroup,
+  query,
+  where,
 } from 'firebase/firestore'
 
 import { DRAFT, SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
@@ -126,6 +130,7 @@ export const useLikertStore = defineStore('likert', () => {
   const createSubmission = async (likertId, respondentData) => {
     console.log('Creating submission (in_progress) for likert:', likertId)
     try {
+      const code = generateSessionCode()
       const ref = await addDoc(collection(db, 'likert', likertId, 'submissions'), {
         name: respondentData.nama,
         class: respondentData.kelas,
@@ -136,12 +141,14 @@ export const useLikertStore = defineStore('likert', () => {
         internship: respondentData.pkl,
         submission: [],
         totalScore: null,
+        code: code,
         status: SUBMISSION_IN_PROGRESS,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
       console.log('Submission created:', ref.id)
-      return ref.id
+      // return ref.id
+      return { id: ref.id, code }
     } catch (error) {
       console.error('Error creating submission:', error)
       throw error
@@ -162,6 +169,18 @@ export const useLikertStore = defineStore('likert', () => {
     } catch (error) {
       console.error('Error completing submission:', error)
       throw error
+    }
+  }
+
+  const findSubmissionByCode = async (code) => {
+    const q = query(collectionGroup(db, 'submissions'), where('code', '==', code))
+    const snap = await getDocs(q)
+    if (snap.empty) return null
+    const docSnap = snap.docs[0]
+    return {
+      id: docSnap.id,
+      likertId: docSnap.ref.parent.parent.id, // ambil parent likert id
+      ...docSnap.data(),
     }
   }
 

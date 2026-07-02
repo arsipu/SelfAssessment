@@ -17,6 +17,9 @@ import AdminSetting from '@/pages/admin/AdminSetting.vue';
 import AdminLikert from '@/pages/admin/likert/AdminLikert.vue';
 import AdminLikertQuestions from '@/pages/admin/likert/AdminLikertQuestions.vue';
 
+import AdminHolland from '@/pages/admin/holland/AdminHolland.vue';
+import AdminHollandQuestions from '@/pages/admin/holland/AdminHollandQuestions.vue';
+
 import TentangKamiView from '@/pages/dashboard/TentangKamiView.vue';
 import LoginView from '@/pages/login/LoginPage.vue';
 
@@ -65,6 +68,16 @@ const routes = [
                 path: "likert/:id",
                 name: "admin-likert-questions",
                 component: AdminLikertQuestions,
+            },
+            {
+                path: "holland",
+                name: "admin-holland",
+                component: AdminHolland,
+            },
+            {
+                path: "holland/questions",
+                name: "admin-holland-questions",
+                component: AdminHollandQuestions,
             },
             {
                 path: "setting",

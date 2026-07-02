@@ -72,6 +72,10 @@ const navItems = [
     name: 'admin-likert'
   },
   {
+    label: 'Holland',
+    name: 'admin-holland'
+  },
+  {
     label: 'Pengaturan',
     name: 'admin-setting'
   }

@@ -13,10 +13,11 @@ export const useLikertSessionStore = defineStore(
     // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
     const startSession = async (likertId, respondentData) => {
       const likertStore = useLikertStore()
-      const submissionId = await likertStore.createSubmission(likertId, respondentData)
+      const { id: submissionId, code } = await likertStore.createSubmission(likertId, respondentData)
 
       sessions.value[likertId] = {
         submissionId,
+        code, 
         respondent: respondentData,
         answers: {},
       }
@@ -57,6 +58,7 @@ export const useLikertSessionStore = defineStore(
       results.value[likertId] = {
         totalScore,
         submissionId: session.submissionId,
+        code: session.code,
         respondentName: session.respondent?.nama || '-',
       }
 
