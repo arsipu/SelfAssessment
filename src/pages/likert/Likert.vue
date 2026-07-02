@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen">
     <AppTopBar />
 
     <div class="max-w-3xl mx-auto px-6 py-10">
