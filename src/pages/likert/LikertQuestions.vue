@@ -124,6 +124,7 @@ import { useLikertStore } from '@/stores/likert'
 import { useLikertQuestionsStore } from '@/stores/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert-category'
 import { useLikertSessionStore } from '@/stores/likert-session'
+import { LikertAnswer, LIKERT_SCALE_OPTIONS, LIKERT_SCORE_MAP, LIKERT_SCORE_MAP_REVERSE } from '@/apps/likert'
 
 const route = useRoute()
 const router = useRouter()
@@ -140,12 +141,7 @@ const { categories } = storeToRefs(categoryStore)
 const answers = ref({})
 let session = null
 
-const scaleOptions = [
-  { value: 'SS', label: 'SS' },
-  { value: 'S',  label: 'S'  },
-  { value: 'TS', label: 'TS' },
-  { value: 'STS', label: 'STS' },
-]
+const scaleOptions = LIKERT_SCALE_OPTIONS
 
 onMounted(async () => {
   session = likertSessionStore.getSession(likertId)
@@ -217,23 +213,12 @@ const progressPct = computed(() =>
   questions.value.length ? (answeredCount.value / questions.value.length) * 100 : 0
 )
 
-const scoreMap = { SS: 4, S: 3, TS: 2, STS: 1 }
-const scoreMapRev = { SS: 1, S: 2, TS: 3, STS: 4 }
+const scoreMap = LIKERT_SCORE_MAP
+const scoreMapRev = LIKERT_SCORE_MAP_REVERSE
 
 const handleSubmit = async () => {
-  const submissionResult = questions.value.map((q) => {
-    const raw = answers.value[q.id]
-    const point = q.favorable ? scoreMap[raw] : scoreMapRev[raw]
-    return {
-      questionId: q.id,
-      categoryId: q.categoryId,
-      favorable: q.favorable ? 'favorable' : 'unfavorable',
-      answer: raw,
-      point,
-    }
-  })
-
-  const totalScore = submissionResult.reduce((sum, r) => sum + r.point, 0)
+  const submissionResult = buildSubmissionResult()
+  const totalScore = submissionResult.reduce((sum, r) => sum + (r.point ?? 0), 0)
 
   try {
     await likertSessionStore.finishSession(likertId, submissionResult, totalScore)

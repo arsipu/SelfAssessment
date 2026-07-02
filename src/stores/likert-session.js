@@ -60,6 +60,7 @@ export const useLikertSessionStore = defineStore(
         submissionId: session.submissionId,
         code: session.code,
         respondentName: session.respondent?.nama || '-',
+        answers: submissionResult, 
       }
 
       delete sessions.value[likertId]

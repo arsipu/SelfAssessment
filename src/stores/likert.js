@@ -22,6 +22,7 @@ export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
   const currentLikert = ref(null)
   const loading = ref(false)
+  const currentLikertScales = ref([])
 
   // ── Likert (surveys) ──────────────────────────────────────
 
@@ -184,6 +185,32 @@ export const useLikertStore = defineStore('likert', () => {
     }
   }
 
+  const fetchLikertScales = async (likertId) => {
+  try {
+    const snap = await getDocs(collection(db, 'likert', likertId, 'scale'))
+    const scales = snap.docs.map((d) => {
+      const data = d.data()
+      // parse "145 – 176" jadi { min: 145, max: 176 }
+      const [minStr, maxStr] = data.range.split('–').map((s) => s.trim())
+      return {
+        id: d.id,
+        label: data.score,
+        description: data.description,
+        min: Number(minStr),
+        max: Number(maxStr),
+      }
+    })
+    // urutkan dari min terbesar ke terkecil (biar konsisten kayak array hardcode sebelumnya)
+    scales.sort((a, b) => b.min - a.min)
+    currentLikertScales.value = scales
+    return scales
+  } catch (error) {
+    console.error('Error fetching likert scales:', error)
+    currentLikertScales.value = []
+    throw error
+  }
+}
+
   return {
     likerts,
     currentLikert,
@@ -197,5 +224,6 @@ export const useLikertStore = defineStore('likert', () => {
     createSubmission,
     completeSubmission,
     updateSubmissionAnswers,
+    fetchLikertScales,
   }
 })
