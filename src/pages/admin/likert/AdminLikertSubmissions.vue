@@ -1,0 +1,137 @@
+<template>
+  <div>
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 mb-4">
+      <button
+        @click="router.push({ name: 'admin-likert' })"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+      >
+        Likert Scale
+      </button>
+      <span class="text-gray-300">/</span>
+      <button
+        @click="router.push({ name: 'admin-likert-detail', params: { id: likertId } })"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+      >
+        {{ currentLikert?.name ?? '...' }}
+      </button>
+      <span class="text-gray-300">/</span>
+      <span class="text-sm text-gray-800 font-medium">Submissions</span>
+    </div>
+
+    <!-- Header -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-lg font-semibold text-gray-900 mb-1">Submissions</h1>
+        <p class="text-sm text-gray-500">Daftar responden yang mengerjakan {{ currentLikert?.name }}</p>
+      </div>
+      <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200">
+        {{ submissions.length }} Responden
+      </span>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+      <p class="text-sm text-gray-400">Memuat data...</p>
+    </div>
+
+    <!-- Table -->
+    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Sekolah</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kelas</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kode</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Skor</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Tanggal</th>
+              <th class="px-5 py-3 w-12"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr
+              v-for="s in submissions"
+              :key="s.id"
+              @click="router.push({ name: 'admin-likert-submission-detail', params: { id: likertId, submissionId: s.id } })"
+              class="hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <td class="px-5 py-3 text-sm text-gray-800 font-medium">{{ s.name }}</td>
+              <td class="px-5 py-3 text-sm text-gray-600">{{ s.school }}</td>
+              <td class="px-5 py-3 text-sm text-gray-600">{{ s.class }}</td>
+              <td class="px-5 py-3 text-sm text-gray-500 font-mono">{{ s.code }}</td>
+              <td class="px-5 py-3">
+                <span
+                  class="text-xs px-2 py-1 rounded-full font-medium"
+                  :class="s.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+                >
+                  {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
+                </span>
+              </td>
+              <td class="px-5 py-3 text-sm text-gray-600">{{ s.totalScore ?? '-' }}</td>
+              <td class="px-5 py-3 text-sm text-gray-500">{{ formatDate(s.createdAt) }}</td>
+              <td class="px-5 py-3 text-right">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 text-gray-400 group-hover:text-gray-700 transition-colors"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </td>
+            </tr>
+
+            <tr v-if="submissions.length === 0">
+              <td colspan="7" class="px-5 py-6 text-center text-sm text-gray-400">
+                Belum ada responden yang mengerjakan.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useLikertStore } from '@/stores/likert'
+import { useLikertSubmissionsStore } from '@/stores/likert-submissions'
+
+const route = useRoute()
+const router = useRouter()
+const likertId = route.params.id
+
+const likertStore = useLikertStore()
+const submissionsStore = useLikertSubmissionsStore()
+
+const { currentLikert } = storeToRefs(likertStore)
+const { submissions, loading } = storeToRefs(submissionsStore)
+
+onMounted(async () => {
+  await Promise.all([
+    likertStore.getLikertById(likertId),
+    submissionsStore.fetchSubmissions(likertId),
+  ])
+})
+
+const formatDate = (timestamp) => {
+  if (!timestamp?.toDate) return '-'
+  return timestamp.toDate().toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+</script>

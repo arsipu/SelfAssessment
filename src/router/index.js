@@ -16,6 +16,8 @@ import AdminSetting from '@/pages/admin/AdminSetting.vue';
 
 import AdminLikert from '@/pages/admin/likert/AdminLikert.vue';
 import AdminLikertQuestions from '@/pages/admin/likert/AdminLikertQuestions.vue';
+import AdminLikertSubmissions from '@/pages/admin/likert/AdminLikertSubmissions.vue';
+import AdminLikertSubmissionDetail from '@/pages/admin/likert/AdminLikertSubmissionDetail.vue';
 
 import AdminHolland from '@/pages/admin/holland/AdminHolland.vue';
 import AdminHollandQuestions from '@/pages/admin/holland/AdminHollandQuestions.vue';
@@ -68,6 +70,16 @@ const routes = [
                 path: "likert/:id",
                 name: "admin-likert-questions",
                 component: AdminLikertQuestions,
+            },
+            {
+                path: "likert/:id/submissions",
+                name: "admin-likert-submissions",
+                component: AdminLikertSubmissions,
+            },
+            {
+                path: "likert/:id/submissions/:submissionId",
+                name: 'admin-likert-submission-detail',
+                component: AdminLikertSubmissionDetail,
             },
             {
                 path: "holland",

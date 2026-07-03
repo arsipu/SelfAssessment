@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useLikertStore } from './likert'
+import { useLikertSubmissionsStore } from './likert-submissions'
+// import { useLikertStore } from './likert'
 
 export const useLikertSessionStore = defineStore(
   'likertSession',
@@ -12,8 +13,8 @@ export const useLikertSessionStore = defineStore(
 
     // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
     const startSession = async (likertId, respondentData) => {
-      const likertStore = useLikertStore()
-      const { id: submissionId, code } = await likertStore.createSubmission(likertId, respondentData)
+      const likertSubmissionsStore = useLikertSubmissionsStore()
+      const { id: submissionId, code } = await likertSubmissionsStore.createSubmission(likertId, respondentData)
 
       sessions.value[likertId] = {
         submissionId,
@@ -38,8 +39,8 @@ export const useLikertSessionStore = defineStore(
       session.answers = answers // instan, buat UX & restore pas refresh
 
       try {
-        const likertStore = useLikertStore()
-        await likertStore.updateSubmissionAnswers(likertId, session.submissionId, submissionResult)
+        const likertSubmissionsStore = useLikertSubmissionsStore()
+        await likertSubmissionsStore.updateSubmissionAnswers(likertId, session.submissionId, submissionResult)
       } catch (error) {
         // gagal sync ke Firestore -> jawaban tetap aman di local state,
         // nanti bisa di-retry pas ada perubahan berikutnya
@@ -52,8 +53,8 @@ export const useLikertSessionStore = defineStore(
       const session = sessions.value[likertId]
       if (!session) throw new Error('Sesi tidak ditemukan')
 
-      const likertStore = useLikertStore()
-      await likertStore.completeSubmission(likertId, session.submissionId, submissionResult, totalScore)
+      const likertSubmissionsStore = useLikertSubmissionsStore()
+      await likertSubmissionsStore.completeSubmission(likertId, session.submissionId, submissionResult, totalScore)
 
       results.value[likertId] = {
         totalScore,
