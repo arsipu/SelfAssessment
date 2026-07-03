@@ -61,6 +61,7 @@ export const useLikertSessionStore = defineStore(
         submissionId: session.submissionId,
         code: session.code,
         respondentName: session.respondent?.nama || '-',
+        respondent: session.respondent,
         answers: submissionResult, 
       }
 

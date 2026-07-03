@@ -1,19 +1,19 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 class="text-lg font-semibold text-gray-900 mb-1">Likert Scale</h1>
+          <h1 class="text-lg md:text-xl font-semibold text-gray-900 mb-1">Likert Scale</h1>
           <p class="text-sm text-gray-500 max-w-3xl">
             Kelola daftar formulir survei Likert. Klik formulir untuk mengelola pertanyaan di dalamnya.
           </p>
         </div>
         <button
           @click="showAddModal = true"
-          class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+          class="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           Tambah Formulir
@@ -22,13 +22,13 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-8 md:p-12 text-center">
       <p class="text-sm text-gray-400">Memuat data...</p>
     </div>
 
     <!-- Tabel -->
     <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+      <div class="px-4 md:px-5 py-3 md:py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <h2 class="text-sm font-medium text-gray-800">Daftar Formulir Survei</h2>
         <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">
           Total: {{ likerts.length }} Formulir
@@ -39,11 +39,11 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-white border-b border-gray-100">
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-16">No</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Formulir</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Deskripsi</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-32">Status</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-40">Aksi</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Formulir</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Deskripsi</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -52,26 +52,26 @@
               :key="likert.id"
               class="hover:bg-gray-50 transition-colors"
             >
-              <td class="px-5 py-3 text-sm text-gray-600">{{ index + 1 }}</td>
-              <td class="px-5 py-3">
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-600">{{ index + 1 }}</td>
+              <td class="px-4 md:px-5 py-3">
                 <button
                   @click="goToQuestions(likert.id)"
-                  class="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors text-left"
+                  class="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors text-left cursor-pointer"
                 >
                   {{ likert.name }}
                 </button>
               </td>
-              <td class="px-5 py-3 text-sm text-gray-500 max-w-xs truncate">{{ likert.description }}</td>
-              <td class="px-5 py-3">
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-500 max-w-xs truncate">{{ likert.description }}</td>
+              <td class="px-4 md:px-5 py-3">
                 <div class="relative inline-block">
                   <button
                     @click="toggleStatusMenu(likert.id)"
                     :class="statusBadgeClass(likert.status)"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 md:py-1 rounded-full text-xs font-medium transition-colors h-8 md:h-auto cursor-pointer"
                   >
-                    <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(likert.status)"></span>
+                    <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="statusDotClass(likert.status)"></span>
                     {{ statusLabel(likert.status) }}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -86,41 +86,41 @@
                       v-for="s in statusOptions"
                       :key="s.value"
                       @click="changeStatus(likert.id, s.value)"
-                      class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                      class="w-full text-left px-3 py-2.5 md:py-2 text-sm hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                       :class="{ 'bg-gray-50 font-medium': likert.status === s.value }"
                     >
-                      <span class="w-1.5 h-1.5 rounded-full" :class="s.dot"></span>
+                      <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="s.dot"></span>
                       {{ s.label }}
                     </button>
                   </div>
                 </div>
               </td>
-              <td class="px-5 py-3">
+              <td class="px-4 md:px-5 py-3">
                 <div class="flex items-center gap-2">
                   <button
                     @click="goToQuestions(likert.id)"
-                    class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                    class="p-2.5 md:p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Kelola Pertanyaan"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </button>
                   <button
                     @click="openEditModal(likert)"
-                    class="p-2 rounded-lg text-yellow-600 hover:bg-yellow-50 transition-colors"
+                    class="p-2.5 md:p-2 rounded-lg text-yellow-600 hover:bg-yellow-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Edit"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.707 15.707L8 16l.293-1.707A4 4 0 019 11z" />
                     </svg>
                   </button>
                   <button
                     @click="openDeleteModal(likert.id)"
-                    class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                    class="p-2.5 md:p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Hapus"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L18.132 18.142A2 2 0 0116.138 20H7.862a2 2 0 01-1.994-1.858L5 7m5-3h4m-6 3V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h8" />
                     </svg>
                   </button>
@@ -128,7 +128,7 @@
               </td>
             </tr>
             <tr v-if="likerts.length === 0">
-              <td colspan="4" class="px-5 py-8 text-center text-sm text-gray-400">
+              <td colspan="5" class="px-4 md:px-5 py-8 text-center text-sm text-gray-400">
                 Belum ada formulir survei.
               </td>
             </tr>
@@ -138,24 +138,24 @@
     </div>
 
     <!-- Modal Tambah/Edit -->
-    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-auto flex flex-col max-h-[90vh]">
+        <div class="px-4 md:px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
           <h3 class="text-base font-semibold text-gray-900">{{ isEditing ? 'Edit Formulir' : 'Tambah Formulir Baru' }}</h3>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 md:p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Formulir</label>
             <input
               v-model="form.name"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+              class="w-full px-3 py-2.5 md:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
               placeholder="Contoh: Pemutusan Peraturan Baru"
             />
           </div>
@@ -164,23 +164,23 @@
             <textarea
               v-model="form.description"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+              class="w-full px-3 py-2.5 md:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
               placeholder="Deskripsi singkat tentang formulir ini..."
             ></textarea>
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+        <div class="px-4 md:px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
           <button
             @click="closeModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors h-10 cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="saveForm"
             :disabled="!isFormValid || saving"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed h-10 cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -189,15 +189,15 @@
     </div>
 
     <!-- Modal Hapus -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
-        <div class="p-6">
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
+        <div class="p-4 md:p-6 overflow-y-auto">
           <h3 class="text-lg font-semibold text-gray-900">Hapus Formulir</h3>
           <p class="mt-2 text-sm text-gray-500">Apakah Anda yakin ingin menghapus formulir ini? Semua pertanyaan di dalamnya juga akan terhapus.</p>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end gap-3">
-          <button @click="showDeleteModal = false" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Batal</button>
-          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm disabled:opacity-60">
+        <div class="px-4 md:px-6 py-4 border-t flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
+          <button @click="showDeleteModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm h-10 cursor-pointer">Batal</button>
+          <button @click="confirmDelete" :disabled="saving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm disabled:opacity-60 h-10 cursor-pointer">
             {{ saving ? 'Menghapus...' : 'Hapus' }}
           </button>
         </div>

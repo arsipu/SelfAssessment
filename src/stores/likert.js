@@ -115,16 +115,21 @@ export const useLikertStore = defineStore('likert', () => {
     const snap = await getDocs(collection(db, 'likert', likertId, 'scale'))
     const scales = snap.docs.map((d) => {
       const data = d.data()
-      // parse "145 – 176" jadi { min: 145, max: 176 }
-      const [minStr, maxStr] = data.range.split('–').map((s) => s.trim())
+      // regex ini nangkep -, –, — dikelilingi spasi opsional
+      const parts = data.range.split(/\s*[-–—]\s*/).map((s) => s.trim())
+      const min = Number(parts[0])
+      const max = Number(parts[1])
+
       return {
         id: d.id,
         label: data.score,
         description: data.description,
-        min: Number(minStr),
-        max: Number(maxStr),
+        min,
+        max,
       }
     })
+
+    
     // urutkan dari min terbesar ke terkecil (biar konsisten kayak array hardcode sebelumnya)
     scales.sort((a, b) => b.min - a.min)
     currentLikertScales.value = scales

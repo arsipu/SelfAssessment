@@ -1,46 +1,47 @@
 <template>
   <div>
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 mb-4">
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
       <button
         @click="router.push({ name: 'admin-likert' })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap cursor-pointer"
       >
         Likert Scale
       </button>
-      <span class="text-gray-300">/</span>
+      <span class="text-gray-300 shrink-0">/</span>
       <button
         @click="router.push({ name: 'admin-likert-questions', params: { id: likertId } })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         {{ currentLikert?.name ?? '...' }}
       </button>
-      <span class="text-gray-300">/</span>
-      <span class="text-sm text-gray-800 font-medium">Submissions</span>
+      <span class="text-gray-300 shrink-0">/</span>
+      <span class="text-sm text-gray-800 font-medium truncate">Submissions</span>
     </div>
 
     <!-- Header -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 flex justify-between items-center">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-lg font-semibold text-gray-900 mb-1">Submissions</h1>
-        <p class="text-sm text-gray-500">Daftar responden yang mengerjakan {{ currentLikert?.name }}</p>
+        <h1 class="text-lg md:text-xl font-semibold text-gray-900 mb-1">Submissions</h1>
+        <p class="text-sm text-gray-500 mb-3">Daftar responden yang mengerjakan {{ currentLikert?.name }}</p>
+        <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200 whitespace-nowrap">
+          {{ submissions.length }} Responden
+        </span>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 w-full sm:w-auto">
         <button
           @click="showExportModal = true"
           :disabled="submissions.length === 0"
-          class="text-xs font-medium px-3 py-2 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+          class="text-xs font-medium px-3 py-2.5 md:py-2 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
         >
           Export Excel
         </button>
-        <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200">
-          {{ submissions.length }} Responden
-        </span>
+        
       </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-8 md:p-12 text-center">
       <p class="text-sm text-gray-400">Memuat data...</p>
     </div>
 
@@ -50,14 +51,14 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Sekolah</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kelas</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kode</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Skor</th>
-              <th class="px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Tanggal</th>
-              <th class="px-5 py-3 w-12"></th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Nama</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Sekolah</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kelas</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kode</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Skor</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Tanggal</th>
+              <th class="px-4 md:px-5 py-3 w-12"></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -67,24 +68,24 @@
               @click="router.push({ name: 'admin-likert-submission-detail', params: { id: likertId, submissionId: s.id } })"
               class="hover:bg-gray-50 transition-colors cursor-pointer"
             >
-              <td class="px-5 py-3 text-sm text-gray-800 font-medium">{{ s.name }}</td>
-              <td class="px-5 py-3 text-sm text-gray-600">{{ s.school }}</td>
-              <td class="px-5 py-3 text-sm text-gray-600">{{ s.class }}</td>
-              <td class="px-5 py-3 text-sm text-gray-500 font-mono">{{ s.code }}</td>
-              <td class="px-5 py-3">
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-800 font-medium">{{ s.name }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-600">{{ s.school }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-600">{{ s.class }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-500 font-mono">{{ s.code }}</td>
+              <td class="px-4 md:px-5 py-3">
                 <span
-                  class="text-xs px-2 py-1 rounded-full font-medium"
+                  class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap"
                   :class="s.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
                 >
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="px-5 py-3 text-sm text-gray-600">{{ s.totalScore ?? '-' }}</td>
-              <td class="px-5 py-3 text-sm text-gray-500">{{ formatDate(s.createdAt) }}</td>
-              <td class="px-5 py-3 text-right">
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-600">{{ s.totalScore ?? '-' }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-gray-500 whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
+              <td class="px-4 md:px-5 py-3 text-right">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-5 h-5 text-gray-400 group-hover:text-gray-700 transition-colors"
+                  class="w-5 h-5 text-gray-400 group-hover:text-gray-700 transition-colors shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -100,7 +101,7 @@
             </tr>
 
             <tr v-if="submissions.length === 0">
-              <td colspan="7" class="px-5 py-6 text-center text-sm text-gray-400">
+              <td colspan="8" class="px-4 md:px-5 py-6 text-center text-sm text-gray-400">
                 Belum ada responden yang mengerjakan.
               </td>
             </tr>
@@ -116,23 +117,23 @@
       class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
       @click.self="showExportModal = false"
     >
-      <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
+      <div class="bg-white rounded-2xl p-4 md:p-6 max-w-sm w-full shadow-lg flex flex-col max-h-[90vh]">
         <h2 class="text-base font-semibold text-gray-900 mb-2">Export ke Excel?</h2>
         <p class="text-sm text-gray-500 leading-relaxed mb-6">
           File berisi rekap {{ submissions.length }} responden akan diunduh dalam format .xlsx.
         </p>
 
-        <div class="flex gap-3">
+        <div class="flex flex-col-reverse sm:flex-row gap-3">
           <button
             @click="showExportModal = false"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors h-10 cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="confirmExportExcel"
             :disabled="exporting"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors h-10 cursor-pointer"
           >
             {{ exporting ? 'Mengunduh...' : 'Ya, export' }}
           </button>

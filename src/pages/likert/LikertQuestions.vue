@@ -2,14 +2,14 @@
   <div class="min-h-screen">
     <AppTopBar />
 
-    <div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
 
       <!-- Header -->
       <div class="mb-6">
         <!-- <router-link to="/likert-form" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
           ← Kembali
         </router-link> -->
-        <h1 class="text-xl font-medium text-gray-900 mt-3">Likert Scale</h1>
+        <h1 class="text-lg md:text-xl font-medium text-gray-900 mt-3">Likert Scale</h1>
         <p class="text-sm text-gray-400 mt-1">
           Berikan tanda pada kolom yang paling sesuai dengan diri Anda.
         </p>
@@ -44,19 +44,19 @@
           <div
             v-for="(q, i) in section.questions"
             :key="q.id"
-            class="bg-white border rounded-xl p-4 transition-colors border-gray-200"
+            class="bg-white border rounded-xl p-3 md:p-4 transition-colors border-gray-200"
           >
             <div class="flex items-start gap-3 mb-3">
               <span class="text-xs font-medium text-gray-400 mt-0.5 w-6 shrink-0">{{ i + 1 }}.</span>
               <p class="text-sm text-gray-800 leading-relaxed">{{ q.question }}</p>
             </div>
 
-            <div class="flex gap-2 pl-9">
+            <div class="flex flex-wrap gap-1.5 md:gap-2 pl-9">
               <button
                 v-for="opt in scaleOptions"
                 :key="opt.value"
                 @click="answers[q.id] = opt.value"
-                class="flex-1 py-2 rounded-lg text-xs font-medium transition-all border"
+                class="flex-1 min-w-[3rem] px-1.5 py-2 rounded-lg text-[11px] md:text-xs font-medium transition-all border leading-tight text-center"
                 :class="answers[q.id] === opt.value
                   ? 'bg-gray-900 text-white border-gray-900'
                   : 'bg-gray-50 text-gray-500 border-gray-100 hover:border-gray-300 hover:text-gray-700'"
@@ -69,14 +69,14 @@
       </div>
 
       <!-- Submit -->
-      <div class="mt-8 flex items-center justify-between">
-        <p class="text-xs text-gray-400">
+      <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <p class="text-xs text-gray-400 text-center sm:text-left">
           {{ unansweredCount > 0 ? `${unansweredCount} soal belum dijawab` : 'Semua soal sudah dijawab ✓' }}
         </p>
         <button
           @click="showConfirmModal = true"
           :disabled="unansweredCount > 0"
-          class="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Kirim jawaban
         </button>
@@ -89,7 +89,7 @@
         class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
         @click.self="showConfirmModal = false"
       >
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
           <h2 class="text-base font-semibold text-gray-900 mb-2">Kirim jawaban?</h2>
           <p class="text-sm text-gray-500 leading-relaxed mb-6">
             Pastikan semua jawaban sudah sesuai. Jawaban tidak bisa diubah lagi setelah dikirim.
@@ -164,11 +164,13 @@ let debounceTimer = null
 function buildSubmissionResult() {
   return questions.value.map((q) => {
     const raw = answers.value[q.id]
-    const point = raw ? (q.favorable ? scoreMap[raw] : scoreMapRev[raw]) : null
+    const isFavorable = q.favorable === 'favorable'
+    const point = raw ? (isFavorable ? scoreMap[raw] : scoreMapRev[raw]) : null
+
     return {
       questionId: q.id,
       categoryId: q.categoryId,
-      favorable: q.favorable ? 'favorable' : 'unfavorable',
+      favorable: q.favorable,
       answer: raw ?? null,
       point,
     }
