@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '@/firebase/firebase-config'
+import { generateSessionCode } from '@/utils/code'
 import {
   collection,
   doc,

@@ -10,7 +10,7 @@
       </button>
       <span class="text-gray-300">/</span>
       <button
-        @click="router.push({ name: 'admin-likert-detail', params: { id: likertId } })"
+        @click="router.push({ name: 'admin-likert-questions', params: { id: likertId } })"
         class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
       >
         {{ currentLikert?.name ?? '...' }}
@@ -25,9 +25,18 @@
         <h1 class="text-lg font-semibold text-gray-900 mb-1">Submissions</h1>
         <p class="text-sm text-gray-500">Daftar responden yang mengerjakan {{ currentLikert?.name }}</p>
       </div>
-      <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200">
-        {{ submissions.length }} Responden
-      </span>
+      <div class="flex items-center gap-3">
+        <button
+          @click="showExportModal = true"
+          :disabled="submissions.length === 0"
+          class="text-xs font-medium px-3 py-2 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+        >
+          Export Excel
+        </button>
+        <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200">
+          {{ submissions.length }} Responden
+        </span>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -100,14 +109,46 @@
       </div>
     </div>
   </div>
+  <!-- Modal konfirmasi export -->
+  <Transition name="fade">
+    <div
+      v-if="showExportModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
+      @click.self="showExportModal = false"
+    >
+      <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
+        <h2 class="text-base font-semibold text-gray-900 mb-2">Export ke Excel?</h2>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+          File berisi rekap {{ submissions.length }} responden akan diunduh dalam format .xlsx.
+        </p>
+
+        <div class="flex gap-3">
+          <button
+            @click="showExportModal = false"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            @click="confirmExportExcel"
+            :disabled="exporting"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          >
+            {{ exporting ? 'Mengunduh...' : 'Ya, export' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert'
 import { useLikertSubmissionsStore } from '@/stores/likert-submissions'
+import { exportSubmissionsToExcel } from '@/utils/excel-export'
 
 const route = useRoute()
 const router = useRouter()
@@ -119,12 +160,8 @@ const submissionsStore = useLikertSubmissionsStore()
 const { currentLikert } = storeToRefs(likertStore)
 const { submissions, loading } = storeToRefs(submissionsStore)
 
-onMounted(async () => {
-  await Promise.all([
-    likertStore.getLikertById(likertId),
-    submissionsStore.fetchSubmissions(likertId),
-  ])
-})
+const showExportModal = ref(false)
+const exporting = ref(false)
 
 const formatDate = (timestamp) => {
   if (!timestamp?.toDate) return '-'
@@ -134,4 +171,22 @@ const formatDate = (timestamp) => {
     year: 'numeric',
   })
 }
+
+async function confirmExportExcel() {
+  if (exporting.value) return
+  exporting.value = true
+  try {
+    exportSubmissionsToExcel(submissions.value, currentLikert.value?.name)
+    showExportModal.value = false
+  } finally {
+    exporting.value = false
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([
+    likertStore.getLikertById(likertId),
+    submissionsStore.fetchSubmissions(likertId),
+  ])
+})
 </script>

@@ -63,15 +63,55 @@
           </div>
         </div>
 
-        <router-link
-          :to="{ name: 'likert' }"
-          class="block w-full text-center py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition"
-        >
-          Selesai
-        </router-link>
+        <div class="flex gap-3">
+          <button
+            @click="showExportPDFModal = true"
+            class="flex-1 py-3 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition"
+          >
+            Unduh PDF
+          </button>
+          <router-link
+            :to="{ name: 'likert' }"
+            class="flex-1 text-center py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition"
+          >
+            Selesai
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
+  
+  <!-- Modal konfirmasi export PDF -->
+   <Transition name="fade">
+    <div
+      v-if="showExportPDFModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
+      @click.self="showExportPDFModal = false"
+    >
+      <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
+        <h2 class="text-base font-semibold text-gray-900 mb-2">Unduh hasil PDF?</h2>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+          Rekap jawaban akan diunduh dalam format .pdf.
+        </p>
+
+        <div class="flex gap-3">
+          <button
+            @click="showExportPDFModal = false"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            @click="confirmExportPDF"
+            :disabled="exportingPDF"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          >
+            {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -82,6 +122,7 @@ import { useLikertSessionStore } from '@/stores/likert-session'
 import { useLikertQuestionsStore } from '@/stores/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert-category'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
+import { exportLikertResultToPDF } from '@/utils/pdf-export'
 
 import AppTopBar from '@/components/AppTopBar.vue'
 
@@ -96,6 +137,20 @@ const categoryStore = useLikertCategoryStore()
 
 const categories = ref([])
 const loading = ref(true)
+
+const showExportPDFModal = ref(false)
+const exportingPDF = ref(false)
+
+async function confirmExportPDF() {
+  if (exportingPDF.value) return
+  exportingPDF.value = true
+  try {
+    handleExportPDF()
+    showExportPDFModal.value = false
+  } finally {
+    exportingPDF.value = false
+  }
+}
 
 const badgeClassMap = {
   'Sangat Tinggi': 'bg-emerald-100 text-emerald-700',
@@ -172,4 +227,16 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function handleExportPDF() {
+  exportLikertResultToPDF({
+    likertName: likertStore.currentLikert?.name || 'Kuesioner',
+    respondentName: respondentName.value,
+    code: result.value.code,
+    totalScore: result.value.totalScore,
+    categoryLabel: category.value?.label || '-',
+    categoryDescription: category.value?.description || '',
+    sections: sections.value,
+  })
+}
 </script>

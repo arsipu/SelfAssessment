@@ -14,8 +14,18 @@
         Beranda
       </router-link>
 
-      <!-- Dropdown Instrumen -->
-      <div class="relative" ref="dropdownRef">
+      <!-- Kalau cuma 1 likert published: tampilin langsung sebagai link -->
+      <router-link
+        v-if="publishedLikerts.length === 1"
+        :to="{ name: 'likert-form', params: { id: publishedLikerts[0].id } }"
+        class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        active-class="text-gray-900 bg-gray-100"
+      >
+        {{ publishedLikerts[0].name }}
+      </router-link>
+
+      <!-- Kalau lebih dari 1 likert published: pakai dropdown -->
+      <div v-else-if="publishedLikerts.length > 1" class="relative" ref="dropdownRef">
         <button
           @click="toggleDropdown"
           class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -45,24 +55,9 @@
             class="absolute top-full left-0 mt-1.5 w-52 bg-white border border-gray-200 rounded-xl shadow-sm py-1 z-50"
           >
             <router-link
-              to="/holland"
-              @click="dropdownOpen = false"
-              class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
-            >
-              <div class="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center shrink-0 mt-0.5">
-                <svg class="w-4 h-4 text-purple-600" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M8 4v4l2.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-800">Holland RIASEC</p>
-                <p class="text-xs text-gray-400">36 butir soal</p>
-              </div>
-            </router-link>
-
-            <router-link
-              to="/likert"
+              v-for="item in publishedLikerts"
+              :key="item.id"
+              :to="{ name: 'likert-form', params: { id: item.id } }"
               @click="dropdownOpen = false"
               class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
             >
@@ -73,8 +68,8 @@
                 </svg>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-800">Likert</p>
-                <p class="text-xs text-gray-400">28 butir soal</p>
+                <p class="text-sm font-medium text-gray-800">{{ item.name }}</p>
+                <p class="text-xs text-gray-400">{{ item.description }}</p>
               </div>
             </router-link>
           </div>
@@ -102,10 +97,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useLikertStore } from '@/stores/likert'
+import { PUBLISHED } from '@/apps/status'
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
+
+const likertStore = useLikertStore()
+const { likerts, loading } = storeToRefs(likertStore)
+
+const publishedLikerts = computed(() =>
+  likerts.value.filter((l) => l.status === PUBLISHED)
+)
+
+onMounted(async () => {
+  await likertStore.fetchLikerts()
+})
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value
