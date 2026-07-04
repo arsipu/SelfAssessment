@@ -163,6 +163,8 @@ const { submissions, loading } = storeToRefs(submissionsStore)
 
 const showExportModal = ref(false)
 const exporting = ref(false)
+const scales = ref([])
+
 
 const formatDate = (timestamp) => {
   if (!timestamp?.toDate) return '-'
@@ -177,7 +179,7 @@ async function confirmExportExcel() {
   if (exporting.value) return
   exporting.value = true
   try {
-    exportSubmissionsToExcel(submissions.value, currentLikert.value?.name)
+    exportSubmissionsToExcel(submissions.value, currentLikert.value?.name, scales.value)
     showExportModal.value = false
   } finally {
     exporting.value = false
@@ -189,5 +191,6 @@ onMounted(async () => {
     likertStore.getLikertById(likertId),
     submissionsStore.fetchSubmissions(likertId),
   ])
+  scales.value = await likertStore.fetchLikertScales(likertId)
 })
 </script>
