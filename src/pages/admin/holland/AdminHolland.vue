@@ -13,7 +13,7 @@
             <button
               @click="showStatusMenu = !showStatusMenu"
               :class="statusBadgeClass(config?.status)"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer"
             >
               <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(config?.status)"></span>
               {{ statusLabel(config?.status) }}
@@ -30,7 +30,7 @@
                 v-for="s in statusOptions"
                 :key="s.value"
                 @click="changeStatus(s.value)"
-                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                 :class="{ 'bg-gray-50 font-medium': config?.status === s.value }"
               >
                 <span class="w-1.5 h-1.5 rounded-full" :class="s.dot"></span>
@@ -41,7 +41,7 @@
 
           <button
             @click="openEditModal"
-            class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+            class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.707 15.707L8 16l.293-1.707A4 4 0 019 11z" />
@@ -61,7 +61,7 @@
     <!-- CTA ke halaman soal -->
     <button
       @click="router.push({ name: 'admin-holland-questions' })"
-      class="w-full bg-white border border-gray-200 rounded-xl p-6 text-left hover:bg-gray-50 transition-colors flex justify-between items-center"
+      class="w-full bg-white border border-gray-200 rounded-xl p-6 text-left hover:bg-gray-50 transition-colors flex justify-between items-center cursor-pointer"
     >
       <div>
         <h2 class="text-sm font-medium text-gray-900 mb-1">Kelola Pertanyaan</h2>
@@ -77,7 +77,7 @@
       <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 flex flex-col max-h-[90vh]">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 class="text-base font-semibold text-gray-900">Edit Info Instrumen</h3>
-          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -114,14 +114,14 @@
         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
           <button
             @click="closeEditModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="saveEdit"
             :disabled="!form.name.trim() || saving"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>

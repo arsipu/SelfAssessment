@@ -4,7 +4,7 @@
     <div class="flex items-center gap-2 mb-4">
       <button
         @click="router.push({ name: 'admin-holland' })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1 cursor-pointer"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -63,7 +63,7 @@
                     <div class="flex items-center gap-2 justify-end">
                       <button
                         @click="openEditModal(q)"
-                        class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                        class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.707 15.707L8 16l.293-1.707A4 4 0 019 11z" />
@@ -71,7 +71,7 @@
                       </button>
                       <button
                         @click="openDeleteModal(q.id)"
-                        class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L18.132 18.142A2 2 0 0116.138 20H7.862a2 2 0 01-1.994-1.858L5 7m5-3h4m-6 3V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h8" />
@@ -104,13 +104,13 @@
               <button
                 @click="saveInline(cat.id, col.id)"
                 :disabled="!inlineForm.question.trim() || saving"
-                class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {{ saving ? 'Menyimpan...' : 'Simpan' }}
               </button>
               <button
                 @click="cancelInline"
-                class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -120,7 +120,7 @@
           <button
             v-else
             @click="openInlineAdd(cat.id, col.id)"
-            class="w-full px-5 py-2.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            class="w-full px-5 py-2.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -136,7 +136,7 @@
       <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 flex flex-col max-h-[90vh]">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 class="text-base font-semibold text-gray-900">Edit Pernyataan</h3>
-          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -176,14 +176,14 @@
         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
           <button
             @click="closeEditModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="saveEdit"
             :disabled="!editForm.question.trim() || saving"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -199,8 +199,8 @@
           <p class="mt-2 text-sm text-gray-500">Apakah Anda yakin ingin menghapus pernyataan ini? Tindakan ini tidak dapat dibatalkan.</p>
         </div>
         <div class="px-6 py-4 border-t flex justify-end gap-3">
-          <button @click="showDeleteModal = false" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Batal</button>
-          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm disabled:opacity-60">
+          <button @click="showDeleteModal = false" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm cursor-pointer">Batal</button>
+          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm disabled:opacity-60 cursor-pointer">
             {{ saving ? 'Menghapus...' : 'Hapus' }}
           </button>
         </div>
