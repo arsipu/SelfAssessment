@@ -134,7 +134,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHollandStore } from '@/stores/holland'
+import { useHollandStore } from '@/stores/holland/holland'
 import { storeToRefs } from 'pinia'
 import { DRAFT, PUBLISHED, ARCHIVED, statusText } from '@/apps/status'
 

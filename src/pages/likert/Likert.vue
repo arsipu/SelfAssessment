@@ -51,7 +51,7 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useLikertStore } from '@/stores/likert'
+import { useLikertStore } from '@/stores/likert/likert'
 import { PUBLISHED } from '@/apps/status'
 
 import AppTopBar from '@/components/AppTopBar.vue'

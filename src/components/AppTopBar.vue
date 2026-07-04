@@ -99,7 +99,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useLikertStore } from '@/stores/likert'
+import { useLikertStore } from '@/stores/likert/likert'
 import { PUBLISHED } from '@/apps/status'
 
 const dropdownOpen = ref(false)

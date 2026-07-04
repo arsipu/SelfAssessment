@@ -217,7 +217,7 @@ import {
   useHollandQuestionsStore,
   RIASEC_CATEGORIES,
   RIASEC_COLUMNS,
-} from '@/stores/holland-questions'
+} from '@/stores/holland/holland-questions'
 
 const router = useRouter()
 const questionsStore = useHollandQuestionsStore()

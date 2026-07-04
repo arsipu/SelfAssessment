@@ -77,8 +77,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useLikertStore } from '@/stores/likert'
-import { useLikertSessionStore } from '@/stores/likert-session'
+import { useLikertStore } from '@/stores/likert/likert'
+import { useLikertSessionStore } from '@/stores/likert/likert-session'
 
 const route = useRoute()
 const router = useRouter()

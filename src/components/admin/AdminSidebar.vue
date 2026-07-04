@@ -87,7 +87,7 @@ const navItems = [
     name: 'admin-overview'
   },
   {
-    label: 'Likert',
+    label: 'Survei',
     name: 'admin-likert'
   },
   {

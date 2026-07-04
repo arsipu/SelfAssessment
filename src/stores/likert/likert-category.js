@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '../firebase/firebase-config'
+import { db } from '@/firebase/firebase-config'
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 
 export const useLikertCategoryStore = defineStore('likertCategory', () => {

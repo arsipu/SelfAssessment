@@ -120,10 +120,10 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useLikertStore } from '@/stores/likert'
-import { useLikertQuestionsStore } from '@/stores/likert-questions'
-import { useLikertCategoryStore } from '@/stores/likert-category'
-import { useLikertSessionStore } from '@/stores/likert-session'
+import { useLikertStore } from '@/stores/likert/likert'
+import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
+import { useLikertCategoryStore } from '@/stores/likert/likert-category'
+import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { LikertAnswer, LIKERT_SCALE_OPTIONS, LIKERT_SCORE_MAP, LIKERT_SCORE_MAP_REVERSE } from '@/apps/likert'
 
 const route = useRoute()

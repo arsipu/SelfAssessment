@@ -147,8 +147,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useLikertStore } from '@/stores/likert'
-import { useLikertSubmissionsStore } from '@/stores/likert-submissions'
+import { useLikertStore } from '@/stores/likert/likert'
+import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
 import { exportSubmissionsToExcel } from '@/utils/excel-export'
 
 const route = useRoute()

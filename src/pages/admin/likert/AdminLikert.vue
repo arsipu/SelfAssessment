@@ -4,9 +4,9 @@
     <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 class="text-lg md:text-xl font-semibold text-gray-900 mb-1">Likert Scale</h1>
+          <h1 class="text-lg md:text-xl font-semibold text-gray-900 mb-1">Survei</h1>
           <p class="text-sm text-gray-500 max-w-3xl">
-            Kelola daftar formulir survei Likert. Klik formulir untuk mengelola pertanyaan di dalamnya.
+            Kelola daftar formulir survei. Klik formulir untuk mengelola pertanyaan di dalamnya.
           </p>
         </div>
         <button
@@ -209,7 +209,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLikertStore } from '@/stores/likert'
+import { useLikertStore } from '@/stores/likert/likert'
 import { storeToRefs } from 'pinia'
 import { DRAFT, PUBLISHED, ARCHIVED, statusText } from '@/apps/status'
 

@@ -265,9 +265,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useLikertStore } from '@/stores/likert'
-import { useLikertQuestionsStore } from '@/stores/likert-questions'
-import { useLikertCategoryStore } from '@/stores/likert-category'
+import { useLikertStore } from '@/stores/likert/likert'
+import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
+import { useLikertCategoryStore } from '@/stores/likert/likert-category'
 import { storeToRefs } from 'pinia'
 
 const route = useRoute()
