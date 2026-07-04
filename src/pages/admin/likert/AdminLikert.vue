@@ -269,9 +269,27 @@ const closeStatusMenu = () => {
   openStatusMenuId.value = null
 }
 
+// const changeStatus = async (id, status) => {
+//   closeStatusMenu()
+//   try {
+//     await likertStore.updateLikertStatus(id, status)
+//   } catch (e) {
+//     console.error(e)
+//   }
+// }
+
 const changeStatus = async (id, status) => {
   closeStatusMenu()
   try {
+    if (status === PUBLISHED) {
+      // cari likert lain yang masih published, turunkan jadi draft dulu
+      const others = likerts.value.filter(
+        (l) => l.id !== id && l.status === PUBLISHED
+      )
+      for (const other of others) {
+        await likertStore.updateLikertStatus(other.id, DRAFT)
+      }
+    }
     await likertStore.updateLikertStatus(id, status)
   } catch (e) {
     console.error(e)

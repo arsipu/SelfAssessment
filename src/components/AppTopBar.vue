@@ -76,6 +76,16 @@
         </transition>
       </div>
 
+      <!-- RIASEC (Holland): singleton, jadi selalu link tunggal, terpisah dari dropdown likert -->
+      <router-link
+        v-if="isHollandPublished"
+        :to="{ name: 'holland-form' }"
+        class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        active-class="text-gray-900 bg-gray-100"
+      >
+        {{ hollandStore.config?.name || 'RIASEC' }}
+      </router-link>
+
       <!-- Tentang Kami -->
       <router-link
         to="/tentang-kami"
@@ -100,20 +110,26 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
+import { useHollandStore } from '@/stores/holland/holland'
 import { PUBLISHED } from '@/apps/status'
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 
 const likertStore = useLikertStore()
-const { likerts, loading } = storeToRefs(likertStore)
+const { likerts } = storeToRefs(likertStore)
+
+const hollandStore = useHollandStore()
 
 const publishedLikerts = computed(() =>
   likerts.value.filter((l) => l.status === PUBLISHED)
 )
 
+// RIASEC singleton: cukup cek status config-nya, bukan filter dari list
+const isHollandPublished = computed(() => hollandStore.config?.status === PUBLISHED)
+
 onMounted(async () => {
-  await likertStore.fetchLikerts()
+  await Promise.all([likertStore.fetchLikerts(), hollandStore.fetchConfig()])
 })
 
 const toggleDropdown = () => {

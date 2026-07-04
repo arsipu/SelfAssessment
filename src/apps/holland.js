@@ -214,22 +214,75 @@ export const RIASEC_GUIDE = Object.freeze({
 export const RIASEC_CATEGORY_ORDER = Object.freeze(['R', 'I', 'A', 'S', 'E', 'C'])
 
 /**
+ * Bentuk { id, name } turunan dari RIASEC_GUIDE, dipakai di admin panel
+ * (dropdown kategori, header tabel, dsb) supaya label kategori SELALU
+ * sinkron dengan yang dipakai di halaman respondent/result — jangan
+ * duplikasi daftar kategori di file lain.
+ */
+export const RIASEC_CATEGORIES = Object.freeze(
+  RIASEC_CATEGORY_ORDER.map((id) => ({ id, name: RIASEC_GUIDE[id].label }))
+)
+
+/**
  * Label kolom pernyataan sesuai dokumen kuesioner Holland.
+ * Dipakai baik di halaman pengisian (respondent) maupun admin panel
+ * (dropdown kolom saat tambah/edit soal) — satu sumber untuk keduanya.
  */
 export const HOLLAND_COLUMNS = Object.freeze([
-  { key: 'adalah', label: 'Saya adalah seseorang yang:' },
-  { key: 'mampu', label: 'Saya mampu:' },
-  { key: 'menyukai', label: 'Saya menyukai:' },
+  { key: 'adalah', id: 'adalah', label: 'Saya adalah seseorang yang' },
+  { key: 'mampu', id: 'mampu', label: 'Saya mampu' },
+  { key: 'menyukai', id: 'menyukai', label: 'Saya menyukai' },
 ])
+
+// Alias biar konsisten sama penamaan yang dipakai di admin panel lama (@/apps/holland)
+export const RIASEC_COLUMNS = HOLLAND_COLUMNS
 
 /**
  * Helper: ambil 3 kode teratas dari objek skor { R, I, A, S, E, C }
  * dan gabungkan jadi string kode RIASEC (misal "SAE").
+ *
+ * PENTING: jumlah pernyataan per kategori TIDAK SAMA (R=17, I=18, A=14,
+ * S=18, E=17, C=16), jadi ranking harus berbasis PERSENTASE
+ * (checked / total pernyataan kategori itu), bukan angka mentah —
+ * kalau pakai angka mentah, kategori dengan pernyataan lebih banyak
+ * otomatis diuntungkan meski minatnya belum tentu lebih tinggi.
+ *
+ * @param {Object} scores - { R: { count, total }, I: { count, total }, ... }
+ * @param {number} topN
+ * @returns {string} contoh: "SAE"
  */
 export function getTopRiasecCode(scores, topN = 3) {
   return Object.entries(scores)
+    .map(([code, s]) => [code, s.total ? (s.count / s.total) * 100 : 0])
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN)
     .map(([code]) => code)
     .join('')
+}
+
+/**
+ * Hitung count, total, dan percentage untuk tiap kategori RIASEC
+ * berdasarkan daftar questions dan checkedMap (object { [questionId]: true }).
+ *
+ * @param {Array} questions - daftar soal { id, category, column, ... }
+ * @param {Object} checkedMap - { [questionId]: true }
+ * @returns {Object} { R: { count, total, percentage }, ... }
+ */
+export function computeRiasecScores(questions, checkedMap) {
+  const scores = Object.fromEntries(
+    RIASEC_CATEGORY_ORDER.map((code) => [code, { count: 0, total: 0 }])
+  )
+
+  for (const q of questions) {
+    if (!scores[q.category]) continue
+    scores[q.category].total += 1
+    if (checkedMap[q.id]) scores[q.category].count += 1
+  }
+
+  for (const code of RIASEC_CATEGORY_ORDER) {
+    const s = scores[code]
+    s.percentage = s.total ? Math.round((s.count / s.total) * 1000) / 10 : 0
+  }
+
+  return scores
 }

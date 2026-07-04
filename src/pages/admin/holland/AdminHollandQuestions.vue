@@ -17,10 +17,33 @@
 
     <!-- Header -->
     <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-      <h1 class="text-lg font-semibold text-gray-900 mb-1">Kelola Pertanyaan RIASEC</h1>
-      <p class="text-sm text-gray-500 max-w-3xl">
-        Setiap kategori punya 3 kolom pernyataan: Saya adalah, Saya mampu, dan Saya menyukai.
-      </p>
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+        <h1 class="text-lg font-semibold text-gray-900 mb-1">Kelola Pertanyaan RIASEC</h1>
+        <p class="text-sm text-gray-500 max-w-3xl">
+          Setiap kategori punya 3 kolom pernyataan: Saya adalah, Saya mampu, dan Saya menyukai.
+        </p>
+      </div>
+        <button
+          @click="router.push({ name: 'admin-holland-submissions'})"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2a4 4 0 014-4h6m0 0l-3-3m3 3l-3 3M5 3v18"
+            />
+          </svg>
+
+          Lihat Submissions
+        </button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -213,11 +236,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import {
-  useHollandQuestionsStore,
-  RIASEC_CATEGORIES,
-  RIASEC_COLUMNS,
-} from '@/stores/holland/holland-questions'
+import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
+import { RIASEC_CATEGORIES, RIASEC_COLUMNS } from '@/apps/holland'
 
 const router = useRouter()
 const questionsStore = useHollandQuestionsStore()

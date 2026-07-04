@@ -13,21 +13,6 @@ import {
 // holland/config/questions
 const questionsCol = () => collection(db, 'holland', 'config', 'questions')
 
-export const RIASEC_CATEGORIES = [
-  { id: 'R', name: 'Realistis' },
-  { id: 'I', name: 'Investigatif' },
-  { id: 'A', name: 'Artistik' },
-  { id: 'S', name: 'Sosial' },
-  { id: 'E', name: 'Enterprising' },
-  { id: 'C', name: 'Konvensional' },
-]
-
-export const RIASEC_COLUMNS = [
-  { id: 'adalah', label: 'Saya adalah' },
-  { id: 'mampu', label: 'Saya mampu' },
-  { id: 'menyukai', label: 'Saya menyukai' },
-]
-
 export const useHollandQuestionsStore = defineStore('hollandQuestions', {
   state: () => ({
     questions: [],

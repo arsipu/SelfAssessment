@@ -3,7 +3,12 @@ import { useUserStore } from '@/stores/user';
 import { ROLE_ADMIN } from '@/apps/role.js';
 
 import BerandaView from '@/pages/dashboard/BerandaView.vue';
+
+
 import Holland from '@/pages/holland/Holland.vue';
+import HollandForm from '@/pages/holland/HollandForm.vue';
+import HollandQuestions from '@/pages/holland/HollandQuestions.vue';
+import HollandResult from '@/pages/holland/HollandResult.vue';
 
 import Likert from '@/pages/likert/Likert.vue';
 import LikertForm from '@/pages/likert/LikertForm.vue';
@@ -21,6 +26,8 @@ import AdminLikertSubmissionDetail from '@/pages/admin/likert/AdminLikertSubmiss
 
 import AdminHolland from '@/pages/admin/holland/AdminHolland.vue';
 import AdminHollandQuestions from '@/pages/admin/holland/AdminHollandQuestions.vue';
+import AdminHollandSubmissions from '@/pages/admin/holland/AdminHollandSubmissions.vue';
+import AdminHollandSubmissionDetail from '@/pages/admin/holland/AdminHollandSubmissionDetail.vue';
 
 import TentangKamiView from '@/pages/dashboard/TentangKamiView.vue';
 import LoginView from '@/pages/login/LoginPage.vue';
@@ -28,9 +35,12 @@ import LoginView from '@/pages/login/LoginPage.vue';
 const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
-	{ path: "/holland", name: "holland", component: Holland },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
+	{ path: "/holland", name: "holland", component: Holland },
+    { path: "/holland-form", name: "holland-form", component: HollandForm },
+    { path: "/holland-questions", name: "holland-questions", component: HollandQuestions },
+    { path: "/holland-result", name: "holland-result", component: HollandResult },
 
     { path: "/likert", name: "likert", component: Likert },
     { path: "/likert-form/:id", name: "likert-form", component: LikertForm },
@@ -90,6 +100,16 @@ const routes = [
                 path: "holland/questions",
                 name: "admin-holland-questions",
                 component: AdminHollandQuestions,
+            },
+            {
+                path: "holland/submissions",
+                name: "admin-holland-submissions",
+                component: AdminHollandSubmissions,
+            },
+            {
+                path: "holland/submissions/:submissionId",
+                name: "admin-holland-submission-detail",
+                component: AdminHollandSubmissionDetail,
             },
             {
                 path: "setting",
