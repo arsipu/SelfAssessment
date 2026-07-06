@@ -16,7 +16,7 @@
       <div class="mb-8">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-xs text-gray-400">Pernyataan dipilih</span>
-          <span class="text-xs text-gray-500 font-medium">{{ answeredCount }}/{{ questions.length }}</span>
+          <span class="text-xs text-gray-500 font-medium">{{ answeredCount }}/{{ allQuestions.length }}</span>
         </div>
         <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <div
@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <!-- Category sections -->
+      <!-- Category sections — grouped by riasecId from riasecList -->
       <div v-for="section in sections" :key="section.key" class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           <div class="h-px flex-1 bg-gray-200"></div>
@@ -112,16 +112,22 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
+import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
-import { RIASEC_CATEGORY_ORDER, HOLLAND_COLUMNS, RIASEC_GUIDE, getTopRiasecCode, computeRiasecScores } from '@/apps/holland'
+import { HOLLAND_COLUMNS, getTopRiasecCode, computeRiasecScores } from '@/apps/holland'
 
+const route = useRoute()
 const router = useRouter()
+const hollandId = route.params.id
 
 const questionsStore = useHollandQuestionsStore()
-const { questions } = storeToRefs(questionsStore)
+const { allQuestions } = storeToRefs(questionsStore)
+
+const riasecStore = useHollandRiasecStore()
+const { riasecList } = storeToRefs(riasecStore)
 
 const sessionStore = useHollandSessionStore()
 
@@ -130,20 +136,24 @@ const checkedMap = reactive({})
 let session = null
 
 onMounted(async () => {
-  session = sessionStore.getSession()
+  session = sessionStore.getSession(hollandId)
 
   if (!session) {
     // ga ada sesi -> balik ke form
-    router.push({ name: 'holland-form' })
+    router.push({ name: 'holland-form', params: { id: hollandId } })
     return
   }
 
-  // restore jawaban dari sesi (array of { questionId, category, column })
+  // restore jawaban dari sesi (array of { questionId, riasecId, column })
   for (const a of session.answers || []) {
     checkedMap[a.questionId] = true
   }
 
-  await questionsStore.fetchQuestions()
+  // Fetch riasec list (labels, descriptions) AND all questions in parallel
+  await Promise.all([
+    riasecStore.fetchRiasecList(hollandId),
+    questionsStore.fetchAllQuestions(hollandId),
+  ])
 })
 
 function isChecked(questionId) {
@@ -159,9 +169,13 @@ function toggleAnswer(question) {
 }
 
 function buildAnswers() {
-  return questions.value
+  return allQuestions.value
     .filter((q) => checkedMap[q.id])
-    .map((q) => ({ questionId: q.id, category: q.category, column: q.column }))
+    .map((q) => ({
+      questionId: q.id,
+      riasecId: q.riasecId, // replaces old field `category`
+      column: q.column,
+    }))
 }
 
 let debounceTimer = null
@@ -171,8 +185,8 @@ watch(
   () => {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
-      sessionStore.updateAnswers(buildAnswers())
-    }, 800) // sesuaikan delay-nya sesuai selera
+      sessionStore.updateAnswers(hollandId, buildAnswers())
+    }, 800)
   },
   { deep: true }
 )
@@ -181,14 +195,13 @@ onUnmounted(() => clearTimeout(debounceTimer))
 
 const dotColors = ['bg-rose-400', 'bg-blue-400', 'bg-purple-400', 'bg-teal-400', 'bg-amber-400', 'bg-emerald-400']
 
-// Kelompokkan questions per kategori, lalu per kolom di dalamnya.
-// Tidak ada field `order` di Firestore, jadi urutan ikut RIASEC_CATEGORY_ORDER
-// (kategori) dan HOLLAND_COLUMNS (kolom); urutan soal dalam 1 kolom ikut
-// urutan hasil fetchQuestions() apa adanya.
+// Kelompokkan questions per riasecId (kategori), lalu per kolom di dalamnya.
+// Urutan kategori dari riasecList (field `order` di Firestore).
+// Label/deskripsi dari riasecList (Firestore), bukan dari constants.
 const sections = computed(() => {
-  return RIASEC_CATEGORY_ORDER
-    .map((code, index) => {
-      const categoryQuestions = questions.value.filter((q) => q.category === code)
+  return riasecList.value
+    .map((cat, index) => {
+      const categoryQuestions = allQuestions.value.filter((q) => q.riasecId === cat.id)
       if (categoryQuestions.length === 0) return null
 
       const columns = HOLLAND_COLUMNS
@@ -200,9 +213,9 @@ const sections = computed(() => {
         .filter((col) => col.questions.length > 0)
 
       return {
-        key: code,
-        code,
-        label: RIASEC_GUIDE[code]?.label || code,
+        key: cat.id,
+        code: cat.id,
+        label: cat.label || cat.id,
         dot: dotColors[index % dotColors.length],
         columns,
       }
@@ -212,11 +225,11 @@ const sections = computed(() => {
 
 const answeredCount = computed(() => Object.keys(checkedMap).length)
 const progressPct = computed(() =>
-  questions.value.length ? (answeredCount.value / questions.value.length) * 100 : 0
+  allQuestions.value.length ? (answeredCount.value / allQuestions.value.length) * 100 : 0
 )
 
 function buildScores() {
-  return computeRiasecScores(questions.value, checkedMap)
+  return computeRiasecScores(allQuestions.value, checkedMap)
 }
 
 const handleSubmit = async () => {
@@ -225,8 +238,8 @@ const handleSubmit = async () => {
   const topCode = getTopRiasecCode(scores)
 
   try {
-    await sessionStore.finishSession(answers, scores, topCode)
-    router.push({ name: 'holland-result' })
+    await sessionStore.finishSession(hollandId, answers, scores, topCode)
+    router.push({ name: 'holland-result', params: { id: hollandId } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
     console.error(error)

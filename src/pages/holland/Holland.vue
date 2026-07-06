@@ -63,17 +63,28 @@
         </ol>
       </div>
 
-      <!-- CTA -->
-      <div class="flex items-center gap-3">
-        <router-link
-          to="/holland/mulai"
-          class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          Mulai asesmen
-        </router-link>
+      <!-- CTA — pilih instrumen dari daftar published -->
+      <div v-if="publishedHollands.length > 0" class="space-y-3">
+        <p class="text-sm font-medium text-gray-700">Pilih instrumen yang tersedia:</p>
+        <div class="flex flex-wrap gap-3">
+          <router-link
+            v-for="h in publishedHollands"
+            :key="h.id"
+            :to="{ name: 'holland-form', params: { id: h.id } }"
+            class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            {{ h.name || 'Mulai asesmen' }}
+          </router-link>
+        </div>
+      </div>
+      <div v-else class="text-sm text-gray-400">
+        Belum ada instrumen Holland yang tersedia.
+      </div>
+
+      <div class="mt-4">
         <router-link
           to="/"
-          class="px-5 py-2.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
         >
           Kembali
         </router-link>
@@ -83,7 +94,22 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import AppTopBar from '@/components/AppTopBar.vue'
+import { useHollandStore } from '@/stores/holland/holland'
+import { PUBLISHED } from '@/apps/status'
+
+const hollandStore = useHollandStore()
+const { hollands } = storeToRefs(hollandStore)
+
+const publishedHollands = computed(() =>
+  hollands.value.filter((h) => h.status === PUBLISHED)
+)
+
+onMounted(async () => {
+  await hollandStore.fetchHollands()
+})
 
 const riasecTypes = [
   {
@@ -127,7 +153,7 @@ const riasecTypes = [
 const tips = [
   'Jawab setiap pernyataan dengan jujur sesuai kondisi dan minat kamu saat ini.',
   'Tidak ada jawaban benar atau salah — semua tipe kepribadian memiliki nilai yang setara.',
-  'Pilih tingkat kesetujuan dari skala 1 (sangat tidak setuju) hingga 5 (sangat setuju).',
+  'Centang satu atau lebih pernyataan yang paling mencerminkan diri Anda pada setiap kolom.',
   'Selesaikan seluruh soal dalam satu sesi agar hasil lebih akurat.',
 ]
 </script>

@@ -8,8 +8,8 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-8 shadow-sm">
 
       <div class="mb-5 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">{{ hollandStore.config?.name }}</h1>
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ hollandStore.config?.description }}</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">{{ hollandStore.currentHolland?.name }}</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ hollandStore.currentHolland?.description }}</p>
       </div>
 
       <form @submit.prevent="goToKuesioner" class="space-y-4 sm:space-y-5">
@@ -85,21 +85,23 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 
+const route = useRoute()
 const router = useRouter()
 const hollandStore = useHollandStore()
 const hollandSessionStore = useHollandSessionStore()
 
-// Holland singleton -> nggak ada id dari route, langsung fetch config
+const hollandId = route.params.id
+
 const responden = ref({
   name: '',
   major: '',
   school: '',
   gender: '',
-  birthDate: '',   // ganti dari birthDateAge -> date picker
+  birthDate: '',
   occupation: '',
   testDate: '',
   testPurpose: '',
@@ -140,12 +142,24 @@ function formatBirthDateAge(birthDate, age) {
 }
 
 onMounted(async () => {
-  await hollandStore.fetchConfig()
+  await hollandStore.getHollandById(hollandId)
 
-  const saved = hollandSessionStore.getSession()
+  // jika instrumen tidak ditemukan, lempar ke halaman not-available
+  if (hollandStore.currentHolland === null) {
+    router.push({
+      name: 'not-available',
+      query: {
+        title: 'Instrumen Tidak Ditemukan',
+        message: 'Instrumen yang kamu cari mungkin sudah dihapus atau link tidak valid.'
+      }
+    })
+    return
+  }
+
+  const saved = hollandSessionStore.getSession(hollandId)
   if (saved) {
     // udah pernah mulai sesi -> langsung lempar ke kuesioner
-    router.push({ name: 'holland-questions' })
+    router.push({ name: 'holland-questions', params: { id: hollandId } })
   }
 })
 
@@ -153,11 +167,11 @@ async function goToKuesioner() {
   if (submitting.value) return
   submitting.value = true
   try {
-    await hollandSessionStore.startSession({
+    await hollandSessionStore.startSession(hollandId, {
       ...responden.value,
-      age: computedAge.value, // simpan juga hasil hitungnya, biar gak dihitung ulang tiap render
+      age: computedAge.value,
     })
-    router.push({ name: 'holland-questions' })
+    router.push({ name: 'holland-questions', params: { id: hollandId } })
   } catch (error) {
     alert('Gagal memulai sesi, coba lagi.')
   } finally {

@@ -9,6 +9,13 @@
         Holland RIASEC
       </button>
       <span class="text-gray-300 shrink-0">/</span>
+      <button
+        @click="router.push({ name: 'admin-holland-questions', params: { id: hollandId } })"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap cursor-pointer"
+      >
+        Pertanyaan
+      </button>
+      <span class="text-gray-300 shrink-0">/</span>
       <span class="text-sm text-gray-800 font-medium truncate">Submissions</span>
     </div>
 
@@ -57,7 +64,7 @@
             <tr
               v-for="s in submissions"
               :key="s.id"
-              @click="router.push({ name: 'admin-holland-submission-detail', params: { submissionId: s.id } })"
+              @click="router.push({ name: 'admin-holland-submission-detail', params: { id: hollandId, submissionId: s.id } })"
               class="hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <td class="px-4 md:px-5 py-3 text-sm text-gray-800 font-medium">{{ s.name }}</td>
@@ -128,12 +135,14 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { exportSubmissionsToExcel } from '@/utils/holland-excel-export'
 
+const route = useRoute()
 const router = useRouter()
+const hollandId = route.params.id
 
 const submissionsStore = useHollandSubmissionsStore()
 const { submissions, loading } = storeToRefs(submissionsStore)
@@ -162,6 +171,6 @@ async function confirmExportExcel() {
 }
 
 onMounted(async () => {
-  await submissionsStore.fetchSubmissions()
+  await submissionsStore.fetchSubmissions(hollandId)
 })
 </script>

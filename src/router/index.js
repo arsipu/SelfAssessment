@@ -38,11 +38,13 @@ const routes = [
 	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
+	// Holland — parameterized by :id like Likert
 	{ path: "/holland", name: "holland", component: Holland },
-    { path: "/holland-form", name: "holland-form", component: HollandForm },
-    { path: "/holland-questions", name: "holland-questions", component: HollandQuestions },
-    { path: "/holland-result", name: "holland-result", component: HollandResult },
+    { path: "/holland/:id", name: "holland-form", component: HollandForm },
+    { path: "/holland/:id/questions", name: "holland-questions", component: HollandQuestions },
+    { path: "/holland/:id/result", name: "holland-result", component: HollandResult },
 
+	// Likert — already parameterized
     { path: "/likert", name: "likert", component: Likert },
     { path: "/likert-form/:id", name: "likert-form", component: LikertForm },
     { path: "/likert-questions/:id", name: "likert-questions", component: LikertQuestions },
@@ -83,6 +85,7 @@ const routes = [
                 name: "admin-overview",
                 component: AdminOverview,
             },
+            // Likert admin
             {
                 path: "likert",
                 name: "admin-likert",
@@ -103,23 +106,24 @@ const routes = [
                 name: 'admin-likert-submission-detail',
                 component: AdminLikertSubmissionDetail,
             },
+            // Holland admin — parameterized by :id like Likert
             {
                 path: "holland",
                 name: "admin-holland",
                 component: AdminHolland,
             },
             {
-                path: "holland/questions",
+                path: "holland/:id",
                 name: "admin-holland-questions",
                 component: AdminHollandQuestions,
             },
             {
-                path: "holland/submissions",
+                path: "holland/:id/submissions",
                 name: "admin-holland-submissions",
                 component: AdminHollandSubmissions,
             },
             {
-                path: "holland/submissions/:submissionId",
+                path: "holland/:id/submissions/:submissionId",
                 name: "admin-holland-submission-detail",
                 component: AdminHollandSubmissionDetail,
             },

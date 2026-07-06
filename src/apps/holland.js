@@ -264,7 +264,10 @@ export function getTopRiasecCode(scores, topN = 3) {
  * Hitung count, total, dan percentage untuk tiap kategori RIASEC
  * berdasarkan daftar questions dan checkedMap (object { [questionId]: true }).
  *
- * @param {Array} questions - daftar soal { id, category, column, ... }
+ * Questions baru pakai `riasecId` (bukan `category`) — karena kategori
+ * sekarang implisit dari path Firestore `holland/{id}/riasec/{riasecId}/questions`.
+ *
+ * @param {Array} questions - daftar soal { id, riasecId, column, ... }
  * @param {Object} checkedMap - { [questionId]: true }
  * @returns {Object} { R: { count, total, percentage }, ... }
  */
@@ -274,9 +277,10 @@ export function computeRiasecScores(questions, checkedMap) {
   )
 
   for (const q of questions) {
-    if (!scores[q.category]) continue
-    scores[q.category].total += 1
-    if (checkedMap[q.id]) scores[q.category].count += 1
+    const category = q.riasecId || q.category // fallback utk data lama
+    if (!scores[category]) continue
+    scores[category].total += 1
+    if (checkedMap[q.id]) scores[category].count += 1
   }
 
   for (const code of RIASEC_CATEGORY_ORDER) {

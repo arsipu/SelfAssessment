@@ -2,45 +2,44 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useHollandSubmissionsStore } from './holland-submissions'
 
-// Beda dari likert-session: Holland cuma 1 instrumen (singleton),
-// jadi state-nya nggak perlu di-keyed by id. Cukup 1 session & 1 result aktif.
 export const useHollandSessionStore = defineStore(
   'hollandSession',
   () => {
-    // { submissionId, code, respondent, answers }
-    const session = ref(null)
-    // { scores, topCode, submissionId, code, respondentName, respondent, answers }
-    const result = ref(null)
+    // sessions.value[hollandId] = { submissionId, code, respondent, answers }
+    const sessions = ref({})
+    // results.value[hollandId] = { scores, topCode, submissionId, code, respondentName, respondent, answers }
+    const results = ref({})
 
     // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
-    const startSession = async (respondentData) => {
+    const startSession = async (hollandId, respondentData) => {
       const submissionsStore = useHollandSubmissionsStore()
-      const { id: submissionId, code } = await submissionsStore.createSubmission(respondentData)
+      const { id: submissionId, code } = await submissionsStore.createSubmission(hollandId, respondentData)
 
-      session.value = {
+      sessions.value[hollandId] = {
         submissionId,
         code,
         respondent: respondentData,
         answers: [], // array of { questionId, category, column }
       }
 
-      // lazy clear: hasil lama dianggap basi begitu sesi baru mulai
-      result.value = null
+      // lazy clear: hasil lama buat hollandId ini dianggap basi begitu sesi baru mulai
+      delete results.value[hollandId]
 
-      return session.value
+      return sessions.value[hollandId]
     }
 
-    const getSession = () => session.value
+    const getSession = (hollandId) => sessions.value[hollandId] || null
 
     // dipanggil tiap checkbox di-toggle (auto-save LOKAL aja, gak nulis ke Firestore tiap klik)
-    const updateAnswers = async (answers) => {
-      if (!session.value) return
+    const updateAnswers = async (hollandId, answers) => {
+      const session = sessions.value[hollandId]
+      if (!session) return
 
-      session.value.answers = answers // instan, buat UX & restore pas refresh
+      session.answers = answers // instan, buat UX & restore pas refresh
 
       try {
         const submissionsStore = useHollandSubmissionsStore()
-        await submissionsStore.updateSubmissionAnswers(session.value.submissionId, answers)
+        await submissionsStore.updateSubmissionAnswers(hollandId, session.submissionId, answers)
       } catch (error) {
         // gagal sync ke Firestore -> jawaban tetap aman di local state,
         // nanti bisa di-retry pas ada perubahan berikutnya
@@ -49,39 +48,40 @@ export const useHollandSessionStore = defineStore(
     }
 
     // dipanggil pas submit kuesioner: tulis final ke Firestore, simpan hasil, bersihkan sesi
-    const finishSession = async (answers, scores, topCode) => {
-      if (!session.value) throw new Error('Sesi tidak ditemukan')
+    const finishSession = async (hollandId, answers, scores, topCode) => {
+      const session = sessions.value[hollandId]
+      if (!session) throw new Error('Sesi tidak ditemukan')
 
       const submissionsStore = useHollandSubmissionsStore()
-      await submissionsStore.completeSubmission(session.value.submissionId, answers, scores, topCode)
+      await submissionsStore.completeSubmission(hollandId, session.submissionId, answers, scores, topCode)
 
-      result.value = {
+      results.value[hollandId] = {
         scores,
         topCode,
-        submissionId: session.value.submissionId,
-        code: session.value.code,
-        respondentName: session.value.respondent?.name || '-',
-        respondent: session.value.respondent,
+        submissionId: session.submissionId,
+        code: session.code,
+        respondentName: session.respondent?.name || '-',
+        respondent: session.respondent,
         answers,
       }
 
-      session.value = null
+      delete sessions.value[hollandId]
     }
 
-    const clearSession = () => {
-      session.value = null
+    const clearSession = (hollandId) => {
+      delete sessions.value[hollandId]
     }
 
-    const getResult = () => result.value
+    const getResult = (hollandId) => results.value[hollandId] || null
 
     // opsional: dipanggil manual dari tombol "Selesai" kalau mau clear lebih cepat
-    const clearResult = () => {
-      result.value = null
+    const clearResult = (hollandId) => {
+      delete results.value[hollandId]
     }
 
     return {
-      session,
-      result,
+      sessions,
+      results,
       startSession,
       getSession,
       updateAnswers,

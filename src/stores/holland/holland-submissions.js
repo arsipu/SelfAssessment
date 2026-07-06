@@ -12,31 +12,26 @@ import {
   addDoc,
   updateDoc,
   serverTimestamp,
+  collectionGroup,
   where,
 } from 'firebase/firestore'
 
 import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
-
-// Holland cuma punya 1 instrumen (singleton), jadi doc id-nya fixed.
-// Kalau suatu saat perlu multi-instrument lagi, tinggal ganti ini
-// jadi parameter seperti semula.
-const HOLLAND_DOC_ID = 'config'
 
 export const useHollandSubmissionsStore = defineStore('holland-submissions', () => {
   const submissions = ref([])
   const currentSubmission = ref(null)
   const loading = ref(false)
 
-  const submissionsRef = () => collection(db, 'holland', HOLLAND_DOC_ID, 'submissions')
-  const submissionDoc = (submissionId) =>
-    doc(db, 'holland', HOLLAND_DOC_ID, 'submissions', submissionId)
+  // ── List semua submission untuk 1 holland ─────────────────
 
-  // ── List semua submission ───────────────────────────────────
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (hollandId) => {
     loading.value = true
     try {
-      const q = query(submissionsRef(), orderBy('createdAt', 'desc'))
+      const q = query(
+        collection(db, 'holland', hollandId, 'submissions'),
+        orderBy('createdAt', 'desc')
+      )
       const snap = await getDocs(q)
       submissions.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
     } catch (error) {
@@ -47,13 +42,17 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     }
   }
 
-  // ── Detail 1 submission ──────────────────────────────────────
+  // ── Detail 1 submission ────────────────────────────────────
 
-  const fetchSubmissionById = async (submissionId) => {
+  const fetchSubmissionById = async (hollandId, submissionId) => {
     loading.value = true
     try {
-      const snap = await getDoc(submissionDoc(submissionId))
-      currentSubmission.value = snap.exists() ? { id: snap.id, ...snap.data() } : null
+      const snap = await getDoc(doc(db, 'holland', hollandId, 'submissions', submissionId))
+      if (snap.exists()) {
+        currentSubmission.value = { id: snap.id, ...snap.data() }
+      } else {
+        currentSubmission.value = null
+      }
     } catch (error) {
       console.error('Error fetching submission detail:', error)
       currentSubmission.value = null
@@ -66,10 +65,10 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   // Dipanggil begitu form respondent disubmit (belum ngerjain soal).
   // Field disamakan dengan dokumen sumber Holland:
   // name, major, school, gender, birthDate, age, occupation, testDate, testPurpose
-  const createSubmission = async (respondentData) => {
+  const createSubmission = async (hollandId, respondentData) => {
     try {
       const code = generateSessionCode()
-      const ref = await addDoc(submissionsRef(), {
+      const ref = await addDoc(collection(db, 'holland', hollandId, 'submissions'), {
         name: respondentData.name,
         major: respondentData.major,
         school: respondentData.school,
@@ -96,9 +95,9 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
 
   // Sync jawaban tiap kali checkbox di-toggle (dipanggil dengan debounce
   // dari komponen pengisian, mengikuti pola likert-submissions.js)
-  const updateSubmissionAnswers = async (submissionId, answers) => {
+  const updateSubmissionAnswers = async (hollandId, submissionId, answers) => {
     try {
-      await updateDoc(submissionDoc(submissionId), {
+      await updateDoc(doc(db, 'holland', hollandId, 'submissions', submissionId), {
         answers,
         updatedAt: serverTimestamp(),
       })
@@ -109,9 +108,9 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   }
 
   // Dipanggil pas user submit kuesioner (final)
-  const completeSubmission = async (submissionId, answers, scores, topCode) => {
+  const completeSubmission = async (hollandId, submissionId, answers, scores, topCode) => {
     try {
-      await updateDoc(submissionDoc(submissionId), {
+      await updateDoc(doc(db, 'holland', hollandId, 'submissions', submissionId), {
         answers,
         scores,
         topCode,
@@ -124,13 +123,19 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     }
   }
 
+  // Mencari submission berdasarkan kode tracking — pakai collectionGroup
+  // agar bisa cari tanpa tahu hollandId-nya terlebih dahulu.
   const findSubmissionByCode = async (code) => {
     try {
-      const q = query(submissionsRef(), where('code', '==', code))
+      const q = query(collectionGroup(db, 'submissions'), where('code', '==', code))
       const snap = await getDocs(q)
       if (snap.empty) return null
       const docSnap = snap.docs[0]
-      return { id: docSnap.id, ...docSnap.data() }
+      return {
+        id: docSnap.id,
+        hollandId: docSnap.ref.parent.parent.id, // ambil parent holland id
+        ...docSnap.data(),
+      }
     } catch (error) {
       console.error('Error finding submission by code:', error)
       throw error

@@ -23,7 +23,7 @@
         </p>
       </div>
         <button
-          @click="router.push({ name: 'admin-holland-submissions'})"
+          @click="router.push({ name: 'admin-holland-submissions', params: { id: hollandId }})"
           class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
@@ -38,18 +38,18 @@
       <p class="text-sm text-gray-400">Memuat pertanyaan...</p>
     </div>
 
-    <!-- Blocks per Category -->
+    <!-- Blocks per Category (riasec) — from Firestore, not constants -->
     <div v-else class="space-y-6">
       <div
-        v-for="cat in categories"
+        v-for="cat in riasecList"
         :key="cat.id"
         class="bg-white border border-gray-200 rounded-xl overflow-hidden"
       >
-        <!-- Category Header -->
+        <!-- Category Header — label from Firestore -->
         <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-          <h2 class="text-sm font-medium text-gray-800">{{ cat.name }} <span class="text-gray-400">({{ cat.id }})</span></h2>
+          <h2 class="text-sm font-medium text-gray-800">{{ cat.label || cat.id }} <span class="text-gray-400">({{ cat.id }})</span></h2>
           <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">
-            {{ questionsByCategory(cat.id).length }} Soal
+            {{ questionsByRiasec(cat.id).length }} Soal
           </span>
         </div>
 
@@ -63,7 +63,7 @@
             <table class="w-full text-left border-collapse">
               <tbody class="divide-y divide-gray-100">
                 <tr
-                  v-for="(q, index) in questionsByCategoryAndColumn(cat.id, col.id)"
+                  v-for="(q, index) in questionsByRiasecAndColumn(cat.id, col.id)"
                   :key="q.id"
                   class="hover:bg-gray-50 transition-colors"
                 >
@@ -72,13 +72,13 @@
                   <td class="px-5 py-3 w-24">
                     <div class="flex items-center gap-2 justify-end">
                       <button
-                        @click="openEditModal(q)"
+                        @click="openEditModal(q, cat.id)"
                         class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
                       >
                         <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5" />
                       </button>
                       <button
-                        @click="openDeleteModal(q.id)"
+                        @click="openDeleteModal(q.id, cat.id)"
                         class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                       >
                         <font-awesome-icon icon="fa-solid fa-trash" class="w-5 h-5" />
@@ -87,7 +87,7 @@
                   </td>
                 </tr>
 
-                <tr v-if="questionsByCategoryAndColumn(cat.id, col.id).length === 0">
+                <tr v-if="questionsByRiasecAndColumn(cat.id, col.id).length === 0">
                   <td colspan="3" class="px-5 py-4 text-center text-xs text-gray-400">
                     Belum ada pernyataan di kolom ini.
                   </td>
@@ -149,7 +149,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
             <input
-              :value="categories.find(c => c.id === editForm.category)?.name ?? '-'"
+              :value="riasecList.find(c => c.id === editRiasecId)?.label || editRiasecId"
               disabled
               class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
             />
@@ -213,54 +213,66 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
-import { RIASEC_CATEGORIES, RIASEC_COLUMNS } from '@/apps/holland'
+import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
+import { RIASEC_COLUMNS } from '@/apps/holland'
 
+const route = useRoute()
 const router = useRouter()
-const questionsStore = useHollandQuestionsStore()
-const { questions, loading } = storeToRefs(questionsStore)
+const hollandId = route.params.id
 
-const categories = RIASEC_CATEGORIES
+const questionsStore = useHollandQuestionsStore()
+const { allQuestions, loading } = storeToRefs(questionsStore)
+
+const riasecStore = useHollandRiasecStore()
+const { riasecList } = storeToRefs(riasecStore)
+
 const columns = RIASEC_COLUMNS
 
 // ── State ──────────────────────────────────────────────────
 
 const saving = ref(false)
 
-// Inline add — key gabungan category+column biar cuma 1 form aktif dalam satu waktu
+// Inline add — key gabungan riasecId+column biar cuma 1 form aktif dalam satu waktu
 const activeAddKey = ref(null)
 const inlineForm = ref({ question: '' })
-const keyOf = (categoryId, columnId) => `${categoryId}__${columnId}`
+const keyOf = (riasecId, columnId) => `${riasecId}__${columnId}`
 
-// Edit modal
+// Edit modal — store riasecId separately
 const showEditModal = ref(false)
 const editingId = ref(null)
-const editForm = ref({ question: '', category: '', column: '' })
+const editRiasecId = ref(null)
+const editForm = ref({ question: '', column: '' })
 
-// Delete modal
+// Delete modal — store riasecId separately
 const showDeleteModal = ref(false)
 const deletingId = ref(null)
+const deleteRiasecId = ref(null)
 
 // ── Lifecycle ──────────────────────────────────────────────
 
 onMounted(async () => {
-  await questionsStore.fetchQuestions()
+  // Fetch both riasec list (for labels/order) and all questions
+  await Promise.all([
+    riasecStore.fetchRiasecList(hollandId),
+    questionsStore.fetchAllQuestions(hollandId),
+  ])
 })
 
 // ── Helpers ────────────────────────────────────────────────
 
-const questionsByCategory = (categoryId) =>
-  questions.value.filter((q) => q.category === categoryId)
+const questionsByRiasec = (riasecId) =>
+  allQuestions.value.filter((q) => q.riasecId === riasecId)
 
-const questionsByCategoryAndColumn = (categoryId, columnId) =>
-  questions.value.filter((q) => q.category === categoryId && q.column === columnId)
+const questionsByRiasecAndColumn = (riasecId, columnId) =>
+  allQuestions.value.filter((q) => q.riasecId === riasecId && q.column === columnId)
 
 // ── Inline Add ─────────────────────────────────────────────
 
-const openInlineAdd = (categoryId, columnId) => {
-  activeAddKey.value = keyOf(categoryId, columnId)
+const openInlineAdd = (riasecId, columnId) => {
+  activeAddKey.value = keyOf(riasecId, columnId)
   inlineForm.value = { question: '' }
 }
 
@@ -269,12 +281,11 @@ const cancelInline = () => {
   inlineForm.value = { question: '' }
 }
 
-const saveInline = async (categoryId, columnId) => {
+const saveInline = async (riasecId, columnId) => {
   if (!inlineForm.value.question.trim()) return
   saving.value = true
   try {
-    await questionsStore.addQuestion({
-      category: categoryId,
+    await questionsStore.addQuestion(hollandId, riasecId, {
       column: columnId,
       question: inlineForm.value.question,
     })
@@ -288,23 +299,25 @@ const saveInline = async (categoryId, columnId) => {
 
 // ── Edit Modal ─────────────────────────────────────────────
 
-const openEditModal = (q) => {
+const openEditModal = (q, riasecId) => {
   editingId.value = q.id
-  editForm.value = { question: q.question, category: q.category, column: q.column }
+  editRiasecId.value = riasecId
+  editForm.value = { question: q.question, column: q.column }
   showEditModal.value = true
 }
 
 const closeEditModal = () => {
   showEditModal.value = false
   editingId.value = null
-  editForm.value = { question: '', category: '', column: '' }
+  editRiasecId.value = null
+  editForm.value = { question: '', column: '' }
 }
 
 const saveEdit = async () => {
   if (!editForm.value.question.trim()) return
   saving.value = true
   try {
-    await questionsStore.updateQuestion(editingId.value, {
+    await questionsStore.updateQuestion(hollandId, editRiasecId.value, editingId.value, {
       question: editForm.value.question.trim(),
       column: editForm.value.column,
     })
@@ -318,17 +331,19 @@ const saveEdit = async () => {
 
 // ── Delete Modal ───────────────────────────────────────────
 
-const openDeleteModal = (id) => {
+const openDeleteModal = (id, riasecId) => {
   deletingId.value = id
+  deleteRiasecId.value = riasecId
   showDeleteModal.value = true
 }
 
 const confirmDelete = async () => {
   saving.value = true
   try {
-    await questionsStore.deleteQuestion(deletingId.value)
+    await questionsStore.deleteQuestion(hollandId, deleteRiasecId.value, deletingId.value)
     showDeleteModal.value = false
     deletingId.value = null
+    deleteRiasecId.value = null
   } catch (e) {
     console.error(e)
   } finally {

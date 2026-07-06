@@ -1,61 +1,145 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { db } from '@/firebase/firebase-config'
 import {
+  collection,
   doc,
+  getDocs,
   getDoc,
-  setDoc,
+  addDoc,
   updateDoc,
+  deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore'
 
-// Singleton: cuma ada 1 dokumen config untuk instrumen Holland RIASEC
-const CONFIG_DOC_PATH = ['holland', 'config']
+import { DRAFT, PUBLISHED } from '@/apps/status'
 
-export const useHollandStore = defineStore('holland', {
-  state: () => ({
-    config: null,
-    loading: false,
-  }),
+export const useHollandStore = defineStore('holland', () => {
+  const hollands = ref([])
+  const currentHolland = ref(null)
+  const loading = ref(false)
 
-  actions: {
-    async fetchConfig() {
-      this.loading = true
-      try {
-        const ref = doc(db, ...CONFIG_DOC_PATH)
-        const snap = await getDoc(ref)
+  // ── List semua instrumen Holland ──────────────────────────
 
-        if (snap.exists()) {
-          this.config = { id: snap.id, ...snap.data() }
-        } else {
-          // Auto-inisialisasi kalau doc belum ada
-          const initial = {
-            name: 'Holland RIASEC',
-            description: '',
-            direction:
-              'Pada Kuesioner ini terdapat tabel, masing-masing tabel terdiri atas 3 kolom kosong yang harus diisi dengan tanda (√) pada pernyataan yang mencerminkan diri Anda.',
-            status: 'draft',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          }
-          await setDoc(ref, initial)
-          this.config = { id: 'config', ...initial }
-        }
-      } finally {
-        this.loading = false
+  const fetchHollands = async () => {
+    loading.value = true
+    try {
+      const snap = await getDocs(collection(db, 'holland'))
+      hollands.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+    } catch (error) {
+      console.error('Error fetching hollands:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // ── Detail 1 instrumen ────────────────────────────────────
+
+  const getHollandById = async (hollandId) => {
+    console.log('Fetching holland:', hollandId)
+    try {
+      const snap = await getDoc(doc(db, 'holland', hollandId))
+      if (snap.exists()) {
+        currentHolland.value = { id: snap.id, ...snap.data() }
+        console.log('Holland fetched:', currentHolland.value.name)
+      } else {
+        console.log('No such holland document!')
+        currentHolland.value = null
       }
-    },
+    } catch (error) {
+      console.error('Error fetching holland:', error)
+    }
+    return currentHolland.value
+  }
 
-    async updateConfig(payload) {
-      const ref = doc(db, ...CONFIG_DOC_PATH)
-      await updateDoc(ref, {
-        ...payload,
+  // ── Buat instrumen baru ───────────────────────────────────
+
+  const addHolland = async ({ name, description, direction }) => {
+    console.log('Adding holland:', name)
+    try {
+      const ref = await addDoc(collection(db, 'holland'), {
+        name,
+        description: description || '',
+        direction: direction || '',
+        status: DRAFT,
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      this.config = { ...this.config, ...payload }
-    },
+      console.log('Holland added with ID:', ref.id)
+      await fetchHollands()
+      return ref.id
+    } catch (error) {
+      console.error('Error adding holland:', error)
+      throw error
+    }
+  }
 
-    async updateStatus(status) {
-      await this.updateConfig({ status })
-    },
-  },
+  // ── Update instrumen ──────────────────────────────────────
+
+  const updateHolland = async (hollandId, { name, description, direction }) => {
+    console.log('Updating holland:', hollandId)
+    try {
+      await updateDoc(doc(db, 'holland', hollandId), {
+        name,
+        description: description || '',
+        direction: direction || '',
+        updatedAt: serverTimestamp(),
+      })
+      console.log('Holland updated:', hollandId)
+      await fetchHollands()
+    } catch (error) {
+      console.error('Error updating holland:', error)
+      throw error
+    }
+  }
+
+  // ── Hapus instrumen ───────────────────────────────────────
+
+  const deleteHolland = async (hollandId) => {
+    console.log('Deleting holland:', hollandId)
+    try {
+      await deleteDoc(doc(db, 'holland', hollandId))
+      console.log('Holland deleted:', hollandId)
+      await fetchHollands()
+    } catch (error) {
+      console.error('Error deleting holland:', error)
+      throw error
+    }
+  }
+
+  // ── Update status ─────────────────────────────────────────
+
+  const updateHollandStatus = async (id, status) => {
+    // Auto-unpublish other published instruments when publishing this one
+    if (status === PUBLISHED) {
+      const others = hollands.value.filter(
+        (h) => h.id !== id && h.status === PUBLISHED
+      )
+      for (const other of others) {
+        await updateDoc(doc(db, 'holland', other.id), {
+          status: DRAFT,
+          updatedAt: serverTimestamp(),
+        })
+      }
+    }
+
+    await updateDoc(doc(db, 'holland', id), {
+      status,
+      updatedAt: serverTimestamp(),
+    })
+
+    await fetchHollands()
+  }
+
+  return {
+    hollands,
+    currentHolland,
+    loading,
+    fetchHollands,
+    getHollandById,
+    addHolland,
+    updateHolland,
+    deleteHolland,
+    updateHollandStatus,
+  }
 })

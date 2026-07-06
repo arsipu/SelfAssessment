@@ -7,7 +7,14 @@
       </button>
       <span class="text-gray-300 shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-holland-submissions' })"
+        @click="router.push({ name: 'admin-holland-questions', params: { id: hollandId } })"
+        class="text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap cursor-pointer"
+      >
+        Pertanyaan
+      </button>
+      <span class="text-gray-300 shrink-0">/</span>
+      <button
+        @click="router.push({ name: 'admin-holland-submissions', params: { id: hollandId } })"
         class="text-sm text-gray-500 hover:text-gray-800 transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         Submissions
@@ -81,7 +88,7 @@
           <div v-for="row in scoreBreakdown" :key="row.code">
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-sm font-medium text-gray-700">
-                {{ RIASEC_GUIDE[row.code]?.label }} ({{ row.code }})
+                {{ riasecMap[row.code]?.label || RIASEC_GUIDE_FALLBACK[row.code]?.label }} ({{ row.code }})
               </span>
               <span class="text-xs text-gray-400">
                 {{ row.count }}/{{ row.total }} · {{ row.percentage }}%
@@ -111,7 +118,7 @@
       >
         <div class="px-4 md:px-5 py-3 md:py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0"></span>
-          <h2 class="text-sm font-medium text-gray-800">{{ RIASEC_GUIDE[section.key]?.label }} ({{ section.key }})</h2>
+          <h2 class="text-sm font-medium text-gray-800">{{ riasecMap[section.key]?.label || RIASEC_GUIDE_FALLBACK[section.key]?.label }} ({{ section.key }})</h2>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse table-fixed">
@@ -187,8 +194,8 @@
         testDate: submission?.testDate,
       }"
       :top-code="submission?.topCode"
-      :scales-label="topCodeChars.map((c) => RIASEC_GUIDE[c]?.label).join(' · ')"
-      :scales-description="topCodeChars.map((c) => RIASEC_GUIDE[c]?.description).join(' ')"
+      :scales-label="topCodeChars.map((c) => (riasecMap[c]?.label || RIASEC_GUIDE_FALLBACK[c]?.label)).join(' · ')"
+      :scales-description="topCodeChars.map((c) => (riasecMap[c]?.description || RIASEC_GUIDE_FALLBACK[c]?.description)).join(' ')"
     />
   </div>
 </template>
@@ -201,17 +208,20 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
-import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE, HOLLAND_COLUMNS } from '@/apps/holland'
+import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
+import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE as RIASEC_GUIDE_FALLBACK, HOLLAND_COLUMNS } from '@/apps/holland'
 
 const route = useRoute()
 const router = useRouter()
+const hollandId = route.params.id
 const submissionId = route.params.submissionId
 
 const submissionsStore = useHollandSubmissionsStore()
 const questionsStore = useHollandQuestionsStore()
+const riasecStore = useHollandRiasecStore()
 
 const { currentSubmission: submission, loading } = storeToRefs(submissionsStore)
-const { questions } = storeToRefs(questionsStore)
+const { allQuestions } = storeToRefs(questionsStore)
 
 const showExportPDFModal = ref(false)
 const exportingPDF = ref(false)
@@ -219,6 +229,15 @@ const scoreCardRef = ref(null)
 
 // urutan huruf topCode ("SAE" -> ["S", "A", "E"])
 const topCodeChars = computed(() => (submission.value?.topCode || '').split(''))
+
+// riasecMap[code] -> { label, description, skills, careers } dari Firestore
+const riasecMap = computed(() => {
+  const map = {}
+  for (const item of riasecStore.riasecList) {
+    map[item.id] = item
+  }
+  return map
+})
 
 // Gabungan tampilan "Tanggal Lahir/Usia" dari birthDate + age tersimpan,
 // biar tetap sesuai gaya dokumen kertas aslinya meski datanya sudah terstruktur.
@@ -259,7 +278,7 @@ const scoreBreakdown = computed(() => {
 const columnLabel = (columnKey) => HOLLAND_COLUMNS.find((c) => c.key === columnKey)?.label || columnKey
 
 const questionText = (questionId) => {
-  const q = questions.value.find((q) => q.id === questionId)
+  const q = allQuestions.value.find((q) => q.id === questionId)
   return q?.question ?? '(soal tidak ditemukan)'
 }
 
@@ -270,8 +289,10 @@ const sections = computed(() => {
   const grouped = {}
 
   for (const a of answers) {
-    if (!grouped[a.category]) grouped[a.category] = []
-    grouped[a.category].push({
+    // Use riasecId (new) or category (old) for grouping
+    const category = a.riasecId || a.category
+    if (!grouped[category]) grouped[category] = []
+    grouped[category].push({
       questionId: a.questionId,
       questionText: questionText(a.questionId),
       column: a.column,
@@ -282,7 +303,7 @@ const sections = computed(() => {
     .filter((code) => grouped[code]?.length)
     .map((code) => ({ 
       key: code, 
-      label: `${RIASEC_GUIDE[code]?.label} (${code})`,
+      label: `${riasecMap.value[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label} (${code})`,
       items: grouped[code] 
     }))
 })
@@ -304,8 +325,9 @@ async function confirmExportPDF() {
 
 onMounted(async () => {
   await Promise.all([
-    submissionsStore.fetchSubmissionById(submissionId),
-    questionsStore.fetchQuestions(),
+    submissionsStore.fetchSubmissionById(hollandId, submissionId),
+    riasecStore.fetchRiasecList(hollandId),
+    questionsStore.fetchAllQuestions(hollandId),
   ])
 })
 </script>
