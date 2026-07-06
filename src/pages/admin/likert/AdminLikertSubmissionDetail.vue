@@ -80,13 +80,13 @@
           <h2 class="text-sm font-medium text-gray-800">{{ section.label }}</h2>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full text-left border-collapse table-fixed">
             <thead>
               <tr class="bg-white border-b border-gray-100">
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pertanyaan</th>
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Jawaban</th>
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Poin</th>
+                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
+                <th class="w-[54%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pertanyaan</th>
+                <th class="w-[26%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Jawaban</th>
+                <th class="w-[12%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Poin</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">

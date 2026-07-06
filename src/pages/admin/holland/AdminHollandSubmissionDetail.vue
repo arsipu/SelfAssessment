@@ -114,12 +114,12 @@
           <h2 class="text-sm font-medium text-gray-800">{{ RIASEC_GUIDE[section.key]?.label }} ({{ section.key }})</h2>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full text-left border-collapse table-fixed">
             <thead>
               <tr class="bg-white border-b border-gray-100">
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pernyataan</th>
-                <th class="px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kolom</th>
+                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
+                <th class="w-[60%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pernyataan</th>
+                <th class="w-[32%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kolom</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
