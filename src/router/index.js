@@ -4,6 +4,7 @@ import { ROLE_ADMIN } from '@/apps/role.js';
 
 import BerandaView from '@/pages/dashboard/BerandaView.vue';
 
+import NotAvailableView from '@/components/NotAvailable.vue';
 
 import Holland from '@/pages/holland/Holland.vue';
 import HollandForm from '@/pages/holland/HollandForm.vue';
@@ -46,6 +47,17 @@ const routes = [
     { path: "/likert-form/:id", name: "likert-form", component: LikertForm },
     { path: "/likert-questions/:id", name: "likert-questions", component: LikertQuestions },
     { path: "/likert-result/:id", name: "likert-result", component: LikertResult },
+
+    // Route untuk Halaman Kosong / Tidak Tersedia
+    {
+        path: '/tidak-tersedia',
+        name: 'not-available',
+        component: NotAvailableView,
+        props: route => ({
+            title: route.query.title,
+            message: route.query.message
+        })
+    },
 
 	// Auth
 	{

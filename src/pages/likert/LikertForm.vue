@@ -82,6 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertSessionStore } from '@/stores/likert/likert-session'
 
@@ -92,6 +93,8 @@ const likertSessionStore = useLikertSessionStore()
 
 const likertId = route.params.id
 
+const { currentLikert } = storeToRefs(likertStore)
+
 const responden = ref({
   nama: '', kelas: '', sekolah: '', jurusan: '',
   usia: '', jenisKelamin: '', pkl: ''
@@ -100,9 +103,24 @@ const responden = ref({
 const submitting = ref(false)
 
 onMounted(async () => {
+  console.log('LikertForm mounted, likertId:', likertId)
+
   await likertStore.getLikertById(likertId)
 
+  // jika kuesioner tidak ditemukan, lempar ke halaman not-available
+  if (currentLikert.value === null) {
+    router.push({
+      name: 'not-available',
+      query: {
+        title: 'Kuesioner Tidak Ditemukan',
+        message: 'Kuesioner yang kamu cari mungkin sudah dihapus atau link tidak valid.'
+      }
+    })
+    return
+  }
+
   const saved = likertSessionStore.getSession(likertId)
+
   if (saved) {
     // udah pernah mulai sesi -> langsung lempar ke kuesioner
     router.push({ name: 'likert-questions', params: { id: likertId } })
