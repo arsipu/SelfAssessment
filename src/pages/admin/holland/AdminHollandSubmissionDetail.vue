@@ -43,7 +43,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
           <div>
-            <p class="text-gray-400 text-xs mb-1">Sekolah</p>
+            <p class="text-gray-400 text-xs mb-1">Sekolah / Universitas</p>
             <p class="text-gray-800">{{ submission.school }}</p>
           </div>
           <div>
@@ -52,7 +52,7 @@
           </div>
           <div>
             <p class="text-gray-400 text-xs mb-1">Tanggal Lahir/Usia / Gender</p>
-            <p class="text-gray-800">{{ submission.birthDateAge }}, {{ submission.gender }}</p>
+            <p class="text-gray-800">{{ formattedBirthDateAge }}, {{ submission.gender }}</p>
           </div>
           <div>
             <p class="text-gray-400 text-xs mb-1">Kode Tracking</p>
@@ -174,17 +174,19 @@
   <div style="position: fixed; left: -9999px; top: 0;">
     <ScoreCardTemplate
       ref="scoreCardRef"
-      likert-name="Holland RIASEC"
+      holland-name="Holland RIASEC"
       :code="submission?.code"
       :respondent="{
-        nama: submission?.name,
-        sekolah: submission?.school,
-        jurusan: submission?.major,
-        birthDateAge: submission?.birthDateAge,
-        jenisKelamin: submission?.gender,
+        name: submission?.name,
+        school: submission?.school,
+        major: submission?.major,
+        birthDateAge: formattedBirthDateAge,
+        gender: submission?.gender,
         occupation: submission?.occupation,
+        testPurpose: submission?.testPurpose,
+        testDate: submission?.testDate,
       }"
-      :total-score="submission?.topCode"
+      :top-code="submission?.topCode"
       :scales-label="topCodeChars.map((c) => RIASEC_GUIDE[c]?.label).join(' · ')"
       :scales-description="topCodeChars.map((c) => RIASEC_GUIDE[c]?.description).join(' ')"
     />
@@ -192,8 +194,8 @@
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/ScoreCardTemplate.vue'
-import { exportResultToPDFHybrid } from '@/utils/pdf-export'
+import ScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
+import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -217,6 +219,27 @@ const scoreCardRef = ref(null)
 
 // urutan huruf topCode ("SAE" -> ["S", "A", "E"])
 const topCodeChars = computed(() => (submission.value?.topCode || '').split(''))
+
+// Gabungan tampilan "Tanggal Lahir/Usia" dari birthDate + age tersimpan,
+// biar tetap sesuai gaya dokumen kertas aslinya meski datanya sudah terstruktur.
+// Fallback ke birthDateAge lama untuk submission yang dibuat sebelum migrasi field ini.
+const formattedBirthDateAge = computed(() => {
+  const s = submission.value
+  if (!s) return '-'
+
+  if (s.birthDate) {
+    const d = new Date(s.birthDate)
+    if (!isNaN(d)) {
+      const formatted = d.toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      })
+      return s.age !== undefined && s.age !== null ? `${formatted} / ${s.age} tahun` : formatted
+    }
+  }
+
+  // data lama sebelum ada birthDate + age
+  return s.birthDateAge || '-'
+})
 
 // breakdown 6 kategori, diurutkan dari persentase tertinggi
 const scoreBreakdown = computed(() => {
@@ -257,18 +280,22 @@ const sections = computed(() => {
 
   return RIASEC_CATEGORY_ORDER
     .filter((code) => grouped[code]?.length)
-    .map((code) => ({ key: code, items: grouped[code] }))
+    .map((code) => ({ 
+      key: code, 
+      label: `${RIASEC_GUIDE[code]?.label} (${code})`,
+      items: grouped[code] 
+    }))
 })
 
 async function confirmExportPDF() {
   if (exportingPDF.value) return
   exportingPDF.value = true
   try {
-    // await exportResultToPDFHybrid({
-    //   scoreCardElement: scoreCardRef.value.cardRef,
-    //   sections: sections.value,
-    //   filename: `hasil-holland-${submission.value?.name}.pdf`.replace(/\s+/g, '_'),
-    // })
+    await exportHollandResultToPDF({
+      scoreCardElement: scoreCardRef.value.cardRef,
+      sections: sections.value,
+      filename: `hasil-holland-${submission.value?.name}.pdf`.replace(/\s+/g, '_'),
+    })
     showExportPDFModal.value = false
   } finally {
     exportingPDF.value = false

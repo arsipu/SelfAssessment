@@ -162,12 +162,12 @@
 
   <!-- Template tersembunyi khusus buat di-screenshot -->
   <div style="position: fixed; left: -9999px; top: 0;">
-    <ScoreCardTemplate
+    <HollandScoreCardTemplate
       ref="scoreCardRef"
-      likert-name="Holland RIASEC"
+      holland-name="Holland RIASEC"
       :code="result?.code"
-      :respondent="result?.respondent || {}"
-      :total-score="result?.topCode"
+      :respondent="scoreCardRespondent"
+      :top-code="result?.topCode"
       :scales-label="topCodeChars.map((c) => RIASEC_GUIDE[c]?.label).join(' · ')"
       :scales-description="topCodeChars.map((c) => RIASEC_GUIDE[c]?.description).join(' ')"
     />
@@ -175,13 +175,13 @@
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/ScoreCardTemplate.vue'
+import HollandScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE } from '@/apps/holland'
-import { exportResultToPDFHybrid } from '@/utils/pdf-export'
+import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 
 const router = useRouter()
 
@@ -199,6 +199,32 @@ const respondentName = computed(() => result.value?.respondentName || '-')
 // urutan huruf topCode ("SAE" -> ["S", "A", "E"]), dipakai buat nampilin
 // deskripsi kategori dominan sesuai urutan skor tertinggi
 const topCodeChars = computed(() => (result.value?.topCode || '').split(''))
+
+// Gabungan tampilan "Tanggal Lahir/Usia" dari birthDate + age tersimpan di session,
+// karena HollandScoreCardTemplate cuma nerima string display (birthDateAge),
+// bukan raw birthDate. Fallback ke birthDateAge lama kalau ada sesi lama tersisa.
+const formattedBirthDateAge = computed(() => {
+  const r = result.value?.respondent
+  if (!r) return '-'
+
+  if (r.birthDate) {
+    const d = new Date(r.birthDate)
+    if (!isNaN(d)) {
+      const formatted = d.toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      })
+      return r.age !== undefined && r.age !== null ? `${formatted} / ${r.age} tahun` : formatted
+    }
+  }
+
+  return r.birthDateAge || '-'
+})
+
+// respondent yang dikirim ke ScoreCardTemplate, birthDateAge-nya sudah diformat
+const scoreCardRespondent = computed(() => ({
+  ...(result.value?.respondent || {}),
+  birthDateAge: formattedBirthDateAge.value,
+}))
 
 // breakdown semua 6 kategori buat progress bar, diurutkan dari persentase tertinggi
 const scoreBreakdown = computed(() => {
@@ -230,7 +256,11 @@ const answerSections = computed(() => {
 
   return RIASEC_CATEGORY_ORDER
     .filter((code) => grouped[code]?.length)
-    .map((code) => ({ key: code, items: grouped[code] }))
+    .map((code) => ({ 
+      key: code, 
+      label: `${RIASEC_GUIDE[code]?.label} (${code})`,
+      items: grouped[code] 
+    }))
 })
 
 onMounted(async () => {
@@ -251,7 +281,7 @@ const scoreCardRef = ref(null)
 const exportingPDF = ref(false)
 
 async function handleExportPDF() {
-  await exportResultToPDFHybrid({
+  await exportHollandResultToPDF({
     scoreCardElement: scoreCardRef.value.cardRef,
     sections: answerSections.value,
     filename: `hasil-holland-${respondentName.value}.pdf`.replace(/\s+/g, '_'),

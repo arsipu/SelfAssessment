@@ -165,7 +165,7 @@
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/ScoreCardTemplate.vue'
+import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
@@ -173,7 +173,7 @@ import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert/likert-category'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
-import { exportResultToPDFHybrid } from '@/utils/pdf-export'
+import { exportResultToPDFHybrid } from '@/utils/likert-pdf-export'
 
 const route = useRoute()
 const router = useRouter()

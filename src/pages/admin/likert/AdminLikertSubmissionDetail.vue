@@ -160,8 +160,8 @@
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/ScoreCardTemplate.vue'
-import { exportResultToPDFHybrid } from '@/utils/pdf-export'
+import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
+import { exportResultToPDFHybrid } from '@/utils/likert-pdf-export'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'

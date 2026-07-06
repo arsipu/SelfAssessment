@@ -131,8 +131,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
-// TODO: sesuaikan/duplikasi util ini buat format kolom Holland (bukan totalScore, tapi topCode + breakdown per kategori)
-import { exportSubmissionsToExcel } from '@/utils/excel-export'
+import { exportSubmissionsToExcel } from '@/utils/holland-excel-export'
 
 const router = useRouter()
 
@@ -155,7 +154,7 @@ async function confirmExportExcel() {
   if (exporting.value) return
   exporting.value = true
   try {
-    // exportSubmissionsToExcel(submissions.value, 'Holland RIASEC')
+    exportSubmissionsToExcel(submissions.value, 'Holland RIASEC')
     showExportModal.value = false
   } finally {
     exporting.value = false

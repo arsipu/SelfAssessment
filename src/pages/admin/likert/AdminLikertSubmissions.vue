@@ -139,7 +139,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
-import { exportSubmissionsToExcel } from '@/utils/excel-export'
+import { exportSubmissionsToExcel } from '@/utils/likert-excel-export'
 
 const route = useRoute()
 const router = useRouter()

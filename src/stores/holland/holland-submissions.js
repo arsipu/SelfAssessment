@@ -65,7 +65,7 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
 
   // Dipanggil begitu form respondent disubmit (belum ngerjain soal).
   // Field disamakan dengan dokumen sumber Holland:
-  // name, major, school, gender, birthDateAge, occupation, testDate, testPurpose
+  // name, major, school, gender, birthDate, age, occupation, testDate, testPurpose
   const createSubmission = async (respondentData) => {
     try {
       const code = generateSessionCode()
@@ -74,7 +74,8 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
         major: respondentData.major,
         school: respondentData.school,
         gender: respondentData.gender,
-        birthDateAge: respondentData.birthDateAge,
+        birthDate: respondentData.birthDate,
+        age: respondentData.age ?? null,
         occupation: respondentData.occupation,
         testDate: respondentData.testDate,
         testPurpose: respondentData.testPurpose,
