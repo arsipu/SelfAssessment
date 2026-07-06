@@ -13,9 +13,7 @@
           @click="showAddModal = true"
           class="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
           Tambah Formulir
         </button>
       </div>
@@ -71,9 +69,7 @@
                   >
                     <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="statusDotClass(likert.status)"></span>
                     {{ statusLabel(likert.status) }}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <font-awesome-icon icon="fa-solid fa-chevron-down" class="w-3.5 h-3.5 shrink-0" />
                   </button>
 
                   <!-- Dropdown -->
@@ -102,27 +98,21 @@
                     class="p-2.5 md:p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Kelola Pertanyaan"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                    <font-awesome-icon icon="fa-solid fa-clipboard-list" class="w-5 h-5 shrink-0" />
                   </button>
                   <button
                     @click="openEditModal(likert)"
                     class="p-2.5 md:p-2 rounded-lg text-yellow-600 hover:bg-yellow-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Edit"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.707 15.707L8 16l.293-1.707A4 4 0 019 11z" />
-                    </svg>
+                    <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5 shrink-0" />
                   </button>
                   <button
                     @click="openDeleteModal(likert.id)"
                     class="p-2.5 md:p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Hapus"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L18.132 18.142A2 2 0 0116.138 20H7.862a2 2 0 01-1.994-1.858L5 7m5-3h4m-6 3V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h8" />
-                    </svg>
+                    <font-awesome-icon icon="fa-solid fa-trash" class="w-5 h-5 shrink-0" />
                   </button>
                 </div>
               </td>
@@ -143,9 +133,7 @@
         <div class="px-4 md:px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
           <h3 class="text-base font-semibold text-gray-900">{{ isEditing ? 'Edit Formulir' : 'Tambah Formulir Baru' }}</h3>
           <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
           </button>
         </div>
 

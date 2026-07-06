@@ -32,13 +32,11 @@
           :class="{ 'text-gray-900 bg-gray-100': dropdownOpen }"
         >
           Instrumen
-          <svg
+          <font-awesome-icon
+            icon="fa-solid fa-chevron-down"
             class="w-3.5 h-3.5 transition-transform duration-200"
-            :class="{ 'rotate-180': dropdownOpen }"
-            viewBox="0 0 12 12" fill="none"
-          >
-            <path d="M2 4.5L6 8L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+            :class="{ 'fa-rotate-180': dropdownOpen }"
+          />
         </button>
 
         <!-- Dropdown Menu -->
@@ -62,10 +60,7 @@
               class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
             >
               <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                <svg class="w-4 h-4 text-blue-600" viewBox="0 0 16 16" fill="none">
-                  <rect x="3" y="2" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M5.5 6h5M5.5 9h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
+                <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4 text-blue-600" />
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-800">{{ item.name }}</p>

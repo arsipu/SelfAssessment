@@ -75,20 +75,10 @@
               <td class="px-4 md:px-5 py-3 text-sm text-gray-800 font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
               <td class="px-4 md:px-5 py-3 text-sm text-gray-500 whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
               <td class="px-4 md:px-5 py-3 text-right">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                <font-awesome-icon
+                  icon="fa-solid fa-chevron-right"
                   class="w-5 h-5 text-gray-400 group-hover:text-gray-700 transition-colors shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
               </td>
             </tr>
 

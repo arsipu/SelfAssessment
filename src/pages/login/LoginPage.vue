@@ -6,15 +6,7 @@
 				<div
 					class="w-10 h-10 bg-gray-900 rounded-xl mx-auto mb-4 flex items-center justify-center"
 				>
-					<svg class="w-5 h-5 text-white" viewBox="0 0 16 16" fill="none">
-						<circle cx="8" cy="6" r="3" stroke="white" stroke-width="1.5" />
-						<path
-							d="M2 14c0-3 2.5-5 6-5s6 2 6 5"
-							stroke="white"
-							stroke-width="1.5"
-							stroke-linecap="round"
-						/>
-					</svg>
+					<font-awesome-icon icon="fa-solid fa-user" class="w-5 h-5 text-white" />
 				</div>
 				<h1 class="text-lg font-medium text-gray-900">Self Assessment</h1>
 				<p class="text-sm text-gray-400 mt-1">Masuk ke panel admin</p>
@@ -64,34 +56,8 @@
 								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
 								tabindex="-1"
 							>
-								<svg
-									v-if="!showPassword"
-									class="w-4 h-4"
-									viewBox="0 0 16 16"
-									fill="none"
-								>
-									<path
-										d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"
-										stroke="currentColor"
-										stroke-width="1.5"
-										stroke-linecap="round"
-									/>
-									<circle
-										cx="8"
-										cy="8"
-										r="2"
-										stroke="currentColor"
-										stroke-width="1.5"
-									/>
-								</svg>
-								<svg v-else class="w-4 h-4" viewBox="0 0 16 16" fill="none">
-									<path
-										d="M2 2l12 12M6.5 6.6A2 2 0 0 0 9.4 9.5M4.2 4.3C2.8 5.3 1.8 6.7 1 8c1.3 2.3 3.8 5 7 5 1.3 0 2.5-.4 3.5-1M6 3.2C6.6 3.1 7.3 3 8 3c3.2 0 5.7 2.7 7 5-.5.9-1.2 1.9-2 2.6"
-										stroke="currentColor"
-										stroke-width="1.5"
-										stroke-linecap="round"
-									/>
-								</svg>
+								<font-awesome-icon v-if="!showPassword" icon="fa-solid fa-eye" class="w-4 h-4" />
+								<font-awesome-icon v-else icon="fa-solid fa-eye-slash" class="w-4 h-4" />
 							</button>
 						</div>
 					</div>
@@ -106,25 +72,7 @@
 							v-if="errorMessage"
 							class="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5"
 						>
-							<svg
-								class="w-4 h-4 text-red-500 shrink-0 mt-0.5"
-								viewBox="0 0 16 16"
-								fill="none"
-							>
-								<circle
-									cx="8"
-									cy="8"
-									r="6"
-									stroke="currentColor"
-									stroke-width="1.5"
-								/>
-								<path
-									d="M8 5v3M8 10.5v.5"
-									stroke="currentColor"
-									stroke-width="1.5"
-									stroke-linecap="round"
-								/>
-							</svg>
+							<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
 							<p class="text-xs text-red-600 leading-relaxed">
 								{{ errorMessage }}
 							</p>
@@ -137,22 +85,11 @@
 						:disabled="isLoading"
 						class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
 					>
-						<svg
+						<font-awesome-icon
 							v-if="isLoading"
+							icon="fa-solid fa-spinner"
 							class="w-4 h-4 animate-spin"
-							viewBox="0 0 16 16"
-							fill="none"
-						>
-							<circle
-								cx="8"
-								cy="8"
-								r="6"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-dasharray="28"
-								stroke-dashoffset="10"
-							/>
-						</svg>
+						/>
 						{{ isLoading ? "Memproses..." : "Masuk" }}
 					</button>
 				</form>

@@ -17,9 +17,7 @@
             >
               <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(config?.status)"></span>
               {{ statusLabel(config?.status) }}
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-chevron-down" class="w-3.5 h-3.5" />
             </button>
             <div
               v-if="showStatusMenu"
@@ -43,9 +41,7 @@
             @click="openEditModal"
             class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.707 15.707L8 16l.293-1.707A4 4 0 019 11z" />
-            </svg>
+            <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
             Edit Info
           </button>
         </div>
@@ -67,9 +63,7 @@
         <h2 class="text-sm font-medium text-gray-900 mb-1">Kelola Pertanyaan</h2>
         <p class="text-sm text-gray-500">Atur pernyataan untuk tiap kategori RIASEC (R, I, A, S, E, C).</p>
       </div>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
+      <font-awesome-icon icon="fa-solid fa-chevron-right" class="h-5 w-5 text-gray-400" />
     </button>
 
     <!-- Modal Edit Info -->
@@ -78,9 +72,7 @@
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 class="text-base font-semibold text-gray-900">Edit Info Instrumen</h3>
           <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
           </button>
         </div>
 

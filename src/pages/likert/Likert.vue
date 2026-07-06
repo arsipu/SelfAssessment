@@ -38,9 +38,7 @@
             <p class="text-sm font-medium text-gray-900 mb-1">{{ likert.name }}</p>
             <p class="text-xs text-gray-400 leading-relaxed">{{ likert.description }}</p>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+          <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-5 h-5 text-gray-300 shrink-0" />
         </button>
       </div>
     </div>

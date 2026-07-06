@@ -57,13 +57,11 @@
             class="w-full flex items-center justify-between gap-2"
           >
             <p class="text-xs font-medium text-gray-400">Rincian jawaban</p>
-            <svg
+            <font-awesome-icon
+              icon="fa-solid fa-chevron-down"
               class="w-4 h-4 text-gray-400 transition-transform duration-200"
-              :class="{ 'rotate-180': showDetails }"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+              :class="{ 'fa-rotate-180': showDetails }"
+            />
           </button>
 
           <Transition name="expand">
