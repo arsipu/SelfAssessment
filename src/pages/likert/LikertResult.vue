@@ -173,7 +173,7 @@ import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { useLikertCategoryStore } from '@/stores/likert/likert-category'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
-import { exportResultToPDFHybrid } from '@/utils/likert-pdf-export'
+import { exportResultToPDF } from '@/utils/likert-pdf-export'
 
 const route = useRoute()
 const router = useRouter()
@@ -286,7 +286,7 @@ async function handleExportPDF() {
   if (exportingPDF.value) return
   exportingPDF.value = true
   try {
-    await exportResultToPDFHybrid({
+    await exportResultToPDF({
       scoreCardElement: scoreCardRef.value.cardRef,
       sections: sections.value,
       filename: `hasil-${likertStore.currentLikert?.name}-${respondentName.value}.pdf`.replace(/\s+/g, '_'),

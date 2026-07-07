@@ -1,12 +1,9 @@
 <template>
   <nav class="w-full bg-white border-b border-gray-200 px-4 md:px-6 py-3 relative">
     <div class="flex items-center justify-between">
-      <!-- Logo -->
       <span class="text-base font-medium text-gray-900 tracking-tight">Self Assessment</span>
 
-      <!-- ── Desktop Nav Links ─────────────────────────────────── -->
       <div class="hidden md:flex items-center gap-1">
-        <!-- Beranda -->
         <router-link
           to="/"
           class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -15,27 +12,17 @@
           Beranda
         </router-link>
 
-        <!-- ── LIKERT ────────────────────────────────────────── -->
-        <router-link
-          v-if="publishedLikerts.length === 1"
-          :to="{ name: 'likert-form', params: { id: publishedLikerts[0].id } }"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-          active-class="text-gray-900 bg-gray-100"
-        >
-          {{ publishedLikerts[0].name }}
-        </router-link>
-
-        <div v-else-if="publishedLikerts.length > 1" class="relative" ref="likertDropdownRef">
+        <div v-if="allInstruments.length > 0" class="relative" ref="instrumentDropdownRef">
           <button
-            @click="toggleDropdown('likert')"
+            @click="toggleDropdown"
             class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            :class="{ 'text-gray-900 bg-gray-100': activeDropdown === 'likert' }"
+            :class="{ 'text-gray-900 bg-gray-100': isInstrumentDropdownOpen }"
           >
             Instrumen
             <font-awesome-icon
               icon="fa-solid fa-chevron-down"
               class="w-3.5 h-3.5 transition-transform duration-200"
-              :class="{ 'fa-rotate-180': activeDropdown === 'likert' }"
+              :class="{ 'fa-rotate-180': isInstrumentDropdownOpen }"
             />
           </button>
 
@@ -48,84 +35,35 @@
             leave-to-class="opacity-0 translate-y-1"
           >
             <div
-              v-if="activeDropdown === 'likert'"
+              v-if="isInstrumentDropdownOpen"
               class="absolute top-full left-0 mt-1.5 w-64 bg-white border border-gray-200 rounded-xl shadow-sm py-1 z-50"
             >
               <router-link
-                v-for="item in publishedLikerts"
-                :key="item.id"
-                :to="{ name: 'likert-form', params: { id: item.id } }"
-                @click="activeDropdown = null"
+                v-for="item in allInstruments"
+                :key="item.key"
+                :to="item.to"
+                @click="isInstrumentDropdownOpen = false"
                 class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
               >
-                <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4 text-blue-600" />
+                <div 
+                  class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                  :class="item.type === 'holland' ? 'bg-purple-100' : 'bg-blue-100'"
+                >
+                  <font-awesome-icon 
+                    :icon="item.type === 'holland' ? 'fa-solid fa-chart-bar' : 'fa-solid fa-file-lines'" 
+                    class="w-4 h-4"
+                    :class="item.type === 'holland' ? 'text-purple-600' : 'text-blue-600'" 
+                  />
                 </div>
                 <div>
                   <p class="text-sm font-medium text-gray-800">{{ item.name }}</p>
-                  <p class="text-xs text-gray-400">{{ item.description }}</p>
+                  <p v-if="item.description" class="text-xs text-gray-400">{{ item.description }}</p>
                 </div>
               </router-link>
             </div>
           </transition>
         </div>
 
-        <!-- ── HOLLAND / RIASEC ──────────────────────────────── -->
-        <router-link
-          v-if="publishedHollands.length === 1"
-          :to="{ name: 'holland-form', params: { id: publishedHollands[0].id } }"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-          active-class="text-gray-900 bg-gray-100"
-        >
-          {{ publishedHollands[0].name || 'RIASEC' }}
-        </router-link>
-
-        <div v-else-if="publishedHollands.length > 1" class="relative" ref="hollandDropdownRef">
-          <button
-            @click="toggleDropdown('holland')"
-            class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            :class="{ 'text-gray-900 bg-gray-100': activeDropdown === 'holland' }"
-          >
-            RIASEC
-            <font-awesome-icon
-              icon="fa-solid fa-chevron-down"
-              class="w-3.5 h-3.5 transition-transform duration-200"
-              :class="{ 'fa-rotate-180': activeDropdown === 'holland' }"
-            />
-          </button>
-
-          <transition
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 translate-y-1"
-            enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition duration-100 ease-in"
-            leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 translate-y-1"
-          >
-            <div
-              v-if="activeDropdown === 'holland'"
-              class="absolute top-full left-0 mt-1.5 w-64 bg-white border border-gray-200 rounded-xl shadow-sm py-1 z-50"
-            >
-              <router-link
-                v-for="item in publishedHollands"
-                :key="item.id"
-                :to="{ name: 'holland-form', params: { id: item.id } }"
-                @click="activeDropdown = null"
-                class="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
-              >
-                <div class="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <font-awesome-icon icon="fa-solid fa-chart-bar" class="w-4 h-4 text-purple-600" />
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-800">{{ item.name }}</p>
-                  <p class="text-xs text-gray-400">{{ item.description }}</p>
-                </div>
-              </router-link>
-            </div>
-          </transition>
-        </div>
-
-        <!-- Tentang Kami -->
         <router-link
           to="/tentang-kami"
           class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -135,7 +73,6 @@
         </router-link>
       </div>
 
-      <!-- Desktop Login -->
       <router-link
         to="/login"
         class="hidden md:inline-block px-4 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors"
@@ -143,7 +80,6 @@
         Login
       </router-link>
 
-      <!-- ── Mobile Hamburger ──────────────────────────────────── -->
       <button
         @click="mobileMenuOpen = !mobileMenuOpen"
         class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
@@ -154,7 +90,6 @@
       </button>
     </div>
 
-    <!-- ── Mobile Menu Panel ───────────────────────────────────── -->
     <transition
       enter-active-class="transition duration-150 ease-out"
       enter-from-class="opacity-0 -translate-y-2"
@@ -177,7 +112,6 @@
             Beranda
           </router-link>
 
-          <!-- Instrumen: gabung likert + holland jadi 1 seksi biar ga makan tempat -->
           <div v-if="allInstruments.length > 0" class="pt-1">
             <p class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
               Instrumen
@@ -235,9 +169,9 @@ import { PUBLISHED } from '@/apps/status'
 
 const route = useRoute()
 
-const activeDropdown = ref(null)
-const likertDropdownRef = ref(null)
-const hollandDropdownRef = ref(null)
+// State untuk Menu Dropdown Gabungan
+const isInstrumentDropdownOpen = ref(false)
+const instrumentDropdownRef = ref(null)
 const mobileMenuOpen = ref(false)
 
 const likertStore = useLikertStore()
@@ -254,18 +188,20 @@ const publishedHollands = computed(() =>
   hollands.value.filter((h) => h.status === PUBLISHED)
 )
 
-// Dipakai khusus di panel mobile: gabung kedua jenis instrumen jadi 1 daftar
+// Gabungan Instrumen (Dipakai di Desktop & Mobile)
 const allInstruments = computed(() => [
   ...publishedLikerts.value.map((l) => ({
     key: `likert-${l.id}`,
     type: 'likert',
     name: l.name,
+    description: l.description, // Menambahkan deskripsi untuk dropdown
     to: { name: 'likert-form', params: { id: l.id } },
   })),
   ...publishedHollands.value.map((h) => ({
     key: `holland-${h.id}`,
     type: 'holland',
     name: h.name || 'RIASEC',
+    description: h.description, // Menambahkan deskripsi untuk dropdown
     to: { name: 'holland-form', params: { id: h.id } },
   })),
 ])
@@ -277,25 +213,24 @@ onMounted(async () => {
   ])
 })
 
-const toggleDropdown = (name) => {
-  activeDropdown.value = activeDropdown.value === name ? null : name
+// Toggle Dropdown (Boolean)
+const toggleDropdown = () => {
+  isInstrumentDropdownOpen.value = !isInstrumentDropdownOpen.value
 }
 
+// Menutup menu jika klik di luar dropdown gabungan
 const handleClickOutside = (e) => {
-  const inLikert = likertDropdownRef.value && likertDropdownRef.value.contains(e.target)
-  const inHolland = hollandDropdownRef.value && hollandDropdownRef.value.contains(e.target)
-  if (!inLikert && !inHolland) {
-    activeDropdown.value = null
+  if (instrumentDropdownRef.value && !instrumentDropdownRef.value.contains(e.target)) {
+    isInstrumentDropdownOpen.value = false
   }
 }
 
-// Tutup menu mobile & dropdown otomatis tiap kali route berubah
-// (misal user klik link dari mobile panel, atau navigasi lewat cara lain)
+// Tutup menu tiap kali route berubah
 watch(
   () => route.fullPath,
   () => {
     mobileMenuOpen.value = false
-    activeDropdown.value = null
+    isInstrumentDropdownOpen.value = false
   }
 )
 

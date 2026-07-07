@@ -161,7 +161,7 @@
 
 <script setup>
 import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
-import { exportResultToPDFHybrid } from '@/utils/likert-pdf-export'
+import { exportResultToPDF } from '@/utils/likert-pdf-export'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -209,7 +209,7 @@ async function confirmExportPDF() {
   if (exportingPDF.value) return
   exportingPDF.value = true
   try {
-    await exportResultToPDFHybrid({
+    await exportResultToPDF({
       scoreCardElement: scoreCardRef.value.cardRef,
       sections: sections.value,
       filename: `hasil-${currentLikert.value?.name}-${submission.value?.name}.pdf`.replace(/\s+/g, '_'),

@@ -1,82 +1,85 @@
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas-pro'
+import html2pdf from 'html2pdf.js'
 
-// ── Halaman 1: screenshot kartu skor dari elemen HTML ─────────
+/**
+ * Mengekspor hasil asesmen Holland ke PDF secara penuh menggunakan html2pdf.js
+ */
+export async function exportHollandResultToPDF({ scoreCardElement, sections, filename }) {
+  // 1. Buat wrapper utama (ukuran A4 pixel = 794px)
+  const workerWrapper = document.createElement('div')
+  workerWrapper.style.width = '794px'
+  workerWrapper.style.backgroundColor = '#ffffff'
 
-async function renderScoreCardPage(doc, element) {
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    backgroundColor: '#ffffff',
-    useCORS: true,
+  // 2. Clone Halaman 1 (Kartu Skor)
+  const scoreCardClone = scoreCardElement.cloneNode(true)
+  workerWrapper.appendChild(scoreCardClone)
+
+  // 3. Bangun HTML untuk Halaman 2+ (Rincian)
+  let detailsHtml = `
+    <div style="page-break-before: always; padding: 45px 55px; font-family: Arial, sans-serif; box-sizing: border-box; width: 794px; background-color: #ffffff;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #111827; padding-bottom: 20px; margin-bottom: 25px;">
+        <div>
+          <p style="font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">Rincian Jawaban</p>
+          <h1 style="font-size: 24px; font-weight: bold; color: #111827; margin: 4px 0 0 0;">${scoreCardClone.querySelector('h1')?.innerText || 'Holland Assessment'}</h1>
+        </div>
+      </div>
+  `
+
+  // Loop setiap section (kategori RIASEC dll)
+  sections.forEach((section) => {
+    detailsHtml += `
+      <div style="margin-bottom: 25px;">
+        <h3 style="font-size: 14px; font-weight: bold; color: #1f2937; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #111827; padding-left: 8px;">
+          ${section.label}
+        </h3>
+    `
+
+    // Loop butir soal (tanpa label jawaban)
+    section.items.forEach((item, i) => {
+      detailsHtml += `
+        <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f3f4f6; page-break-inside: avoid;">
+          <p style="font-size: 12px; color: #374151; line-height: 1.5; margin: 0; text-align: left;">
+            ${i + 1}. ${item.questionText}
+          </p>
+        </div>
+      `
+    })
+
+    detailsHtml += `</div>`
   })
 
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 10
-  const imgWidth = pageWidth - margin * 2
-  const imgHeight = (canvas.height * imgWidth) / canvas.width
+  detailsHtml += `</div>`
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.95)
-  doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight)
-}
+  // Satukan HTML ke Wrapper
+  const detailsContainer = document.createElement('div')
+  detailsContainer.innerHTML = detailsHtml
+  workerWrapper.appendChild(detailsContainer)
 
-// ── Halaman 2+: rincian jawaban per kategori (tanpa kolom jawaban) ─
-
-function renderAnswerDetailPages(doc, sections) {
-  doc.addPage()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const marginX = 15
-  const textColWidth = pageWidth - marginX * 2
-  let y = 20
-
-  function checkPageBreak(extraHeight = 10) {
-    if (y + extraHeight > pageHeight - 15) {
-      doc.addPage()
-      y = 20
+  // 4. Konfigurasi PDF
+  const options = {
+    margin: 0, 
+    filename: filename || 'holland-result.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      scrollX: 0, // Kunci: Mencegah miring/geser akibat posisi scroll layar
+      scrollY: 0,
+      windowWidth: 794
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
     }
   }
 
-  doc.setFontSize(13)
-  doc.setFont(undefined, 'bold')
-  doc.setTextColor(20, 20, 20)
-  doc.text('Rincian Jawaban', marginX, y)
-  y += 4
-  doc.setDrawColor(220)
-  doc.line(marginX, y, pageWidth - marginX, y)
-  y += 10
-
-  sections.forEach((section) => {
-    checkPageBreak(12)
-    doc.setFontSize(11)
-    doc.setFont(undefined, 'bold')
-    doc.setTextColor(30, 30, 30)
-    doc.text(section.label, marginX, y)
-    y += 7
-
-    section.items.forEach((item, i) => {
-      const textLines = doc.splitTextToSize(`${i + 1}. ${item.questionText}`, textColWidth)
-      const rowHeight = Math.max(textLines.length * 5, 6) + 5
-      checkPageBreak(rowHeight)
-
-      doc.setFontSize(9.5)
-      doc.setFont(undefined, 'normal')
-      doc.setTextColor(60, 60, 60)
-      doc.text(textLines, marginX, y)
-
-      y += rowHeight
-    })
-
-    y += 5 // jarak antar section
-  })
-}
-
-// ── Fungsi utama: gabung halaman 1 (screenshot) + halaman 2+ (teks) ─
-
-export async function exportHollandResultToPDF({ scoreCardElement, sections, filename }) {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-
-  await renderScoreCardPage(doc, scoreCardElement)
-  renderAnswerDetailPages(doc, sections)
-
-  doc.save(filename)
+  // 5. Eksekusi Ekspor
+  try {
+    await html2pdf().set(options).from(workerWrapper).save()
+  } catch (error) {
+    console.error('Error saat melakukan export PDF Holland:', error)
+    throw error
+  }
 }
