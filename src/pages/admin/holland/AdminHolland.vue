@@ -25,7 +25,7 @@
     </div>
 
     <!-- Tabel -->
-    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div v-else class="bg-white border border-gray-200 rounded-xl">
       <div class="px-4 md:px-5 py-3 md:py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <h2 class="text-sm font-medium text-gray-800">Daftar Instrumen Holland</h2>
         <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">

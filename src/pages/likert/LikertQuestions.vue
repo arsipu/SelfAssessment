@@ -6,9 +6,6 @@
 
       <!-- Header -->
       <div class="mb-6">
-        <!-- <router-link to="/likert-form" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-          ← Kembali
-        </router-link> -->
         <h1 class="text-lg md:text-xl font-medium text-gray-900 mt-3">Likert Scale</h1>
         <p class="text-sm text-gray-400 mt-1">
           Berikan tanda pada kolom yang paling sesuai dengan diri Anda.

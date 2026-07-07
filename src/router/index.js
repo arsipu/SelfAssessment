@@ -44,11 +44,11 @@ const routes = [
     { path: "/holland/:id/questions", name: "holland-questions", component: HollandQuestions },
     { path: "/holland/:id/result", name: "holland-result", component: HollandResult },
 
-	// Likert — already parameterized
+	// Likert — parameterized by :id like Holland
     { path: "/likert", name: "likert", component: Likert },
-    { path: "/likert-form/:id", name: "likert-form", component: LikertForm },
-    { path: "/likert-questions/:id", name: "likert-questions", component: LikertQuestions },
-    { path: "/likert-result/:id", name: "likert-result", component: LikertResult },
+    { path: "/likert/:id", name: "likert-form", component: LikertForm },
+    { path: "/likert/:id/questions", name: "likert-questions", component: LikertQuestions },
+    { path: "/likert/:id/result", name: "likert-result", component: LikertResult },
 
     // Route untuk Halaman Kosong / Tidak Tersedia
     {
