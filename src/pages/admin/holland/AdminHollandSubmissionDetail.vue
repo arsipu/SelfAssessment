@@ -110,6 +110,91 @@
         </p>
       </div>
 
+      <!-- Detail keterampilan, pekerjaan, dan mata pelajaran untuk kode dominan -->
+      <div v-if="topCodeChars.length" class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+        <p class="text-xs font-medium text-gray-400 mb-4">Detail minat dominan</p>
+
+        <div class="space-y-3">
+          <div
+            v-for="code in topCodeChars"
+            :key="code"
+            class="bg-gray-50 border border-gray-100 rounded-xl p-4"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-semibold text-gray-800">
+                {{ riasecMap[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label }} ({{ code }})
+              </p>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed mb-3">
+              {{ riasecMap[code]?.description || RIASEC_GUIDE_FALLBACK[code]?.description }}
+            </p>
+
+            <button
+              @click="toggleExpandedCode(code)"
+              class="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+            >
+              {{ expandedCodes.includes(code) ? 'Sembunyikan detail' : 'Lihat keterampilan & rekomendasi' }}
+              <svg
+                class="w-3.5 h-3.5 transition-transform duration-200"
+                :class="{ 'rotate-180': expandedCodes.includes(code) }"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <Transition name="expand">
+              <div v-if="expandedCodes.includes(code)" class="mt-3 pt-3 border-t border-gray-200 space-y-3">
+                <div v-if="(riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)?.length">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                    Keterampilan kunci
+                  </p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="skill in (riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)"
+                      :key="skill"
+                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                    >
+                      {{ skill }}
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="(riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)?.length">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                    Contoh pekerjaan relevan
+                  </p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="career in (riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)"
+                      :key="career"
+                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                    >
+                      {{ career }}
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="(riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)?.length">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                    Mata pelajaran pendukung
+                  </p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="subject in (riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)"
+                      :key="subject"
+                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                    >
+                      {{ subject }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+        </div>
+      </div>
+
       <!-- Jawaban per kategori -->
       <div
         v-for="section in sections"
@@ -274,6 +359,17 @@ const scoreBreakdown = computed(() => {
     .sort((a, b) => b.percentage - a.percentage)
     .map((row) => ({ ...row, isTop: topCodeChars.value.includes(row.code) }))
 })
+
+const expandedCodes = ref([])
+
+function toggleExpandedCode(code) {
+  const idx = expandedCodes.value.indexOf(code)
+  if (idx === -1) {
+    expandedCodes.value.push(code)
+  } else {
+    expandedCodes.value.splice(idx, 1)
+  }
+}
 
 const columnLabel = (columnKey) => HOLLAND_COLUMNS.find((c) => c.key === columnKey)?.label || columnKey
 

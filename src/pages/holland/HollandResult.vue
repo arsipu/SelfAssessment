@@ -26,7 +26,7 @@
             <p class="text-xs text-gray-400">Kode minat dominan (3 kategori tertinggi)</p>
           </div>
 
-          <!-- Deskripsi tiap kategori dalam topCode — dari Firestore riasecList -->
+          <!-- Deskripsi tiap kategori dalam topCode -->
           <div class="space-y-3">
             <div
               v-for="code in topCodeChars"
@@ -34,11 +34,72 @@
               class="bg-gray-50 border border-gray-100 rounded-xl p-4"
             >
               <p class="text-sm font-semibold text-gray-800 mb-1">
-                {{ riasecMap[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label }} ({{ code }})
+                {{ riasecInfo(code)?.label }} ({{ code }})
               </p>
-              <p class="text-xs text-gray-500 leading-relaxed">
-                {{ riasecMap[code]?.description || RIASEC_GUIDE_FALLBACK[code]?.description }}
-              </p>
+              <p class="text-xs text-gray-500 leading-relaxed mb-3">{{ riasecInfo(code)?.description }}</p>
+
+              <button
+                @click="toggleExpandedCode(code)"
+                class="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                {{ expandedCodes.includes(code) ? 'Sembunyikan detail' : 'Lihat keterampilan & rekomendasi' }}
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200"
+                  :class="{ 'rotate-180': expandedCodes.includes(code) }"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <Transition name="expand">
+                <div v-if="expandedCodes.includes(code)" class="mt-3 pt-3 border-t border-gray-200 space-y-3">
+                  <div v-if="riasecInfo(code)?.skills?.length">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                      Keterampilan kunci
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        v-for="skill in riasecInfo(code).skills"
+                        :key="skill"
+                        class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      >
+                        {{ skill }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-if="riasecInfo(code)?.careers?.length">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                      Contoh pekerjaan relevan
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        v-for="career in riasecInfo(code).careers"
+                        :key="career"
+                        class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      >
+                        {{ career }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-if="riasecInfo(code)?.subjects?.length">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                      Mata pelajaran pendukung
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        v-for="subject in riasecInfo(code).subjects"
+                        :key="subject"
+                        class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      >
+                        {{ subject }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
             </div>
           </div>
         </div>
@@ -51,7 +112,7 @@
             <div v-for="row in scoreBreakdown" :key="row.code">
               <div class="flex items-center justify-between mb-1.5">
                 <span class="text-sm font-medium text-gray-700">
-                  {{ riasecMap[row.code]?.label || RIASEC_GUIDE_FALLBACK[row.code]?.label }} ({{ row.code }})
+                  {{ riasecInfo(row.code)?.label }} ({{ row.code }})
                 </span>
                 <span class="text-xs text-gray-400">
                   {{ row.count }}/{{ row.total }} · {{ row.percentage }}%
@@ -82,7 +143,7 @@
             Unduh PDF
           </button>
           <router-link
-            :to="{ name: 'holland-form', params: { id: hollandId } }"
+            :to="{ name: 'holland-form' }"
             class="w-full md:flex-1 text-center py-3 h-10 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition"
           >
             Selesai
@@ -96,11 +157,13 @@
             class="w-full flex items-center justify-between gap-2"
           >
             <p class="text-xs font-medium text-gray-400">Rincian jawaban</p>
-            <font-awesome-icon
-              icon="fa-solid fa-chevron-down"
+            <svg
               class="w-4 h-4 text-gray-400 transition-transform duration-200"
-              :class="{ 'fa-rotate-180': showDetails }"
-            />
+              :class="{ 'rotate-180': showDetails }"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
 
           <Transition name="expand">
@@ -109,7 +172,7 @@
                 <div class="flex items-center gap-2 mb-2.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                   <span class="text-xs font-medium text-gray-500">
-                    {{ riasecMap[section.key]?.label || RIASEC_GUIDE_FALLBACK[section.key]?.label }} ({{ section.key }})
+                    {{ riasecInfo(section.key)?.label }} ({{ section.key }})
                   </span>
                 </div>
 
@@ -168,10 +231,10 @@
       ref="scoreCardRef"
       holland-name="Holland RIASEC"
       :code="result?.code"
-      :respondent="scoreCardRespondent"
+      :respondent="result?.respondent || {}"
       :top-code="result?.topCode"
-      :scales-label="topCodeChars.map((c) => (riasecMap[c]?.label || RIASEC_GUIDE_FALLBACK[c]?.label)).join(' · ')"
-      :scales-description="topCodeChars.map((c) => (riasecMap[c]?.description || RIASEC_GUIDE_FALLBACK[c]?.description)).join(' ')"
+      :scales-label="topCodeChars.map((c) => riasecInfo(c)?.label).join(' · ')"
+      :scales-description="topCodeChars.map((c) => riasecInfo(c)?.description).join(' ')"
     />
   </div>
 </template>
@@ -183,7 +246,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
-import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE as RIASEC_GUIDE_FALLBACK } from '@/apps/holland'
+import { RIASEC_CATEGORY_ORDER } from '@/apps/holland'
 import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 
 const route = useRoute()
@@ -195,6 +258,7 @@ const questionsStore = useHollandQuestionsStore()
 const riasecStore = useHollandRiasecStore()
 
 const loading = ref(true)
+const expandedCodes = ref([])
 
 const showExportPDFModal = ref(false)
 const showDetails = ref(false)
@@ -206,39 +270,20 @@ const respondentName = computed(() => result.value?.respondentName || '-')
 // deskripsi kategori dominan sesuai urutan skor tertinggi
 const topCodeChars = computed(() => (result.value?.topCode || '').split(''))
 
-// riasecMap[code] -> { label, description, skills, careers } dari Firestore
-// Dibangun dari riasecList
-const riasecMap = computed(() => {
-  const map = {}
-  for (const item of riasecStore.riasecList) {
-    map[item.id] = item
+// cari data 1 kategori (label, description, skills, careers, subjects)
+// dari riasecList yang sudah di-fetch dari Firestore
+function riasecInfo(code) {
+  return riasecStore.riasecList.find((r) => r.id === code) || null
+}
+
+function toggleExpandedCode(code) {
+  const idx = expandedCodes.value.indexOf(code)
+  if (idx === -1) {
+    expandedCodes.value.push(code)
+  } else {
+    expandedCodes.value.splice(idx, 1)
   }
-  return map
-})
-
-// Gabungan tampilan "Tanggal Lahir/Usia" dari birthDate + age tersimpan di session
-const formattedBirthDateAge = computed(() => {
-  const r = result.value?.respondent
-  if (!r) return '-'
-
-  if (r.birthDate) {
-    const d = new Date(r.birthDate)
-    if (!isNaN(d)) {
-      const formatted = d.toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      })
-      return r.age !== undefined && r.age !== null ? `${formatted} / ${r.age} tahun` : formatted
-    }
-  }
-
-  return r.birthDateAge || '-'
-})
-
-// respondent yang dikirim ke ScoreCardTemplate, birthDateAge-nya sudah diformat
-const scoreCardRespondent = computed(() => ({
-  ...(result.value?.respondent || {}),
-  birthDateAge: formattedBirthDateAge.value,
-}))
+}
 
 // breakdown semua 6 kategori buat progress bar, diurutkan dari persentase tertinggi
 const scoreBreakdown = computed(() => {
@@ -260,11 +305,9 @@ const answerSections = computed(() => {
   const grouped = {}
 
   for (const a of answers) {
-    // Use riasecId (new) or category (old) to group
-    const category = a.riasecId || a.category
     const question = questionsStore.allQuestions.find((q) => q.id === a.questionId)
-    if (!grouped[category]) grouped[category] = []
-    grouped[category].push({
+    if (!grouped[a.category]) grouped[a.category] = []
+    grouped[a.category].push({
       questionId: a.questionId,
       questionText: question?.question || '(soal tidak ditemukan)',
     })
@@ -272,11 +315,7 @@ const answerSections = computed(() => {
 
   return RIASEC_CATEGORY_ORDER
     .filter((code) => grouped[code]?.length)
-    .map((code) => ({ 
-      key: code, 
-      label: `${riasecMap.value[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label} (${code})`,
-      items: grouped[code] 
-    }))
+    .map((code) => ({ key: code, items: grouped[code] }))
 })
 
 onMounted(async () => {
@@ -287,7 +326,6 @@ onMounted(async () => {
 
   loading.value = true
   try {
-    // Fetch both riasec data (from Firestore) and questions in parallel
     await Promise.all([
       riasecStore.fetchRiasecList(hollandId),
       questionsStore.fetchAllQuestions(hollandId),

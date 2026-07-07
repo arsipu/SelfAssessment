@@ -1,252 +1,185 @@
 <template>
-	<AppTopBar />
-	<div class="min-h-screen p-6">
-		<!-- Stat Cards -->
-		<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-			<div
-				v-for="stat in stats"
-				:key="stat.label"
-				class="bg-gray-100 rounded-lg p-4"
-			>
-				<p class="text-xs text-gray-400 mb-1.5">{{ stat.label }}</p>
-				<p class="text-3xl font-medium text-gray-900 leading-none">
-					{{ stat.value }}
-				</p>
-				<p
-					class="text-xs mt-1.5"
-					:class="stat.positive ? 'text-green-600' : 'text-yellow-600'"
-				>
-					{{ stat.sub }}
-				</p>
-			</div>
-		</div>
+  <div class="min-h-screen">
+    <AppTopBar />
 
-		<!-- Mid Row -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-5">
-			<!-- RIASEC Bars -->
-			<div class="bg-white border border-gray-200 rounded-xl p-5">
-				<h2 class="text-sm font-medium text-gray-800 mb-4">
-					Distribusi tipe RIASEC
-				</h2>
-				<div class="space-y-2">
-					<div
-						v-for="item in riasec"
-						:key="item.label"
-						class="flex items-center gap-2 text-xs"
-					>
-						<span class="w-5 text-gray-400 font-medium shrink-0">{{
-							item.label
-						}}</span>
-						<div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-							<div
-								class="h-full rounded-full transition-all duration-700"
-								:style="{ width: item.pct + '%', background: item.color }"
-							></div>
-						</div>
-						<span class="w-7 text-right text-gray-400 shrink-0"
-							>{{ item.pct }}%</span
-						>
-					</div>
-				</div>
-			</div>
+    <!-- ─── Hero ─────────────────────────────────────────── -->
+    <section class="max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-16">
+      <div class="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
+        <div class="flex-1 text-center md:text-left">
+          <p class="text-xs font-semibold tracking-wide uppercase text-blue-600 mb-3">
+            Self Assessment
+          </p>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
+            Kenali arah minat<br class="hidden sm:block" />
+            dan kesiapan kerjamu.
+          </h1>
+          <p class="text-sm md:text-base text-gray-500 leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
+            Kumpulan instrumen asesmen diri untuk membantu kamu memahami minat
+            karier dan tingkat kesiapan kerja — diisi online, hasil langsung
+            terlihat begitu selesai.
+          </p>
+          <a
+            href="#instrumen"
+            class="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition active:scale-[0.98]"
+          >
+            Mulai asesmen
+          </a>
+        </div>
 
-			<!-- Aktivitas -->
-			<div class="bg-white border border-gray-200 rounded-xl p-5">
-				<h2 class="text-sm font-medium text-gray-800 mb-4">
-					Aktivitas terbaru
-				</h2>
-				<div class="space-y-3">
-					<div
-						v-for="act in activities"
-						:key="act.text"
-						class="flex items-start gap-3"
-					>
-						<div
-							class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm"
-							:class="act.color"
-						>
-							<span class="material-symbols-outlined text-[14px]">{{
-								act.icon
-							}}</span>
-						</div>
-						<div>
-							<p class="text-sm text-gray-700 leading-snug">{{ act.text }}</p>
-							<p class="text-xs text-gray-400">{{ act.time }}</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+        <!-- Signature: hexagon RIASEC, motif asli dari teori Holland -->
+        <div class="shrink-0 w-40 sm:w-48 md:w-56" aria-hidden="true">
+          <svg viewBox="0 0 320 320" class="w-full h-auto">
+            <polygon
+              points="160,20 285,92 285,228 160,300 35,228 35,92"
+              class="fill-none stroke-gray-300"
+              stroke-width="2"
+            />
+            <polygon
+              points="160,70 240,110 240,210 160,250 80,210 80,110"
+              class="fill-none stroke-blue-500"
+              stroke-width="2"
+            />
+            <g class="fill-gray-800 text-[15px] font-semibold">
+              <text x="160" y="16" text-anchor="middle">R</text>
+              <text x="295" y="90" text-anchor="middle">I</text>
+              <text x="295" y="232" text-anchor="middle">A</text>
+              <text x="160" y="314" text-anchor="middle">S</text>
+              <text x="25" y="232" text-anchor="middle">E</text>
+              <text x="25" y="90" text-anchor="middle">C</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
 
-		<!-- Bottom Row -->
-		<div class="grid grid-cols-1 lg:grid-cols-5 gap-3">
-			<!-- Instrumen -->
-			<div class="lg:col-span-3 bg-white border border-gray-200 rounded-xl p-5">
-				<h2 class="text-sm font-medium text-gray-800 mb-4">Instrumen aktif</h2>
-				<div class="space-y-2">
-					<div
-						v-for="(ins, i) in instruments"
-						:key="ins.name"
-						class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:border-blue-300 border border-transparent cursor-pointer transition-colors"
-					>
-						<div
-							class="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-medium flex items-center justify-center shrink-0"
-						>
-							{{ i + 1 }}
-						</div>
-						<div class="flex-1">
-							<p class="text-sm text-gray-800">{{ ins.name }}</p>
-							<p class="text-xs text-gray-400">{{ ins.sub }}</p>
-						</div>
-						<span
-							class="text-xs px-2 py-0.5 rounded"
-							:class="badgeClass(ins.status)"
-						>
-							{{ ins.status }}
-						</span>
-					</div>
-				</div>
-			</div>
+    <!-- ─── Instrumen tersedia ───────────────────────────── -->
+    <section id="instrumen" class="max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 scroll-mt-16">
+      <p class="text-xs font-semibold tracking-wide uppercase text-emerald-600 mb-2">
+        Instrumen tersedia
+      </p>
+      <h2 class="text-lg md:text-xl font-semibold text-gray-900 mb-6">
+        Pilih yang ingin kamu kerjakan
+      </h2>
 
-			<!-- Ring -->
-			<div
-				class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5 flex flex-col items-center justify-center text-center gap-3"
-			>
-				<h2 class="text-sm font-medium text-gray-800 self-start">
-					Tingkat penyelesaian
-				</h2>
-				<svg width="110" height="110" viewBox="0 0 110 110">
-					<circle
-						cx="55"
-						cy="55"
-						r="46"
-						fill="none"
-						stroke="#f3f4f6"
-						stroke-width="10"
-					/>
-					<circle
-						cx="55"
-						cy="55"
-						r="46"
-						fill="none"
-						stroke="#378ADD"
-						stroke-width="10"
-						stroke-linecap="round"
-						stroke-dasharray="289"
-						:stroke-dashoffset="289 - 289 * 0.738"
-						transform="rotate(-90 55 55)"
-					/>
-					<text
-						x="55"
-						y="51"
-						text-anchor="middle"
-						font-size="22"
-						font-weight="500"
-						fill="#111827"
-					>
-						74%
-					</text>
-					<text
-						x="55"
-						y="65"
-						text-anchor="middle"
-						font-size="11"
-						fill="#9ca3af"
-					>
-						selesai
-					</text>
-				</svg>
-				<p class="text-sm text-gray-700">183 dari 248 responden</p>
-				<p class="text-xs text-gray-400">
-					telah menyelesaikan seluruh instrumen
-				</p>
-			</div>
-		</div>
-	</div>
+      <div v-if="loading" class="text-center text-sm text-gray-400 py-12">
+        Memuat instrumen...
+      </div>
+
+      <div v-else-if="allInstruments.length === 0" class="text-center text-sm text-gray-400 py-12">
+        Belum ada instrumen yang dipublikasikan saat ini.
+      </div>
+
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+        <router-link
+          v-for="item in allInstruments"
+          :key="item.key"
+          :to="item.to"
+          class="block bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-900 hover:shadow-sm transition-all"
+        >
+          <span
+            class="inline-block text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3"
+            :class="item.type === 'holland'
+              ? 'bg-purple-100 text-purple-700'
+              : 'bg-blue-100 text-blue-700'"
+          >
+            {{ item.type === 'holland' ? 'RIASEC' : 'Likert' }}
+          </span>
+          <h3 class="text-sm font-semibold text-gray-900 mb-1.5">{{ item.name }}</h3>
+          <p class="text-xs text-gray-500 leading-relaxed mb-4 min-h-[2.5em]">
+            {{ item.description || 'Belum ada deskripsi untuk instrumen ini.' }}
+          </p>
+          <span class="text-xs font-medium text-gray-700">Mulai isi →</span>
+        </router-link>
+      </div>
+    </section>
+
+    <!-- ─── Cara kerja ───────────────────────────────────── -->
+    <section class="max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14">
+      <p class="text-xs font-semibold tracking-wide uppercase text-amber-600 mb-2">
+        Cara kerja
+      </p>
+      <h2 class="text-lg md:text-xl font-semibold text-gray-900 mb-6">
+        Tiga langkah, selesai
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
+        <div>
+          <span class="block text-2xl font-bold text-gray-300 mb-2">01</span>
+          <h3 class="text-sm font-semibold text-gray-900 mb-1">Isi data diri</h3>
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Nama, sekolah/universitas, dan beberapa data singkat lain sebelum mulai.
+          </p>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-gray-300 mb-2">02</span>
+          <h3 class="text-sm font-semibold text-gray-900 mb-1">Jawab pernyataan</h3>
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Jawab sesuai kondisi dirimu yang sebenarnya — tidak ada jawaban benar atau salah.
+          </p>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-gray-300 mb-2">03</span>
+          <h3 class="text-sm font-semibold text-gray-900 mb-1">Lihat hasil</h3>
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Hasil dan penjelasannya langsung tampil begitu kamu selesai mengisi.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center py-8 px-4 text-xs text-gray-400 border-t border-gray-100">
+      Self Assessment — dibuat untuk membantu proses eksplorasi karier.
+    </footer>
+  </div>
 </template>
 
 <script setup>
-import AppTopBar from "../../components/AppTopBar.vue";
-import { computed } from "vue";
+import AppTopBar from '@/components/AppTopBar.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useLikertStore } from '@/stores/likert/likert'
+import { useHollandStore } from '@/stores/holland/holland'
+import { PUBLISHED } from '@/apps/status'
 
-const today = computed(() => {
-	return new Date().toLocaleDateString("id-ID", {
-		weekday: "long",
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	});
-});
+const likertStore = useLikertStore()
+const hollandStore = useHollandStore()
 
-const stats = [
-	{
-		label: "Total responden",
-		value: 248,
-		sub: "+12 minggu ini",
-		positive: true,
-	},
-	{
-		label: "Asesmen selesai",
-		value: 183,
-		sub: "73.8% dari total",
-		positive: true,
-	},
-	{
-		label: "Sedang berjalan",
-		value: 41,
-		sub: "Belum selesai",
-		positive: false,
-	},
-	{ label: "Laporan dibuat", value: 167, sub: "+5 hari ini", positive: true },
-];
+const loading = ref(true)
 
-const riasec = [
-	{ label: "R", pct: 62, color: "#639922" },
-	{ label: "I", pct: 78, color: "#378ADD" },
-	{ label: "A", pct: 45, color: "#D4537E" },
-	{ label: "S", pct: 85, color: "#1D9E75" },
-	{ label: "E", pct: 54, color: "#BA7517" },
-	{ label: "C", pct: 70, color: "#7F77DD" },
-];
+const publishedLikerts = computed(() =>
+  (likertStore.likerts || []).filter((l) => l.status === PUBLISHED)
+)
+const publishedHollands = computed(() =>
+  (hollandStore.hollands || []).filter((h) => h.status === PUBLISHED)
+)
 
-const activities = [
-	{
-		icon: "check_circle",
-		color: "bg-green-100 text-green-700",
-		text: "Rizky Ananda menyelesaikan RIASEC",
-		time: "2 menit lalu",
-	},
-	{
-		icon: "person_add",
-		color: "bg-blue-100 text-blue-700",
-		text: "Responden baru terdaftar",
-		time: "15 menit lalu",
-	},
-	{
-		icon: "download",
-		color: "bg-yellow-100 text-yellow-700",
-		text: "Laporan Likert diekspor",
-		time: "1 jam lalu",
-	},
-	{
-		icon: "check_circle",
-		color: "bg-green-100 text-green-700",
-		text: "Siti Rahma menyelesaikan Likert",
-		time: "2 jam lalu",
-	},
-];
+// Gabungkan kedua jenis instrumen jadi 1 grid, ditandai `type` biar
+// tag & route tujuannya beda tanpa perlu 2 blok terpisah di template.
+const allInstruments = computed(() => [
+  ...publishedLikerts.value.map((l) => ({
+    key: `likert-${l.id}`,
+    type: 'likert',
+    name: l.name,
+    description: l.description,
+    to: { name: 'likert-form', params: { id: l.id } },
+  })),
+  ...publishedHollands.value.map((h) => ({
+    key: `holland-${h.id}`,
+    type: 'holland',
+    name: h.name,
+    description: h.description,
+    to: { name: 'holland-form', params: { id: h.id } },
+  })),
+])
 
-const instruments = [
-	{ name: "Holland RIASEC", sub: "36 butir soal", status: "Aktif" },
-	{ name: "Likert Scale", sub: "28 butir soal", status: "Aktif" },
-	{ name: "Minat Bakat (MBTI)", sub: "40 butir soal", status: "Draft" },
-	{ name: "Kesiapan Kerja Lanjutan", sub: "–", status: "Baru" },
-];
-
-const badgeClass = (status) =>
-	({
-		Aktif: "bg-green-100 text-green-700",
-		Draft: "bg-yellow-100 text-yellow-700",
-		Baru: "bg-blue-100 text-blue-700",
-	})[status] ?? "";
+onMounted(async () => {
+  loading.value = true
+  try {
+    await Promise.all([
+      likertStore.fetchLikerts(),
+      hollandStore.fetchHollands(),
+    ])
+  } finally {
+    loading.value = false
+  }
+})
 </script>
