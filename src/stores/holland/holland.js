@@ -9,10 +9,12 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   serverTimestamp,
 } from 'firebase/firestore'
 
 import { DRAFT, PUBLISHED } from '@/apps/status'
+import { RIASEC_GUIDE, RIASEC_CATEGORY_ORDER } from '@/apps/holland'
 
 export const useHollandStore = defineStore('holland', () => {
   const hollands = ref([])
@@ -36,14 +38,11 @@ export const useHollandStore = defineStore('holland', () => {
   // ── Detail 1 instrumen ────────────────────────────────────
 
   const getHollandById = async (hollandId) => {
-    console.log('Fetching holland:', hollandId)
     try {
       const snap = await getDoc(doc(db, 'holland', hollandId))
       if (snap.exists()) {
         currentHolland.value = { id: snap.id, ...snap.data() }
-        console.log('Holland fetched:', currentHolland.value.name)
       } else {
-        console.log('No such holland document!')
         currentHolland.value = null
       }
     } catch (error) {
@@ -52,10 +51,37 @@ export const useHollandStore = defineStore('holland', () => {
     return currentHolland.value
   }
 
-  // ── Buat instrumen baru ───────────────────────────────────
+  // ── Seed 6 dokumen riasec (R, I, A, S, E, C) dari template ──
+  // Dipanggil sekali pas instrumen baru dibuat. `code` dan `label`
+  // diambil apa adanya dari RIASEC_GUIDE dan TIDAK dimaksudkan untuk
+  // diubah admin — cuma description/skills/careers/subjects yang
+  // boleh disesuaikan lewat updateRiasecContent().
+
+  const seedRiasecCategories = async (hollandId) => {
+    const batch = writeBatch(db)
+
+    RIASEC_CATEGORY_ORDER.forEach((code, index) => {
+      const template = RIASEC_GUIDE[code]
+      const ref = doc(db, 'holland', hollandId, 'riasec', code)
+      batch.set(ref, {
+        code: template.code,
+        label: template.label,
+        description: template.description,
+        skills: template.skills,
+        careers: template.careers,
+        subjects: template.subjects,
+        order: index + 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    })
+
+    await batch.commit()
+  }
+
+  // ── Buat instrumen baru (+ otomatis seed 6 kategori riasec) ──
 
   const addHolland = async ({ name, description, direction }) => {
-    console.log('Adding holland:', name)
     try {
       const ref = await addDoc(collection(db, 'holland'), {
         name,
@@ -65,7 +91,19 @@ export const useHollandStore = defineStore('holland', () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      console.log('Holland added with ID:', ref.id)
+
+      // Seed 6 kategori riasec langsung setelah doc holland berhasil dibuat.
+      // Kalau seeding gagal, instrumen tetap kebuat tapi tanpa kategori —
+      // log error biar kelihatan, jangan biarkan silent.
+      try {
+        await seedRiasecCategories(ref.id)
+      } catch (seedError) {
+        console.error('Gagal seed kategori riasec untuk holland baru:', ref.id, seedError)
+        throw new Error(
+          'Instrumen dibuat, tapi gagal menyiapkan 6 kategori RIASEC. Silakan cek atau hapus dan coba lagi.'
+        )
+      }
+
       await fetchHollands()
       return ref.id
     } catch (error) {
@@ -74,10 +112,9 @@ export const useHollandStore = defineStore('holland', () => {
     }
   }
 
-  // ── Update instrumen ──────────────────────────────────────
+  // ── Update instrumen (nama, deskripsi, petunjuk) ─────────────
 
   const updateHolland = async (hollandId, { name, description, direction }) => {
-    console.log('Updating holland:', hollandId)
     try {
       await updateDoc(doc(db, 'holland', hollandId), {
         name,
@@ -85,7 +122,6 @@ export const useHollandStore = defineStore('holland', () => {
         direction: direction || '',
         updatedAt: serverTimestamp(),
       })
-      console.log('Holland updated:', hollandId)
       await fetchHollands()
     } catch (error) {
       console.error('Error updating holland:', error)
@@ -93,13 +129,37 @@ export const useHollandStore = defineStore('holland', () => {
     }
   }
 
+  // ── Update konten 1 kategori riasec (BUKAN code/label) ───────
+  // Dipakai kalau admin mau sesuaikan description/skills/careers/subjects
+  // per instrumen. `code` dan `label` sengaja tidak diterima parameter
+  // ini sama sekali, biar nggak ada jalan buat keubah dari sisi kode.
+
+  const updateRiasecContent = async (hollandId, riasecId, { description, skills, careers, subjects }) => {
+    try {
+      await updateDoc(doc(db, 'holland', hollandId, 'riasec', riasecId), {
+        description,
+        skills,
+        careers,
+        subjects,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      console.error('Error updating riasec content:', error)
+      throw error
+    }
+  }
+
   // ── Hapus instrumen ───────────────────────────────────────
+  // CATATAN: ini cuma hapus doc holland utama. Subcollection
+  // `riasec` (dan nested `questions` di dalamnya) serta `submissions`
+  // TIDAK ikut terhapus otomatis — Firestore tidak punya cascade delete
+  // dari client SDK. Untuk pembersihan penuh, perlu Cloud Function
+  // terpisah atau dihapus manual. Untuk sekarang biarkan begini dulu,
+  // tapi ini technical debt yang perlu diketahui.
 
   const deleteHolland = async (hollandId) => {
-    console.log('Deleting holland:', hollandId)
     try {
       await deleteDoc(doc(db, 'holland', hollandId))
-      console.log('Holland deleted:', hollandId)
       await fetchHollands()
     } catch (error) {
       console.error('Error deleting holland:', error)
@@ -110,7 +170,6 @@ export const useHollandStore = defineStore('holland', () => {
   // ── Update status ─────────────────────────────────────────
 
   const updateHollandStatus = async (id, status) => {
-    // Auto-unpublish other published instruments when publishing this one
     if (status === PUBLISHED) {
       const others = hollands.value.filter(
         (h) => h.id !== id && h.status === PUBLISHED
@@ -139,6 +198,7 @@ export const useHollandStore = defineStore('holland', () => {
     getHollandById,
     addHolland,
     updateHolland,
+    updateRiasecContent,
     deleteHolland,
     updateHollandStatus,
   }

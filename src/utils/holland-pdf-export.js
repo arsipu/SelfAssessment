@@ -28,24 +28,36 @@ export async function exportHollandResultToPDF({ scoreCardElement, sections, fil
   // Loop setiap section (kategori RIASEC dll)
   sections.forEach((section) => {
     detailsHtml += `
-      <div style="margin-bottom: 25px;">
-        <h3 style="font-size: 14px; font-weight: bold; color: #1f2937; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #111827; padding-left: 8px;">
+      <div style="margin-bottom: 28px;">
+        <h3 style="display: flex; align-items: center; font-size: 15px; font-weight: bold; color: #111827; margin-top: 0; margin-bottom: 14px;">
           ${section.label}
         </h3>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
     `
 
-    // Loop butir soal (tanpa label jawaban)
+    // Loop butir soal
     section.items.forEach((item, i) => {
+      // PERBAIKAN 2: Memberikan efek zebra (warna background selang-seling) agar tidak polos
+      const isEven = i % 2 === 0;
+      const bgColor = isEven ? '#f9fafb' : '#ffffff'; // abu-abu sangat muda vs putih
+      const borderColor = isEven ? '#f3f4f6' : 'transparent';
+
       detailsHtml += `
-        <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f3f4f6; page-break-inside: avoid;">
-          <p style="font-size: 12px; color: #374151; line-height: 1.5; margin: 0; text-align: left;">
-            ${i + 1}. ${item.questionText}
-          </p>
-        </div>
+          <div style="display: flex; align-items: flex-start; padding: 10px 12px; background-color: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px; page-break-inside: avoid;">
+            <span style="font-size: 12px; font-weight: 700; color: #6b7280; min-width: 28px; line-height: 1.5; flex-shrink: 0;">
+              ${i + 1}.
+            </span>
+            <p style="font-size: 12px; color: #374151; line-height: 1.5; margin: 0; text-align: left;">
+              ${item.questionText}
+            </p>
+          </div>
       `
     })
 
-    detailsHtml += `</div>`
+    detailsHtml += `
+        </div>
+      </div>
+    `
   })
 
   detailsHtml += `</div>`
@@ -64,7 +76,7 @@ export async function exportHollandResultToPDF({ scoreCardElement, sections, fil
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
-      scrollX: 0, // Kunci: Mencegah miring/geser akibat posisi scroll layar
+      scrollX: 0,
       scrollY: 0,
       windowWidth: 794
     },

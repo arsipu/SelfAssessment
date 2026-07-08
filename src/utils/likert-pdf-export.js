@@ -32,21 +32,80 @@ export async function exportResultToPDF({ scoreCardElement, sections, filename }
   // Loop untuk setiap kelompok/section pertanyaan
   sections.forEach((section) => {
     detailsHtml += `
-      <div style="margin-bottom: 25px;">
-        <h3 style="font-size: 14px; font-weight: bold; color: #1f2937; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #111827; padding-left: 8px;">
+      <div style="margin-bottom: 28px;">
+        <h3 style="display:flex; align-items:center; font-size:15px; font-weight:bold; color:#111827; margin-top:0; margin-bottom:14px;">
           ${section.label}
         </h3>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
     `
 
     // Loop untuk butir item pertanyaan di dalam section
     section.items.forEach((item, i) => {
-      // 'page-break-inside: avoid' memastikan satu nomor soal & jawaban tidak terbelah di ujung halaman
+      const isEven = i % 2 === 0
+      const bgColor = isEven ? '#f9fafb' : '#ffffff'
+      const borderColor = isEven ? '#f3f4f6' : 'transparent'
+
       detailsHtml += `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
-          <div style="font-size: 12px; color: #374151; width: 72%; line-height: 1.5; text-align: left;">
-            ${i + 1}. ${item.questionText}
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:16px;
+            padding:10px 12px;
+            margin-bottom:6px;
+            background-color:${bgColor};
+            border:1px solid ${borderColor};
+            border-radius:6px;
+            page-break-inside:avoid;
+          "
+        >
+          <div
+            style="
+              display:flex;
+              align-items:flex-start;
+              flex:1;
+              min-width:0;
+            "
+          >
+            <span
+              style="
+                min-width:28px;
+                font-size:12px;
+                font-weight:700;
+                color:#6b7280;
+                line-height:1.5;
+                flex-shrink:0;
+              "
+            >
+              ${i + 1}.
+            </span>
+
+            <div
+              style="
+                font-size:12px;
+                color:#374151;
+                line-height:1.5;
+                text-align:left;
+                word-break:break-word;
+              "
+            >
+              ${item.questionText}
+            </div>
           </div>
-          <div style="font-size: 12px; font-weight: bold; color: #111827; width: 25%; text-align: right; word-wrap: break-word;">
+
+          <div
+            style="
+              min-width:140px;
+              max-width:170px;
+              text-align:right;
+              font-size:12px;
+              font-weight:700;
+              color:#111827;
+              line-height:1.5;
+            "
+          >
             ${item.answerLabel}
           </div>
         </div>

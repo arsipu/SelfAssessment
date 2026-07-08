@@ -49,19 +49,22 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-8 mb-8">
-      <div class="shrink-0 w-32 h-32 rounded-full border-[5px] border-[#111827] flex items-center justify-center bg-[#ffffff]">
-        <span class="text-4xl font-extrabold text-[#111827]">{{ totalScore }}</span>
-      </div>
-      <div class="flex-1">
-        <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-3 tracking-wide"
-          :style="{ backgroundColor: badgeBg, color: badgeText }"
-        >
-          {{ scalesLabel }}
-        </span>
-        <p class="text-base text-[#4b5563] leading-relaxed pr-4">{{ scalesDescription }}</p>
-      </div>
+    <div class="border border-[#e5e7eb] rounded-xl px-8 py-8 mb-8 text-center">
+      <p class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-3">
+        Total Skor
+      </p>
+
+      <p class="text-5xl font-extrabold text-[#111827] tracking-[0.08em] mb-4">
+        {{ totalScore }}
+      </p>
+
+      <p class="text-sm font-bold text-[#374151] uppercase tracking-wide mb-4">
+        {{ scalesLabel }}
+      </p>
+
+      <p class="text-sm text-[#4b5563] leading-relaxed max-w-[560px] mx-auto">
+        {{ scalesDescription }}
+      </p>
     </div>
 
     <div class="border-t border-[#e5e7eb] pt-6 mt-10 flex justify-between items-center">

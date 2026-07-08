@@ -231,7 +231,16 @@
       ref="scoreCardRef"
       holland-name="Holland RIASEC"
       :code="result?.code"
-      :respondent="result?.respondent || {}"
+      :respondent="{
+        name: result?.respondent?.name,
+        school: result?.respondent?.school,
+        major: result?.respondent?.major,
+        birthDateAge: formattedBirthDateAge,
+        gender: result?.respondent?.gender,
+        occupation: result?.respondent?.occupation,
+        testPurpose: result?.respondent?.testPurpose,
+        testDate: result?.respondent?.testDate,
+      }"
       :top-code="result?.topCode"
       :scales-label="topCodeChars.map((c) => riasecInfo(c)?.label).join(' · ')"
       :scales-description="topCodeChars.map((c) => riasecInfo(c)?.description).join(' ')"
@@ -246,8 +255,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
-import { RIASEC_CATEGORY_ORDER } from '@/apps/holland'
 import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
+import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections } from '@/utils/holland-result'
 
 const route = useRoute()
 const router = useRouter()
@@ -276,6 +285,10 @@ function riasecInfo(code) {
   return riasecStore.riasecList.find((r) => r.id === code) || null
 }
 
+const formattedBirthDateAge = computed(() =>
+  formatBirthDateAge(result.value?.respondent)
+)
+
 function toggleExpandedCode(code) {
   const idx = expandedCodes.value.indexOf(code)
   if (idx === -1) {
@@ -288,35 +301,17 @@ function toggleExpandedCode(code) {
 // breakdown semua 6 kategori buat progress bar, diurutkan dari persentase tertinggi
 const scoreBreakdown = computed(() => {
   const scores = result.value?.scores || {}
-  return RIASEC_CATEGORY_ORDER
-    .map((code) => ({
-      code,
-      count: scores[code]?.count ?? 0,
-      total: scores[code]?.total ?? 0,
-      percentage: scores[code]?.percentage ?? 0,
-    }))
-    .sort((a, b) => b.percentage - a.percentage)
-    .map((row) => ({ ...row, isTop: topCodeChars.value.includes(row.code) }))
+  return buildScoreBreakdown(scores, result.value?.topCode)
 })
 
 // rincian jawaban per kategori, pakai teks soal dari questions store
-const answerSections = computed(() => {
-  const answers = result.value?.answers || []
-  const grouped = {}
-
-  for (const a of answers) {
-    const question = questionsStore.allQuestions.find((q) => q.id === a.questionId)
-    if (!grouped[a.category]) grouped[a.category] = []
-    grouped[a.category].push({
-      questionId: a.questionId,
-      questionText: question?.question || '(soal tidak ditemukan)',
-    })
-  }
-
-  return RIASEC_CATEGORY_ORDER
-    .filter((code) => grouped[code]?.length)
-    .map((code) => ({ key: code, items: grouped[code] }))
-})
+const answerSections = computed(() =>
+  buildAnswerSections({
+    answers: result.value?.answers,
+    questions: questionsStore.allQuestions,
+    riasecInfo,
+  })
+)
 
 onMounted(async () => {
   if (!result.value) {

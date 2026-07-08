@@ -46,11 +46,22 @@
         class="bg-white border border-gray-200 rounded-xl overflow-hidden"
       >
         <!-- Category Header — label from Firestore -->
-        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-          <h2 class="text-sm font-medium text-gray-800">{{ cat.label || cat.id }} <span class="text-gray-400">({{ cat.id }})</span></h2>
-          <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">
-            {{ questionsByRiasec(cat.id).length }} Soal
-          </span>
+        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center gap-3">
+          <h2 class="text-sm font-medium text-gray-800 truncate">
+            {{ cat.label || cat.id }} <span class="text-gray-400">({{ cat.id }})</span>
+          </h2>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">
+              {{ questionsByRiasec(cat.id).length }} Soal
+            </span>
+            <button
+              @click="openRiasecEditModal(cat)"
+              class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-white transition-colors cursor-pointer"
+              title="Edit deskripsi & rekomendasi kategori"
+            >
+              <font-awesome-icon icon="fa-solid fa-pen" class="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <!-- Sub-block per Column -->
@@ -193,6 +204,104 @@
       </div>
     </div>
 
+    <!-- Modal Edit Deskripsi & Rekomendasi Kategori -->
+    <div v-if="showRiasecEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-xl mx-auto flex flex-col max-h-[90vh]">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
+          <div>
+            <h3 class="text-base font-semibold text-gray-900">Edit Kategori {{ riasecEditForm.label }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Kode & label kategori baku, tidak bisa diubah.</p>
+          </div>
+          <button @click="closeRiasecEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4 overflow-y-auto">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kode</label>
+              <input
+                :value="riasecEditForm.code"
+                disabled
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+              <input
+                :value="riasecEditForm.label"
+                disabled
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi bidang minat</label>
+            <textarea
+              v-model="riasecEditForm.description"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
+              placeholder="Deskripsi karakteristik kategori ini..."
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Keterampilan kunci <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            </label>
+            <textarea
+              v-model="riasecEditForm.skillsText"
+              rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              placeholder="Menggunakan dan mengoperasikan alat&#10;Merancang, membangun, memperbaiki"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Contoh pekerjaan relevan <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            </label>
+            <textarea
+              v-model="riasecEditForm.careersText"
+              rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              placeholder="Pilot&#10;Petani&#10;Insinyur"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Mata pelajaran pendukung <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            </label>
+            <textarea
+              v-model="riasecEditForm.subjectsText"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              placeholder="Matematika&#10;Sains&#10;Teknologi"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
+          <button
+            @click="closeRiasecEditModal"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="saveRiasecEdit"
+            :disabled="savingRiasec"
+            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {{ savingRiasec ? 'Menyimpan...' : 'Simpan' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Hapus -->
     <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
@@ -217,6 +326,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
+import { useHollandStore } from '@/stores/holland/holland'
 import { RIASEC_COLUMNS } from '@/apps/holland'
 
 const route = useRoute()
@@ -228,6 +338,8 @@ const { allQuestions, loading } = storeToRefs(questionsStore)
 
 const riasecStore = useHollandRiasecStore()
 const { riasecList } = storeToRefs(riasecStore)
+
+const hollandStore = useHollandStore()
 
 const columns = RIASEC_COLUMNS
 
@@ -251,6 +363,19 @@ const showDeleteModal = ref(false)
 const deletingId = ref(null)
 const deleteRiasecId = ref(null)
 
+// Edit deskripsi & rekomendasi kategori riasec
+const showRiasecEditModal = ref(false)
+const savingRiasec = ref(false)
+const riasecEditForm = ref({
+  id: null,
+  code: '',
+  label: '',
+  description: '',
+  skillsText: '',
+  careersText: '',
+  subjectsText: '',
+})
+
 // ── Lifecycle ──────────────────────────────────────────────
 
 onMounted(async () => {
@@ -268,6 +393,14 @@ const questionsByRiasec = (riasecId) =>
 
 const questionsByRiasecAndColumn = (riasecId, columnId) =>
   allQuestions.value.filter((q) => q.riasecId === riasecId && q.column === columnId)
+
+// array <-> textarea (1 baris = 1 item), buang baris kosong
+const arrayToText = (arr) => (arr || []).join('\n')
+const textToArray = (text) =>
+  text
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
 // ── Inline Add ─────────────────────────────────────────────
 
@@ -297,7 +430,7 @@ const saveInline = async (riasecId, columnId) => {
   }
 }
 
-// ── Edit Modal ─────────────────────────────────────────────
+// ── Edit Modal Soal ────────────────────────────────────────
 
 const openEditModal = (q, riasecId) => {
   editingId.value = q.id
@@ -329,7 +462,54 @@ const saveEdit = async () => {
   }
 }
 
-// ── Delete Modal ───────────────────────────────────────────
+// ── Edit Modal Kategori (deskripsi & rekomendasi) ─────────────
+
+const openRiasecEditModal = (cat) => {
+  riasecEditForm.value = {
+    id: cat.id,
+    code: cat.code || cat.id,
+    label: cat.label || cat.id,
+    description: cat.description || '',
+    skillsText: arrayToText(cat.skills),
+    careersText: arrayToText(cat.careers),
+    subjectsText: arrayToText(cat.subjects),
+  }
+  showRiasecEditModal.value = true
+}
+
+const closeRiasecEditModal = () => {
+  showRiasecEditModal.value = false
+  riasecEditForm.value = {
+    id: null,
+    code: '',
+    label: '',
+    description: '',
+    skillsText: '',
+    careersText: '',
+    subjectsText: '',
+  }
+}
+
+const saveRiasecEdit = async () => {
+  savingRiasec.value = true
+  try {
+    await hollandStore.updateRiasecContent(hollandId, riasecEditForm.value.id, {
+      description: riasecEditForm.value.description.trim(),
+      skills: textToArray(riasecEditForm.value.skillsText),
+      careers: textToArray(riasecEditForm.value.careersText),
+      subjects: textToArray(riasecEditForm.value.subjectsText),
+    })
+    // refresh biar label/deskripsi di kartu kategori langsung ke-update
+    await riasecStore.fetchRiasecList(hollandId)
+    closeRiasecEditModal()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    savingRiasec.value = false
+  }
+}
+
+// ── Delete Modal Soal ──────────────────────────────────────
 
 const openDeleteModal = (id, riasecId) => {
   deletingId.value = id

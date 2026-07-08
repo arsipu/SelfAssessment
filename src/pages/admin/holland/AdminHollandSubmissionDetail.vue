@@ -294,7 +294,8 @@ import { storeToRefs } from 'pinia'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
-import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE as RIASEC_GUIDE_FALLBACK, HOLLAND_COLUMNS } from '@/apps/holland'
+import { RIASEC_GUIDE as RIASEC_GUIDE_FALLBACK, HOLLAND_COLUMNS } from '@/apps/holland'
+import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections } from '@/utils/holland-result'
 
 const route = useRoute()
 const router = useRouter()
@@ -324,40 +325,14 @@ const riasecMap = computed(() => {
   return map
 })
 
-// Gabungan tampilan "Tanggal Lahir/Usia" dari birthDate + age tersimpan,
-// biar tetap sesuai gaya dokumen kertas aslinya meski datanya sudah terstruktur.
-// Fallback ke birthDateAge lama untuk submission yang dibuat sebelum migrasi field ini.
-const formattedBirthDateAge = computed(() => {
-  const s = submission.value
-  if (!s) return '-'
+const formattedBirthDateAge = computed(() =>
+  formatBirthDateAge(submission.value)
+)
 
-  if (s.birthDate) {
-    const d = new Date(s.birthDate)
-    if (!isNaN(d)) {
-      const formatted = d.toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      })
-      return s.age !== undefined && s.age !== null ? `${formatted} / ${s.age} tahun` : formatted
-    }
-  }
-
-  // data lama sebelum ada birthDate + age
-  return s.birthDateAge || '-'
-})
-
-// breakdown 6 kategori, diurutkan dari persentase tertinggi
+// breakdown semua 6 kategori buat progress bar, diurutkan dari persentase tertinggi
 const scoreBreakdown = computed(() => {
-  const scores = submission.value?.scores || null
-  if (!scores) return []
-  return RIASEC_CATEGORY_ORDER
-    .map((code) => ({
-      code,
-      count: scores[code]?.count ?? 0,
-      total: scores[code]?.total ?? 0,
-      percentage: scores[code]?.percentage ?? 0,
-    }))
-    .sort((a, b) => b.percentage - a.percentage)
-    .map((row) => ({ ...row, isTop: topCodeChars.value.includes(row.code) }))
+  const scores = submission.value?.scores || {}
+  return buildScoreBreakdown(scores, submission.value?.topCode)
 })
 
 const expandedCodes = ref([])
@@ -373,36 +348,16 @@ function toggleExpandedCode(code) {
 
 const columnLabel = (columnKey) => HOLLAND_COLUMNS.find((c) => c.key === columnKey)?.label || columnKey
 
-const questionText = (questionId) => {
-  const q = allQuestions.value.find((q) => q.id === questionId)
-  return q?.question ?? '(soal tidak ditemukan)'
-}
-
 // kelompokkan answers submission per kategori
-const sections = computed(() => {
-  if (!submission.value) return []
-  const answers = submission.value.answers || []
-  const grouped = {}
-
-  for (const a of answers) {
-    // Use riasecId (new) or category (old) for grouping
-    const category = a.riasecId || a.category
-    if (!grouped[category]) grouped[category] = []
-    grouped[category].push({
-      questionId: a.questionId,
-      questionText: questionText(a.questionId),
-      column: a.column,
-    })
-  }
-
-  return RIASEC_CATEGORY_ORDER
-    .filter((code) => grouped[code]?.length)
-    .map((code) => ({ 
-      key: code, 
-      label: `${riasecMap.value[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label} (${code})`,
-      items: grouped[code] 
-    }))
-})
+// rincian jawaban per kategori, pakai teks soal dari questions store
+const sections = computed(() =>
+  buildAnswerSections({
+    answers: submission.value?.answers,
+    questions: allQuestions.value,
+    riasecInfo: (code) =>
+      riasecMap.value[code] || RIASEC_GUIDE_FALLBACK[code],
+  })
+)
 
 async function confirmExportPDF() {
   if (exportingPDF.value) return

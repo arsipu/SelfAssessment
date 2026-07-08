@@ -53,19 +53,27 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-8 mb-8">
-      <div class="shrink-0 w-32 h-32 rounded-full border-[5px] border-[#111827] flex items-center justify-center bg-[#ffffff]">
-        <span class="text-4xl font-extrabold text-[#111827] text-center">{{ topCode }}</span>
-      </div>
-      <div class="flex-1">
-        <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-3 tracking-wide text-center"
-          style="background-color: #e5e7eb; color: #374151;"
-        >
-          {{ scalesLabel }}
-        </span>
-        <p class="text-base text-[#4b5563] leading-relaxed pr-4">{{ scalesDescription }}</p>
-      </div>
+    <!--
+      Bagian kode RIASEC dominan.
+      SENGAJA tidak pakai flexbox (items-center / justify-center) atau
+      lingkaran border-radius-full, karena kombinasi itu sering gagal
+      di-render simetris oleh html2canvas. Semua di sini pakai
+      text-align: center di level block biasa — jauh lebih konsisten
+      hasil capture-nya untuk PDF.
+    -->
+    <div class="border border-[#e5e7eb] rounded-xl px-8 py-8 mb-8 text-center">
+      <p class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-3">
+        Kode RIASEC Dominan
+      </p>
+      <p class="text-5xl font-extrabold text-[#111827] tracking-[0.25em] mb-4">
+        {{ topCode }}
+      </p>
+      <p class="text-sm font-bold text-[#374151] uppercase tracking-wide mb-4">
+        {{ scalesLabel }}
+      </p>
+      <p class="text-sm text-[#4b5563] leading-relaxed text-left max-w-[560px] mx-auto">
+        {{ scalesDescription }}
+      </p>
     </div>
 
     <div class="border-t border-[#e5e7eb] pt-6 mt-10 flex justify-between items-center">
@@ -95,7 +103,6 @@ const generatedDate = new Date().toLocaleDateString('id-ID', {
 })
 
 const genderLabel = computed(() => {
-  if (!props.respondent.gender) return '-'
-  return props.respondent.gender === 'L' ? 'Laki-laki' : 'Perempuan'
+  return props.respondent.gender || '-'
 })
 </script>
