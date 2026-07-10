@@ -4,27 +4,27 @@
     <div class="flex items-center gap-2 mb-4">
       <button
         @click="router.push({ name: 'admin-holland' })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1 cursor-pointer"
+        class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1 cursor-pointer"
       >
         <font-awesome-icon icon="fa-solid fa-chevron-left" class="h-4 w-4" />
         Holland RIASEC
       </button>
-      <span class="text-gray-300">/</span>
-      <span class="text-sm text-gray-800 font-medium">Pertanyaan</span>
+      <span class="text-text-muted">/</span>
+      <span class="text-sm text-text-primary font-medium">Pertanyaan</span>
     </div>
 
     <!-- Header -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+    <div class="bg-surface border border-border rounded-xl p-6 mb-6">
       <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-        <h1 class="text-lg font-semibold text-gray-900 mb-1">Kelola Pertanyaan RIASEC</h1>
-        <p class="text-sm text-gray-500 max-w-3xl">
+        <h1 class="text-lg font-semibold text-text-primary mb-1">Kelola Pertanyaan RIASEC</h1>
+        <p class="text-sm text-text-secondary max-w-3xl">
           Setiap kategori punya 3 kolom pernyataan: Saya adalah, Saya mampu, dan Saya menyukai.
         </p>
       </div>
         <button
           @click="router.push({ name: 'admin-holland-submissions', params: { id: hollandId }})"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
 
@@ -34,8 +34,8 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-12 text-center">
-      <p class="text-sm text-gray-400">Memuat pertanyaan...</p>
+    <div v-if="loading" class="bg-surface border border-border rounded-xl p-12 text-center">
+      <p class="text-sm text-text-muted">Memuat pertanyaan...</p>
     </div>
 
     <!-- Blocks per Category (riasec) — from Firestore, not constants -->
@@ -43,20 +43,20 @@
       <div
         v-for="cat in riasecList"
         :key="cat.id"
-        class="bg-white border border-gray-200 rounded-xl overflow-hidden"
+        class="bg-surface border border-border rounded-xl overflow-hidden"
       >
         <!-- Category Header — label from Firestore -->
-        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center gap-3">
-          <h2 class="text-sm font-medium text-gray-800 truncate">
-            {{ cat.label || cat.id }} <span class="text-gray-400">({{ cat.id }})</span>
+        <div class="px-5 py-4 border-b border-border bg-surface-muted flex justify-between items-center gap-3">
+          <h2 class="text-sm font-medium text-text-primary truncate">
+            {{ cat.label || cat.id }} <span class="text-text-muted">({{ cat.id }})</span>
           </h2>
           <div class="flex items-center gap-2 shrink-0">
-            <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200">
+            <span class="text-xs font-medium text-text-secondary bg-surface px-2.5 py-1 rounded-md border border-border">
               {{ questionsByRiasec(cat.id).length }} Soal
             </span>
             <button
               @click="openRiasecEditModal(cat)"
-              class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-white transition-colors cursor-pointer"
+              class="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface transition-colors cursor-pointer"
               title="Edit deskripsi & rekomendasi kategori"
             >
               <font-awesome-icon icon="fa-solid fa-pen" class="w-4 h-4" />
@@ -65,32 +65,32 @@
         </div>
 
         <!-- Sub-block per Column -->
-        <div v-for="col in columns" :key="col.id" class="border-b border-gray-100 last:border-b-0">
-          <div class="px-5 py-2.5 bg-gray-50/50">
-            <span class="text-xs font-medium text-gray-600 uppercase tracking-wider">{{ col.label }}</span>
+        <div v-for="col in columns" :key="col.id" class="border-b border-border last:border-b-0">
+          <div class="px-5 py-2.5 bg-surface-muted/50">
+            <span class="text-xs font-medium text-text-secondary uppercase tracking-wider">{{ col.label }}</span>
           </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-border">
                 <tr
                   v-for="(q, index) in questionsByRiasecAndColumn(cat.id, col.id)"
                   :key="q.id"
-                  class="hover:bg-gray-50 transition-colors"
+                  class="hover:bg-surface-muted transition-colors"
                 >
-                  <td class="px-5 py-3 text-sm text-gray-600 w-12">{{ index + 1 }}</td>
-                  <td class="px-5 py-3 text-sm text-gray-800">{{ q.question }}</td>
+                  <td class="px-5 py-3 text-sm text-text-secondary w-12">{{ index + 1 }}</td>
+                  <td class="px-5 py-3 text-sm text-text-primary">{{ q.question }}</td>
                   <td class="px-5 py-3 w-24">
                     <div class="flex items-center gap-2 justify-end">
                       <button
                         @click="openEditModal(q, cat.id)"
-                        class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                        class="p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors cursor-pointer"
                       >
                         <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5" />
                       </button>
                       <button
                         @click="openDeleteModal(q.id, cat.id)"
-                        class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                        class="p-2 rounded-lg text-danger hover:bg-danger-soft transition-colors cursor-pointer"
                       >
                         <font-awesome-icon icon="fa-solid fa-trash" class="w-5 h-5" />
                       </button>
@@ -99,7 +99,7 @@
                 </tr>
 
                 <tr v-if="questionsByRiasecAndColumn(cat.id, col.id).length === 0">
-                  <td colspan="3" class="px-5 py-4 text-center text-xs text-gray-400">
+                  <td colspan="3" class="px-5 py-4 text-center text-xs text-text-muted">
                     Belum ada pernyataan di kolom ini.
                   </td>
                 </tr>
@@ -108,12 +108,12 @@
           </div>
 
           <!-- Inline Add Form -->
-          <div v-if="activeAddKey === keyOf(cat.id, col.id)" class="px-5 py-3 bg-gray-50">
+          <div v-if="activeAddKey === keyOf(cat.id, col.id)" class="px-5 py-3 bg-surface-muted">
             <div class="flex items-start gap-3">
               <input
                 v-model="inlineForm.question"
                 type="text"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                class="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
                 placeholder="Masukkan teks pernyataan..."
                 autofocus
                 @keyup.enter="saveInline(cat.id, col.id)"
@@ -121,13 +121,13 @@
               <button
                 @click="saveInline(cat.id, col.id)"
                 :disabled="!inlineForm.question.trim() || saving"
-                class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {{ saving ? 'Menyimpan...' : 'Simpan' }}
               </button>
               <button
                 @click="cancelInline"
-                class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                class="px-4 py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -137,7 +137,7 @@
           <button
             v-else
             @click="openInlineAdd(cat.id, col.id)"
-            class="w-full px-5 py-2.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
+            class="w-full px-5 py-2.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors flex items-center gap-2 cursor-pointer"
           >
             <font-awesome-icon icon="fa-solid fa-plus" class="h-3.5 w-3.5" />
             Tambah Pernyataan
@@ -148,55 +148,55 @@
 
     <!-- Modal Edit Soal -->
     <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 flex flex-col max-h-[90vh]">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="text-base font-semibold text-gray-900">Edit Pernyataan</h3>
-          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-4 flex flex-col max-h-[90vh]">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <h3 class="text-base font-semibold text-text-primary">Edit Pernyataan</h3>
+          <button @click="closeEditModal" class="text-text-muted hover:text-text-secondary transition-colors cursor-pointer">
             <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
           </button>
         </div>
 
         <div class="p-6 space-y-4 overflow-y-auto">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+            <label class="block text-sm font-medium text-text-primary mb-1">Kategori</label>
             <input
               :value="riasecList.find(c => c.id === editRiasecId)?.label || editRiasecId"
               disabled
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-muted text-text-muted cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Kolom</label>
+            <label class="block text-sm font-medium text-text-primary mb-1">Kolom</label>
             <select
               v-model="editForm.column"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
             >
               <option v-for="col in columns" :key="col.id" :value="col.id">{{ col.label }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teks Pernyataan</label>
+            <label class="block text-sm font-medium text-text-primary mb-1">Teks Pernyataan</label>
             <textarea
               v-model="editForm.question"
               rows="2"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
             ></textarea>
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3">
           <button
             @click="closeEditModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="saveEdit"
             :disabled="!editForm.question.trim() || saving"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -206,13 +206,13 @@
 
     <!-- Modal Edit Deskripsi & Rekomendasi Kategori -->
     <div v-if="showRiasecEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-xl mx-auto flex flex-col max-h-[90vh]">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-xl mx-auto flex flex-col max-h-[90vh]">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center shrink-0">
           <div>
-            <h3 class="text-base font-semibold text-gray-900">Edit Kategori {{ riasecEditForm.label }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Kode & label kategori baku, tidak bisa diubah.</p>
+            <h3 class="text-base font-semibold text-text-primary">Edit Kategori {{ riasecEditForm.label }}</h3>
+            <p class="text-xs text-text-muted mt-0.5">Kode & label kategori baku, tidak bisa diubah.</p>
           </div>
-          <button @click="closeRiasecEditModal" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+          <button @click="closeRiasecEditModal" class="text-text-muted hover:text-text-secondary transition-colors cursor-pointer">
             <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
           </button>
         </div>
@@ -220,81 +220,81 @@
         <div class="p-6 space-y-4 overflow-y-auto">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Kode</label>
+              <label class="block text-sm font-medium text-text-primary mb-1">Kode</label>
               <input
                 :value="riasecEditForm.code"
                 disabled
-                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+                class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-muted text-text-muted cursor-not-allowed"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+              <label class="block text-sm font-medium text-text-primary mb-1">Label</label>
               <input
                 :value="riasecEditForm.label"
                 disabled
-                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+                class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-muted text-text-muted cursor-not-allowed"
               />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi bidang minat</label>
+            <label class="block text-sm font-medium text-text-primary mb-1">Deskripsi bidang minat</label>
             <textarea
               v-model="riasecEditForm.description"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
               placeholder="Deskripsi karakteristik kategori ini..."
             ></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Keterampilan kunci <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            <label class="block text-sm font-medium text-text-primary mb-1">
+              Keterampilan kunci <span class="text-text-muted font-normal">(1 baris = 1 item)</span>
             </label>
             <textarea
               v-model="riasecEditForm.skillsText"
               rows="4"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
               placeholder="Menggunakan dan mengoperasikan alat&#10;Merancang, membangun, memperbaiki"
             ></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Contoh pekerjaan relevan <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            <label class="block text-sm font-medium text-text-primary mb-1">
+              Contoh pekerjaan relevan <span class="text-text-muted font-normal">(1 baris = 1 item)</span>
             </label>
             <textarea
               v-model="riasecEditForm.careersText"
               rows="4"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
               placeholder="Pilot&#10;Petani&#10;Insinyur"
             ></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Mata pelajaran pendukung <span class="text-gray-400 font-normal">(1 baris = 1 item)</span>
+            <label class="block text-sm font-medium text-text-primary mb-1">
+              Mata pelajaran pendukung <span class="text-text-muted font-normal">(1 baris = 1 item)</span>
             </label>
             <textarea
               v-model="riasecEditForm.subjectsText"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
               placeholder="Matematika&#10;Sains&#10;Teknologi"
             ></textarea>
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
+        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3 shrink-0">
           <button
             @click="closeRiasecEditModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="saveRiasecEdit"
             :disabled="savingRiasec"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ savingRiasec ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -304,14 +304,14 @@
 
     <!-- Modal Hapus -->
     <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
         <div class="p-6">
-          <h3 class="text-lg font-semibold text-gray-900">Hapus Pernyataan</h3>
-          <p class="mt-2 text-sm text-gray-500">Apakah Anda yakin ingin menghapus pernyataan ini? Tindakan ini tidak dapat dibatalkan.</p>
+          <h3 class="text-lg font-semibold text-text-primary">Hapus Pernyataan</h3>
+          <p class="mt-2 text-sm text-text-secondary">Apakah Anda yakin ingin menghapus pernyataan ini? Tindakan ini tidak dapat dibatalkan.</p>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end gap-3">
-          <button @click="showDeleteModal = false" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm cursor-pointer">Batal</button>
-          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm disabled:opacity-60 cursor-pointer">
+        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
+          <button @click="showDeleteModal = false" class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer">Batal</button>
+          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer">
             {{ saving ? 'Menghapus...' : 'Hapus' }}
           </button>
         </div>

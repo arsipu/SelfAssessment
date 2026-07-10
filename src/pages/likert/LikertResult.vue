@@ -1,37 +1,37 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-bg">
 
     <div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
-      <div v-if="!result || loading" class="text-center text-sm text-gray-400 py-20">
+      <div v-if="!result || loading" class="text-center text-sm text-text-muted py-20">
         Memuat hasil...
       </div>
 
       <div v-else class="space-y-6">
         <!-- Kartu skor -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 md:p-8 shadow-sm">
+        <div class="bg-surface border border-border rounded-2xl p-5 md:p-8 shadow-sm">
           <div class="text-center mb-8">
-            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+            <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
               Hasil {{ likertStore.currentLikert?.name || 'Kuesioner' }}
             </p>
-            <h1 class="text-base md:text-lg font-semibold text-gray-900">{{ respondentName }}</h1>
-            <p class="text-xs text-gray-400 mt-1 font-mono">
-              Kode: <span class="font-semibold text-gray-600">{{ result.code }}</span>
+            <h1 class="text-base md:text-lg font-semibold text-text-primary">{{ respondentName }}</h1>
+            <p class="text-xs text-text-muted mt-1 font-mono">
+              Kode: <span class="font-semibold text-text-secondary">{{ result.code }}</span>
             </p>
           </div>
 
           <div class="flex flex-col items-center mb-8">
-            <div class="text-4xl md:text-5xl font-bold text-gray-900 mb-1">{{ result.totalScore }}</div>
+            <div class="text-4xl md:text-5xl font-bold text-text-primary mb-1">{{ result.totalScore }}</div>
 
             <span
               class="px-4 py-1.5 rounded-full text-sm font-semibold"
-              :class="category?.badgeClass"
+              :style="{ backgroundColor: category?.bg, color: category?.text }"
             >
               {{ category?.label || '-' }}
             </span>
           </div>
 
-          <div class="bg-gray-50 border border-gray-100 rounded-xl p-5">
-            <p class="text-sm text-gray-600 leading-relaxed">{{ category?.description }}</p>
+          <div class="bg-surface-muted border border-border rounded-xl p-5">
+            <p class="text-sm text-text-secondary leading-relaxed">{{ category?.description }}</p>
           </div>
         </div>
         
@@ -39,27 +39,27 @@
         <div class="flex flex-col md:flex-row gap-3">
           <button
             @click="showExportPDFModal = true"
-            class="w-full md:flex-1 py-3 h-10 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition"
+            class="w-full md:flex-1 py-3 h-10 border border-border text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition"
           >
             Unduh PDF
           </button>
           <router-link
-            :to="{ name: 'likert' }"
-            class="w-full md:flex-1 text-center py-3 h-10 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition"
+            to="/"
+            class="w-full md:flex-1 text-center py-3 h-10 bg-instrument text-text-on-primary text-sm font-semibold rounded-xl hover:bg-instrument-hover transition"
           >
             Selesai
           </router-link>
         </div>
         <!-- Rincian jawaban per soal -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-4 md:p-6 shadow-sm">
+        <div class="bg-surface border border-border rounded-2xl p-4 md:p-6 shadow-sm">
           <button
             @click="showDetails = !showDetails"
             class="w-full flex items-center justify-between gap-2"
           >
-            <p class="text-xs font-medium text-gray-400">Rincian jawaban</p>
+            <p class="text-xs font-medium text-text-muted">Rincian jawaban</p>
             <font-awesome-icon
               icon="fa-solid fa-chevron-down"
-              class="w-4 h-4 text-gray-400 transition-transform duration-200"
+              class="w-4 h-4 text-text-muted transition-transform duration-200"
               :class="{ 'fa-rotate-180': showDetails }"
             />
           </button>
@@ -68,20 +68,20 @@
             <div v-if="showDetails" class="mt-4">
               <div v-for="section in sections" :key="section.key" class="mb-5 last:mb-0">
                 <div class="flex items-center gap-2 mb-2.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                  <span class="text-xs font-medium text-gray-500">{{ section.label }}</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+                  <span class="text-xs font-medium text-text-secondary">{{ section.label }}</span>
                 </div>
 
                 <div class="space-y-2">
                   <div
                     v-for="(item, i) in section.items"
                     :key="item.questionId"
-                    class="flex items-start justify-between gap-3 py-2.5 px-3 rounded-lg bg-gray-50"
+                    class="flex items-start justify-between gap-3 py-2.5 px-3 rounded-lg bg-surface-muted"
                   >
-                    <p class="text-sm text-gray-700 leading-relaxed flex-1">
-                      <span class="text-gray-400 mr-1">{{ i + 1 }}.</span>{{ item.questionText }}
+                    <p class="text-sm text-text-primary leading-relaxed flex-1">
+                      <span class="text-text-muted mr-1">{{ i + 1 }}.</span>{{ item.questionText }}
                     </p>
-                    <span class="shrink-0 text-[11px] md:text-xs font-semibold px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700 whitespace-nowrap">
+                    <span class="shrink-0 text-[11px] md:text-xs font-semibold px-2 py-1 rounded-md bg-surface border border-border text-text-primary whitespace-nowrap">
                       {{ item.answerLabel }}
                     </span>
                   </div>
@@ -90,31 +90,6 @@
             </div>
           </Transition>
         </div>
-        <!-- <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <p class="text-xs font-medium text-gray-400 mb-4">Rincian jawaban</p>
-
-          <div v-for="section in sections" :key="section.key" class="mb-5 last:mb-0">
-            <div class="flex items-center gap-2 mb-2.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-              <span class="text-xs font-medium text-gray-500">{{ section.label }}</span>
-            </div>
-
-            <div class="space-y-2">
-              <div
-                v-for="(item, i) in section.items"
-                :key="item.questionId"
-                class="flex items-start justify-between gap-4 py-2.5 px-3 rounded-lg bg-gray-50"
-              >
-                <p class="text-sm text-gray-700 leading-relaxed flex-1">
-                  <span class="text-gray-400 mr-1">{{ i + 1 }}.</span>{{ item.questionText }}
-                </p>
-                <span class="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-700">
-                  {{ item.answerLabel }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
   </div>
@@ -126,23 +101,23 @@
       class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
       @click.self="showExportPDFModal = false"
     >
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 class="text-base font-semibold text-gray-900 mb-2">Unduh hasil PDF?</h2>
-        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+        <div class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
+        <h2 class="text-base font-semibold text-text-primary mb-2">Unduh hasil PDF?</h2>
+        <p class="text-sm text-text-secondary leading-relaxed mb-6">
           Rekap jawaban akan diunduh dalam format .pdf.
         </p>
 
         <div class="flex gap-3">
           <button
             @click="showExportPDFModal = false"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
           >
             Batal
           </button>
           <button
             @click="confirmExportPDF"
             :disabled="exportingPDF"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
           >
             {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
           </button>
@@ -202,12 +177,12 @@ async function confirmExportPDF() {
   }
 }
 
-const badgeClassMap = {
-  'Sangat Tinggi': 'bg-emerald-100 text-emerald-700',
-  'Tinggi': 'bg-teal-100 text-teal-700',
-  'Sedang': 'bg-amber-100 text-amber-700',
-  'Rendah': 'bg-orange-100 text-orange-700',
-  'Sangat Rendah': 'bg-rose-100 text-rose-700',
+const badgeStyleMap = {
+  'Sangat Tinggi': { bg: 'var(--color-level-5-soft)', text: 'var(--color-level-5)' },
+  'Tinggi': { bg: 'var(--color-level-4-soft)', text: 'var(--color-level-4)' },
+  'Sedang': { bg: 'var(--color-level-3-soft)', text: 'var(--color-level-3)' },
+  'Rendah': { bg: 'var(--color-level-2-soft)', text: 'var(--color-level-2)' },
+  'Sangat Rendah': { bg: 'var(--color-level-1-soft)', text: 'var(--color-level-1)' },
 }
 
 // map value jawaban (SS/S/TS/STS) -> label tampilan
@@ -221,11 +196,16 @@ const maxScore = computed(() => categories.value[0]?.max ?? categories.value[0]?
 
 const category = computed(() => {
   const score = result.value?.totalScore ?? 0
-  return (
+  const found = (
     categories.value.find((c) => score >= c.min && score <= c.max) ||
     categories.value[categories.value.length - 1] ||
     null
   )
+  if (found) {
+    const style = badgeStyleMap[found.label] || { bg: 'var(--color-surface-muted)', text: 'var(--color-text-secondary)' }
+    return { ...found, bg: style.bg, text: style.text }
+  }
+  return null
 })
 
 // gabungkan submissionResult (jawaban) dengan teks soal & nama kategori,
@@ -271,7 +251,8 @@ onMounted(async () => {
     const scales = await likertStore.fetchLikertScales(likertId)
     categories.value = scales.map((s) => ({
       ...s,
-      badgeClass: badgeClassMap[s.label] || 'bg-gray-100 text-gray-700',
+      bg: badgeStyleMap[s.label]?.bg || 'var(--color-surface-muted)',
+      text: badgeStyleMap[s.label]?.text || 'var(--color-text-secondary)',
     }))
   } finally {
     loading.value = false

@@ -1,19 +1,19 @@
 <template>
   <aside
     :class="[
-      'fixed top-0 left-0 h-full w-56 bg-white border-r border-gray-200 flex flex-col z-40',
+      'fixed top-0 left-0 h-full w-56 bg-surface border-r border-border flex flex-col z-40',
       'transform transition-transform duration-300',
       isOpen ? 'translate-x-0' : '-translate-x-full',
       'md:translate-x-0'
     ]"
   >
     <!-- Header -->
-    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-gray-900">
+        <p class="text-sm font-medium text-text-primary">
           Self Assessment
         </p>
-        <p class="text-xs text-gray-400">
+        <p class="text-xs text-text-muted">
           Panel Admin
         </p>
       </div>
@@ -21,7 +21,7 @@
       <!-- Close button, mobile only -->
       <button
         @click="$emit('close')"
-        class="md:hidden p-1 text-gray-400 hover:text-gray-600"
+        class="md:hidden p-1 text-text-muted hover:text-text-primary"
       >
         ✕
       </button>
@@ -34,18 +34,18 @@
         :key="item.name"
         :to="{ name: item.name }"
         @click="$emit('close')"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-        active-class="bg-gray-900 text-white"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-muted"
+        active-class="bg-primary text-white"
       >
         {{ item.label }}
       </RouterLink>
     </nav>
 
     <!-- Footer -->
-    <div class="px-3 py-4 border-t border-gray-100">
+    <div class="px-3 py-4 border-t border-border">
       <div class="flex items-center gap-2 px-3 py-2 mb-2">
         <div
-          class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium"
+          class="w-8 h-8 rounded-full bg-primary text-text-on-primary flex items-center justify-center text-xs font-medium"
         >
           {{ userInitials }}
         </div>
@@ -54,7 +54,7 @@
           <p class="text-sm font-medium truncate">
             {{ userName }}
           </p>
-          <p class="text-xs text-gray-400">
+          <p class="text-xs text-text-muted">
             Admin
           </p>
         </div>
@@ -62,7 +62,7 @@
 
       <button
         @click="handleLogout"
-        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-danger-soft hover:text-danger transition-colors"
       >
         Keluar
       </button>

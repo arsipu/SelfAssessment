@@ -2,47 +2,47 @@
   <div>
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 mb-4 flex-wrap">
-      <button @click="router.push({ name: 'admin-holland' })" class="text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap cursor-pointer">
+      <button @click="router.push({ name: 'admin-holland' })" class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer">
         Holland RIASEC
       </button>
-      <span class="text-gray-300 shrink-0">/</span>
+      <span class="text-text-muted shrink-0">/</span>
       <button
         @click="router.push({ name: 'admin-holland-questions', params: { id: hollandId } })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap cursor-pointer"
+        class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer"
       >
         Pertanyaan
       </button>
-      <span class="text-gray-300 shrink-0">/</span>
+      <span class="text-text-muted shrink-0">/</span>
       <button
         @click="router.push({ name: 'admin-holland-submissions', params: { id: hollandId } })"
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
+        class="text-sm text-text-secondary hover:text-text-primary transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         Submissions
       </button>
-      <span class="text-gray-300 shrink-0">/</span>
-      <span class="text-sm text-gray-800 font-medium truncate max-w-[150px] md:max-w-none">{{ submission?.name ?? '...' }}</span>
+      <span class="text-text-muted shrink-0">/</span>
+      <span class="text-sm text-text-primary font-medium truncate max-w-[150px] md:max-w-none">{{ submission?.name ?? '...' }}</span>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-8 md:p-12 text-center">
-      <p class="text-sm text-gray-400">Memuat data...</p>
+    <div v-if="loading" class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
+      <p class="text-sm text-text-muted">Memuat data...</p>
     </div>
 
     <template v-else-if="submission">
       <!-- Info Responden -->
-      <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+      <div class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-          <h1 class="text-lg md:text-xl font-semibold text-gray-900">{{ submission.name }}</h1>
+          <h1 class="text-lg md:text-xl font-semibold text-text-primary">{{ submission.name }}</h1>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button
               @click="showExportPDFModal = true"
-              class="text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
+              class="text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-muted transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
             >
               Unduh PDF
             </button>
             <span
               class="text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
-              :class="submission.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+              :class="submission.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
             >
               {{ submission.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
             </span>
@@ -50,88 +50,88 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
           <div>
-            <p class="text-gray-400 text-xs mb-1">Sekolah / Universitas</p>
-            <p class="text-gray-800">{{ submission.school }}</p>
+            <p class="text-text-muted text-xs mb-1">Sekolah / Universitas</p>
+            <p class="text-text-primary">{{ submission.school }}</p>
           </div>
           <div>
-            <p class="text-gray-400 text-xs mb-1">Jurusan</p>
-            <p class="text-gray-800">{{ submission.major }}</p>
+            <p class="text-text-muted text-xs mb-1">Jurusan</p>
+            <p class="text-text-primary">{{ submission.major }}</p>
           </div>
           <div>
-            <p class="text-gray-400 text-xs mb-1">Tanggal Lahir/Usia / Gender</p>
-            <p class="text-gray-800">{{ formattedBirthDateAge }}, {{ submission.gender }}</p>
+            <p class="text-text-muted text-xs mb-1">Tanggal Lahir/Usia / Gender</p>
+            <p class="text-text-primary">{{ formattedBirthDateAge }}, {{ submission.gender }}</p>
           </div>
           <div>
-            <p class="text-gray-400 text-xs mb-1">Kode Tracking</p>
-            <p class="text-gray-800 font-mono">{{ submission.code }}</p>
+            <p class="text-text-muted text-xs mb-1">Kode Tracking</p>
+            <p class="text-text-primary font-mono">{{ submission.code }}</p>
           </div>
           <div v-if="submission.occupation">
-            <p class="text-gray-400 text-xs mb-1">Pekerjaan</p>
-            <p class="text-gray-800">{{ submission.occupation }}</p>
+            <p class="text-text-muted text-xs mb-1">Pekerjaan</p>
+            <p class="text-text-primary">{{ submission.occupation }}</p>
           </div>
           <div v-if="submission.testPurpose">
-            <p class="text-gray-400 text-xs mb-1">Tujuan Tes</p>
-            <p class="text-gray-800">{{ submission.testPurpose }}</p>
+            <p class="text-text-muted text-xs mb-1">Tujuan Tes</p>
+            <p class="text-text-primary">{{ submission.testPurpose }}</p>
           </div>
           <div v-if="submission.topCode">
-            <p class="text-gray-400 text-xs mb-1">Kode RIASEC</p>
-            <p class="text-gray-800 font-semibold tracking-wide">{{ submission.topCode }}</p>
+            <p class="text-text-muted text-xs mb-1">Kode RIASEC</p>
+            <p class="text-text-primary font-semibold tracking-wide">{{ submission.topCode }}</p>
           </div>
         </div>
       </div>
 
       <!-- Breakdown skor per kategori -->
-      <div v-if="scoreBreakdown.length" class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-        <p class="text-xs font-medium text-gray-400 mb-4">Rincian skor per kategori</p>
+      <div v-if="scoreBreakdown.length" class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+        <p class="text-xs font-medium text-text-muted mb-4">Rincian skor per kategori</p>
 
         <div class="space-y-4">
           <div v-for="row in scoreBreakdown" :key="row.code">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="text-sm font-medium text-gray-700">
+              <span class="text-sm font-medium text-text-primary">
                 {{ riasecMap[row.code]?.label || RIASEC_GUIDE_FALLBACK[row.code]?.label }} ({{ row.code }})
               </span>
-              <span class="text-xs text-gray-400">
+              <span class="text-xs text-text-muted">
                 {{ row.count }}/{{ row.total }} · {{ row.percentage }}%
               </span>
             </div>
-            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full transition-all duration-300"
-                :class="row.isTop ? 'bg-gray-900' : 'bg-gray-300'"
+                :class="row.isTop ? 'bg-instrument' : 'bg-border'"
                 :style="{ width: row.percentage + '%' }"
               ></div>
             </div>
           </div>
         </div>
 
-        <p class="text-[11px] text-gray-400 mt-4 leading-relaxed">
+        <p class="text-[11px] text-text-muted mt-4 leading-relaxed">
           Persentase dihitung dari jumlah pernyataan yang dipilih dibagi total pernyataan pada
           kategori tersebut, karena jumlah pernyataan tiap kategori tidak sama.
         </p>
       </div>
 
       <!-- Detail keterampilan, pekerjaan, dan mata pelajaran untuk kode dominan -->
-      <div v-if="topCodeChars.length" class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-        <p class="text-xs font-medium text-gray-400 mb-4">Detail minat dominan</p>
+      <div v-if="topCodeChars.length" class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+        <p class="text-xs font-medium text-text-muted mb-4">Detail minat dominan</p>
 
         <div class="space-y-3">
           <div
             v-for="code in topCodeChars"
             :key="code"
-            class="bg-gray-50 border border-gray-100 rounded-xl p-4"
+            class="bg-surface-muted border border-border rounded-xl p-4"
           >
             <div class="flex items-center justify-between mb-2">
-              <p class="text-sm font-semibold text-gray-800">
+              <p class="text-sm font-semibold text-text-primary">
                 {{ riasecMap[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label }} ({{ code }})
               </p>
             </div>
-            <p class="text-xs text-gray-500 leading-relaxed mb-3">
+            <p class="text-xs text-text-secondary leading-relaxed mb-3">
               {{ riasecMap[code]?.description || RIASEC_GUIDE_FALLBACK[code]?.description }}
             </p>
 
             <button
               @click="toggleExpandedCode(code)"
-              class="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
             >
               {{ expandedCodes.includes(code) ? 'Sembunyikan detail' : 'Lihat keterampilan & rekomendasi' }}
               <svg
@@ -144,16 +144,16 @@
             </button>
 
             <Transition name="expand">
-              <div v-if="expandedCodes.includes(code)" class="mt-3 pt-3 border-t border-gray-200 space-y-3">
+              <div v-if="expandedCodes.includes(code)" class="mt-3 pt-3 border-t border-border space-y-3">
                 <div v-if="(riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)?.length">
-                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
                     Keterampilan kunci
                   </p>
                   <div class="flex flex-wrap gap-1.5">
                     <span
                       v-for="skill in (riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)"
                       :key="skill"
-                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
                     >
                       {{ skill }}
                     </span>
@@ -161,14 +161,14 @@
                 </div>
 
                 <div v-if="(riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)?.length">
-                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
                     Contoh pekerjaan relevan
                   </p>
                   <div class="flex flex-wrap gap-1.5">
                     <span
                       v-for="career in (riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)"
                       :key="career"
-                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
                     >
                       {{ career }}
                     </span>
@@ -176,14 +176,14 @@
                 </div>
 
                 <div v-if="(riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)?.length">
-                  <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
                     Mata pelajaran pendukung
                   </p>
                   <div class="flex flex-wrap gap-1.5">
                     <span
                       v-for="subject in (riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)"
                       :key="subject"
-                      class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700"
+                      class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
                     >
                       {{ subject }}
                     </span>
@@ -199,26 +199,26 @@
       <div
         v-for="section in sections"
         :key="section.key"
-        class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-4 md:mb-6 last:mb-0"
+        class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6 last:mb-0"
       >
-        <div class="px-4 md:px-5 py-3 md:py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0"></span>
-          <h2 class="text-sm font-medium text-gray-800">{{ riasecMap[section.key]?.label || RIASEC_GUIDE_FALLBACK[section.key]?.label }} ({{ section.key }})</h2>
+        <div class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-text-muted shrink-0"></span>
+          <h2 class="text-sm font-medium text-text-primary">{{ riasecMap[section.key]?.label || RIASEC_GUIDE_FALLBACK[section.key]?.label }} ({{ section.key }})</h2>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse table-fixed">
             <thead>
-              <tr class="bg-white border-b border-gray-100">
-                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">No</th>
-                <th class="w-[60%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pernyataan</th>
-                <th class="w-[32%] px-4 md:px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Kolom</th>
+              <tr class="bg-surface border-b border-border">
+                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">No</th>
+                <th class="w-[60%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Pernyataan</th>
+                <th class="w-[32%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Kolom</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-border">
               <tr v-for="(item, index) in section.items" :key="item.questionId">
-                <td class="px-4 md:px-5 py-3 text-sm text-gray-600">{{ index + 1 }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-gray-800">{{ item.questionText }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-gray-500 whitespace-nowrap">{{ columnLabel(item.column) }}</td>
+                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
+                <td class="px-4 md:px-5 py-3 text-sm text-text-primary">{{ item.questionText }}</td>
+                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary whitespace-nowrap">{{ columnLabel(item.column) }}</td>
               </tr>
             </tbody>
           </table>
@@ -226,8 +226,8 @@
       </div>
     </template>
 
-    <div v-else class="bg-white border border-gray-200 rounded-xl p-8 md:p-12 text-center">
-      <p class="text-sm text-gray-400">Data submission tidak ditemukan.</p>
+    <div v-else class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
+      <p class="text-sm text-text-muted">Data submission tidak ditemukan.</p>
     </div>
   </div>
 
@@ -238,23 +238,23 @@
       class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
       @click.self="showExportPDFModal = false"
     >
-      <div class="bg-white rounded-2xl p-4 md:p-6 max-w-sm w-full shadow-lg flex flex-col max-h-[90vh]">
-        <h2 class="text-base font-semibold text-gray-900 mb-2">Unduh hasil PDF?</h2>
-        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+      <div class="bg-surface rounded-2xl p-4 md:p-6 max-w-sm w-full shadow-lg flex flex-col max-h-[90vh]">
+        <h2 class="text-base font-semibold text-text-primary mb-2">Unduh hasil PDF?</h2>
+        <p class="text-sm text-text-secondary leading-relaxed mb-6">
           Rekap hasil {{ submission?.name }} akan diunduh dalam format .pdf.
         </p>
 
         <div class="flex flex-col-reverse sm:flex-row gap-3">
           <button
             @click="showExportPDFModal = false"
-            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors h-10 cursor-pointer"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors h-10 cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="confirmExportPDF"
             :disabled="exportingPDF"
-            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors h-10 cursor-pointer"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
           >
             {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
           </button>
@@ -264,7 +264,7 @@
   </Transition>
 
   <div style="position: fixed; left: -9999px; top: 0;">
-    <ScoreCardTemplate
+    <HollandScoreCardTemplate
       ref="scoreCardRef"
       holland-name="Holland RIASEC"
       :code="submission?.code"
@@ -281,12 +281,14 @@
       :top-code="submission?.topCode"
       :scales-label="topCodeChars.map((c) => (riasecMap[c]?.label || RIASEC_GUIDE_FALLBACK[c]?.label)).join(' · ')"
       :scales-description="topCodeChars.map((c) => (riasecMap[c]?.description || RIASEC_GUIDE_FALLBACK[c]?.description)).join(' ')"
+      :scores="scorePercentMap"
+      :riasec-labels="riasecLabelMap"
     />
   </div>
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
+import HollandScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
 import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -358,6 +360,24 @@ const sections = computed(() =>
       riasecMap.value[code] || RIASEC_GUIDE_FALLBACK[code],
   })
 )
+
+// map kode -> persentase, dipakai buat hexagon chart di PDF
+const scorePercentMap = computed(() => {
+  const map = {}
+  for (const row of scoreBreakdown.value) {
+    map[row.code] = row.percentage
+  }
+  return map
+})
+
+// map kode -> label, fallback ke RIASEC_GUIDE kalau riasecMap Firestore belum ada
+const riasecLabelMap = computed(() => {
+  const map = {}
+  for (const code of Object.keys(RIASEC_GUIDE_FALLBACK)) {
+    map[code] = riasecMap.value[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label
+  }
+  return map
+})
 
 async function confirmExportPDF() {
   if (exportingPDF.value) return

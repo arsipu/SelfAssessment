@@ -6,8 +6,8 @@
 
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-lg md:text-xl font-medium text-gray-900 mt-3">Holland RIASEC</h1>
-        <p class="text-sm text-gray-400 mt-1">
+        <h1 class="text-lg md:text-xl font-medium text-text-primary mt-3">Holland RIASEC</h1>
+        <p class="text-sm text-text-muted mt-1">
           Centang satu atau lebih pernyataan yang paling mencerminkan diri Anda pada setiap kolom.
         </p>
       </div>
@@ -15,12 +15,12 @@
       <!-- Progress -->
       <div class="mb-8">
         <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs text-gray-400">Pernyataan dipilih</span>
-          <span class="text-xs text-gray-500 font-medium">{{ answeredCount }}/{{ allQuestions.length }}</span>
+          <span class="text-xs text-text-muted">Pernyataan dipilih</span>
+          <span class="text-xs text-text-secondary font-medium">{{ answeredCount }}/{{ allQuestions.length }}</span>
         </div>
-        <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
           <div
-            class="h-full bg-gray-900 rounded-full transition-all duration-300"
+            class="h-full bg-instrument rounded-full transition-all duration-300"
             :style="{ width: progressPct + '%' }"
           ></div>
         </div>
@@ -29,32 +29,35 @@
       <!-- Category sections — grouped by riasecId from riasecList -->
       <div v-for="section in sections" :key="section.key" class="mb-8">
         <div class="flex items-center gap-3 mb-4">
-          <div class="h-px flex-1 bg-gray-200"></div>
+          <div class="h-px flex-1 bg-border"></div>
           <div class="flex items-center gap-2 shrink-0">
-            <span class="w-2 h-2 rounded-full" :class="section.dot"></span>
-            <span class="text-xs font-medium text-gray-500">{{ section.label }} ({{ section.code }})</span>
+            <span
+              class="w-2 h-2 rounded-full"
+              :style="{ backgroundColor: section.dot }"
+            ></span>
+            <span class="text-xs font-medium text-text-secondary">{{ section.label }} ({{ section.code }})</span>
           </div>
-          <div class="h-px flex-1 bg-gray-200"></div>
+          <div class="h-px flex-1 bg-border"></div>
         </div>
 
         <div class="space-y-5">
           <div v-for="col in section.columns" :key="col.key">
-            <p class="text-xs font-semibold text-gray-600 mb-2">{{ col.label }}</p>
+            <p class="text-xs font-semibold text-text-secondary mb-2">{{ col.label }}</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label
                 v-for="q in col.questions"
                 :key="q.id"
-                class="flex items-start gap-2.5 bg-white border rounded-lg p-2.5 cursor-pointer transition-colors"
-                :class="isChecked(q.id) ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'"
+                class="flex items-start gap-2.5 bg-surface border rounded-lg p-2.5 cursor-pointer transition-colors"
+                :class="isChecked(q.id) ? 'border-instrument bg-instrument-soft' : 'border-border hover:border-instrument'"
               >
                 <input
                   type="checkbox"
-                  class="mt-0.5 w-4 h-4 shrink-0 accent-gray-900"
+                  class="mt-0.5 w-4 h-4 shrink-0 accent-instrument"
                   :checked="isChecked(q.id)"
                   @change="toggleAnswer(q)"
                 />
-                <span class="text-sm text-gray-800 leading-relaxed">{{ q.question }}</span>
+                <span class="text-sm text-text-primary leading-relaxed">{{ q.question }}</span>
               </label>
             </div>
           </div>
@@ -63,13 +66,13 @@
 
       <!-- Submit -->
       <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <p class="text-xs text-gray-400 text-center sm:text-left">
+        <p class="text-xs text-text-muted text-center sm:text-left">
           {{ answeredCount === 0 ? 'Belum ada pernyataan yang dipilih' : `${answeredCount} pernyataan dipilih` }}
         </p>
         <button
           @click="showConfirmModal = true"
           :disabled="answeredCount === 0"
-          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Kirim jawaban
         </button>
@@ -83,23 +86,23 @@
         class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
         @click.self="showConfirmModal = false"
       >
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
-          <h2 class="text-base font-semibold text-gray-900 mb-2">Kirim jawaban?</h2>
-          <p class="text-sm text-gray-500 leading-relaxed mb-6">
+        <div class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
+          <h2 class="text-base font-semibold text-text-primary mb-2">Kirim jawaban?</h2>
+          <p class="text-sm text-text-secondary leading-relaxed mb-6">
             Pastikan pilihan Anda sudah sesuai. Jawaban tidak bisa diubah lagi setelah dikirim.
           </p>
 
           <div class="flex gap-3">
             <button
               @click="showConfirmModal = false"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
             >
               Batal
             </button>
             <button
               @click="confirmSubmit"
               :disabled="submitting"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
             >
               {{ submitting ? 'Mengirim...' : 'Ya, kirim' }}
             </button>
@@ -193,7 +196,14 @@ watch(
 
 onUnmounted(() => clearTimeout(debounceTimer))
 
-const dotColors = ['bg-rose-400', 'bg-blue-400', 'bg-purple-400', 'bg-teal-400', 'bg-amber-400', 'bg-emerald-400']
+const dotColors = [
+  'var(--color-viz-1)',
+  'var(--color-viz-2)',
+  'var(--color-viz-3)',
+  'var(--color-viz-4)',
+  'var(--color-viz-5)',
+  'var(--color-viz-6)',
+]
 
 // Kelompokkan questions per riasecId (kategori), lalu per kolom di dalamnya.
 // Urutan kategori dari riasecList (field `order` di Firestore).

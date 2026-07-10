@@ -5,10 +5,71 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
+@theme {
+  /* ── Neutral ── */
+  --color-bg: #feffed;
+  --color-surface: #ffffff;
+  --color-border: #e8e6d9;
+  --color-surface-muted: #f7f6ee;
+
+  --color-text-primary: #1c1b16;
+  --color-text-on-primary: #ffffff;
+  --color-text-secondary: #6b6a5f;
+  --color-text-muted: #9a988a;
+
+  /* ── Brand / primary ── */
+  --color-primary: #2d6a4f;
+  --color-primary-hover: #1f4d3a;
+  --color-primary-soft: #e3ede7;
+
+  /* ── Kategori instrumen ── */
+  --color-instrument: #a8623f;
+  --color-instrument-hover: #8a4f32;
+  --color-instrument-soft: #f3e7df;
+
+  --color-likert: #a8623f;
+  --color-likert-hover: #8a4f32;
+  --color-likert-soft: #f3e7df;
+
+  --color-holland: #2f7a6f;
+  --color-holland-hover: #24605a;
+  --color-holland-soft: #e2eeec;
+
+  /* ── Categorical / data-viz (dot indicator, chart, legend) ── */
+  --color-viz-1: #e74c3c;
+  --color-viz-2: #3498db;
+  --color-viz-3: #9b59b6;
+  --color-viz-4: #1abc9c;
+  --color-viz-5: #f39c12;
+  --color-viz-6: #2ecc71;
+
+  /* ── Level scale (5 tingkat skor Likert) ── */
+  --color-level-1: #e74c3c;
+  --color-level-1-soft: #fadbd8;
+  --color-level-2: #a8623f;
+  --color-level-2-soft: #f3e7df;
+  --color-level-3: #f39c12;
+  --color-level-3-soft: #fef0d5;
+  --color-level-4: #1abc9c;
+  --color-level-4-soft: #d1f2eb;
+  --color-level-5: #2ecc71;
+  --color-level-5-soft: #d5f5e3;
+
+  /* ── Semantic / status ── */
+  --color-success: #3f7d5c;
+  --color-success-soft: #e8f0ea;
+
+  --color-warning: #b8863a;
+  --color-warning-soft: #f5ebdb;
+
+  --color-danger: #b3503f;
+  --color-danger-soft: #f3e2de;
+}
+
 html {
 	font-family: "Plus Jakarta Sans", "Poppins", "Inter", sans-serif;
 }
 
 body {
-	background-color: #feffed; /* A slightly creamy off-white */
+	background-color: var(--color-bg);
 }

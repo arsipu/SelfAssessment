@@ -28,22 +28,20 @@ export async function exportHollandResultToPDF({ scoreCardElement, sections, fil
   // Loop setiap section (kategori RIASEC dll)
   sections.forEach((section) => {
     detailsHtml += `
-      <div style="margin-bottom: 28px;">
-        <h3 style="display: flex; align-items: center; font-size: 15px; font-weight: bold; color: #111827; margin-top: 0; margin-bottom: 14px;">
+      <div style="margin-bottom: 28px; page-break-inside: auto; break-inside: auto;">
+        <h3 style="display: flex; align-items: center; font-size: 15px; font-weight: bold; color: #111827; margin-top: 0; margin-bottom: 14px; page-break-after: avoid; break-after: avoid;">
           ${section.label}
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: block;">
     `
 
-    // Loop butir soal
     section.items.forEach((item, i) => {
-      // PERBAIKAN 2: Memberikan efek zebra (warna background selang-seling) agar tidak polos
       const isEven = i % 2 === 0;
-      const bgColor = isEven ? '#f9fafb' : '#ffffff'; // abu-abu sangat muda vs putih
+      const bgColor = isEven ? '#f9fafb' : '#ffffff';
       const borderColor = isEven ? '#f3f4f6' : 'transparent';
 
       detailsHtml += `
-          <div style="display: flex; align-items: flex-start; padding: 10px 12px; background-color: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px; page-break-inside: avoid;">
+          <div style="display: flex; align-items: flex-start; padding: 10px 12px; background-color: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid;">
             <span style="font-size: 12px; font-weight: 700; color: #6b7280; min-width: 28px; line-height: 1.5; flex-shrink: 0;">
               ${i + 1}.
             </span>
@@ -84,7 +82,9 @@ export async function exportHollandResultToPDF({ scoreCardElement, sections, fil
       unit: 'mm',
       format: 'a4',
       orientation: 'portrait'
-    }
+    },
+    // PERUBAHAN: Hapus 'avoid-all'. Cukup gunakan css dan legacy.
+    pagebreak: { mode: ['css', 'legacy'] }
   }
 
   // 5. Eksekusi Ekspor

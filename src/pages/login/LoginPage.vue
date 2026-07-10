@@ -1,25 +1,25 @@
 <template>
-	<div class="min-h-screen flex items-center justify-center px-4">
+	<div class="min-h-screen bg-bg flex items-center justify-center px-4">
 		<div class="w-full max-w-sm">
 			<!-- Logo / Brand -->
 			<div class="text-center mb-8">
 				<div
-					class="w-10 h-10 bg-gray-900 rounded-xl mx-auto mb-4 flex items-center justify-center"
+					class="w-10 h-10 bg-primary rounded-xl mx-auto mb-4 flex items-center justify-center"
 				>
-					<font-awesome-icon icon="fa-solid fa-user" class="w-5 h-5 text-white" />
+					<font-awesome-icon icon="fa-solid fa-user" class="w-5 h-5 text-text-on-primary" />
 				</div>
-				<h1 class="text-lg font-medium text-gray-900">Self Assessment</h1>
-				<p class="text-sm text-gray-400 mt-1">Masuk ke panel admin</p>
+				<h1 class="text-lg font-medium text-text-primary">Self Assessment</h1>
+				<p class="text-sm text-text-muted mt-1">Masuk ke panel admin</p>
 			</div>
 
 			<!-- Card -->
-			<div class="bg-white border border-gray-200 rounded-2xl p-6">
+			<div class="bg-surface border border-border rounded-2xl p-6">
 				<form @submit.prevent="handleLogin" class="space-y-4">
 					<!-- Username -->
 					<div>
 						<label
 							for="username"
-							class="block text-xs font-medium text-gray-600 mb-1.5"
+							class="block text-xs font-medium text-text-secondary mb-1.5"
 						>
 							Username
 						</label>
@@ -29,7 +29,7 @@
 							type="text"
 							required
 							placeholder="username"
-							class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-300 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors"
+							class="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-surface-muted text-text-primary placeholder-text-muted focus:outline-none focus:border-instrument focus:bg-surface transition-colors"
 						/>
 					</div>
 
@@ -37,7 +37,7 @@
 					<div>
 						<label
 							for="password"
-							class="block text-xs font-medium text-gray-600 mb-1.5"
+							class="block text-xs font-medium text-text-secondary mb-1.5"
 						>
 							Kata sandi
 						</label>
@@ -48,12 +48,12 @@
 								:type="showPassword ? 'text' : 'password'"
 								required
 								placeholder="••••••••"
-								class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-300 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors pr-10"
+								class="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-surface-muted text-text-primary placeholder-text-muted focus:outline-none focus:border-instrument focus:bg-surface transition-colors pr-10"
 							/>
 							<button
 								type="button"
 								@click="showPassword = !showPassword"
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+								class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
 								tabindex="-1"
 							>
 								<font-awesome-icon v-if="!showPassword" icon="fa-solid fa-eye" class="w-4 h-4" />
@@ -70,10 +70,10 @@
 					>
 						<div
 							v-if="errorMessage"
-							class="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5"
+							class="flex items-start gap-2.5 bg-danger-soft border border-danger rounded-lg px-3 py-2.5"
 						>
-							<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-							<p class="text-xs text-red-600 leading-relaxed">
+							<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="w-4 h-4 text-danger shrink-0 mt-0.5" />
+							<p class="text-xs text-danger leading-relaxed">
 								{{ errorMessage }}
 							</p>
 						</div>
@@ -83,7 +83,7 @@
 					<button
 						type="submit"
 						:disabled="isLoading"
-						class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+						class="w-full py-2.5 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
 					>
 						<font-awesome-icon
 							v-if="isLoading"
@@ -99,7 +99,7 @@
 			<div class="text-center mt-5">
 				<router-link
 					to="/"
-					class="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+					class="text-xs text-text-muted hover:text-text-secondary transition-colors"
 				>
 					← Kembali ke beranda
 				</router-link>
@@ -135,12 +135,5 @@ const handleLogin = async () => {
 	} finally {
 		isLoading.value = false;
 	}
-
-	// await userStore.login(username.value + '@gmail.com', password.value).catch((err) => {
-	//   console.log(err)
-	//   errorMessage.value = 'Username atau kata sandi salah. Coba lagi.'
-	// })
-
-	// isLoading.value = false
-};
+}
 </script>
