@@ -13,7 +13,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 
-import { DRAFT, PUBLISHED } from '@/apps/status'
+import { ACTIVE, INACTIVE } from '@/apps/status'
 import { RIASEC_GUIDE, RIASEC_CATEGORY_ORDER } from '@/apps/holland'
 
 export const useHollandStore = defineStore('holland', () => {
@@ -87,7 +87,7 @@ export const useHollandStore = defineStore('holland', () => {
         name,
         description: description || '',
         direction: direction || '',
-        status: DRAFT,
+        status: INACTIVE,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
@@ -170,13 +170,13 @@ export const useHollandStore = defineStore('holland', () => {
   // ── Update status ─────────────────────────────────────────
 
   const updateHollandStatus = async (id, status) => {
-    if (status === PUBLISHED) {
+    if (status === ACTIVE) {
       const others = hollands.value.filter(
-        (h) => h.id !== id && h.status === PUBLISHED
+        (h) => h.id !== id && h.status === ACTIVE
       )
       for (const other of others) {
         await updateDoc(doc(db, 'holland', other.id), {
-          status: DRAFT,
+          status: INACTIVE,
           updatedAt: serverTimestamp(),
         })
       }

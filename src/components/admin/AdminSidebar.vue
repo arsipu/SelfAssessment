@@ -94,10 +94,10 @@ const navItems = [
     label: 'Holland',
     name: 'admin-holland'
   },
-  {
-    label: 'Pengaturan',
-    name: 'admin-setting'
-  }
+  // {
+  //   label: 'Pengaturan',
+  //   name: 'admin-setting'
+  // }
 ]
 
 const userName = computed(

@@ -15,7 +15,7 @@ import {
   where,
 } from 'firebase/firestore'
 
-import { DRAFT } from '@/apps/status'
+import { ACTIVE, INACTIVE } from '@/apps/status'
 
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
@@ -60,7 +60,7 @@ export const useLikertStore = defineStore('likert', () => {
       const ref = await addDoc(collection(db, 'likert'), { 
         name,
         description,
-        status: DRAFT,
+        status: INACTIVE,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
@@ -102,6 +102,19 @@ export const useLikertStore = defineStore('likert', () => {
   }
 
   const updateLikertStatus = async (id, status) => {
+    if (status === ACTIVE) {
+      // cari likert lain yang masih active, turunkan jadi inactive dulu
+      const others = likerts.value.filter(
+        (l) => l.id !== id && l.status === ACTIVE
+      )
+      for (const other of others) {
+        await updateDoc(doc(db, 'likert', other.id), {
+          status: INACTIVE,
+          updatedAt: serverTimestamp(),
+        })
+      }
+    }
+
     await updateDoc(doc(db, 'likert', id), {
       status,
       updatedAt: serverTimestamp(),

@@ -37,10 +37,10 @@
             <label class="text-sm font-semibold text-text-primary">Jenis Kelamin <span class="text-danger">*</span></label>
             <div class="flex flex-col sm:flex-row gap-2 sm:gap-5 items-start sm:items-center py-1 sm:py-2">
               <label class="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
-                <input v-model="responden.gender" type="radio" value="Laki-laki" required class="w-4 h-4" /> Laki-laki
+                <input v-model="responden.gender" name="jenisKelamin" type="radio" value="Laki-laki" required class="w-4 h-4" /> Laki-laki
               </label>
               <label class="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
-                <input v-model="responden.gender" type="radio" value="Perempuan" class="w-4 h-4" /> Perempuan
+                <input v-model="responden.gender" name="jenisKelamin" type="radio" value="Perempuan" class="w-4 h-4" /> Perempuan
               </label>
             </div>
           </div>

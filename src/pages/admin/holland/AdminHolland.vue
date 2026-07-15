@@ -208,7 +208,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHollandStore } from '@/stores/holland/holland'
 import { storeToRefs } from 'pinia'
-import { DRAFT, PUBLISHED, ARCHIVED, statusText } from '@/apps/status'
+import { ACTIVE, INACTIVE, statusText } from '@/apps/status'
 
 const router = useRouter()
 const hollandStore = useHollandStore()
@@ -228,9 +228,8 @@ const isFormValid = computed(() => form.value.name.trim() !== '')
 const openStatusMenuId = ref(null)
 
 const statusOptions = [
-  { value: DRAFT, label: statusText(DRAFT), dot: 'bg-text-muted' },
-  { value: PUBLISHED, label: statusText(PUBLISHED), dot: 'bg-success' },
-  { value: ARCHIVED, label: statusText(ARCHIVED), dot: 'bg-danger' },
+  { value: ACTIVE, label: statusText(ACTIVE), dot: 'bg-success' },
+  { value: INACTIVE, label: statusText(INACTIVE), dot: 'bg-text-muted' },
 ]
 
 onMounted(async () => {
@@ -249,10 +248,8 @@ const statusDotClass = (status) => {
 
 const statusBadgeClass = (status) => {
   switch (status) {
-    case PUBLISHED:
+    case ACTIVE:
       return 'bg-success-soft text-success hover:bg-success'
-    case ARCHIVED:
-      return 'bg-danger-soft text-danger hover:bg-danger'
     default:
       return 'bg-surface-muted text-text-secondary hover:bg-border'
   }

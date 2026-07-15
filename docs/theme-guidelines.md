@@ -32,10 +32,10 @@ Likert dan Holland TIDAK punya warna terpisah. Keduanya sama-sama pakai token `i
 Dipakai untuk: badge tag "Likert"/"RIASEC" di kartu instrumen, tombol submit kuesioner, progress bar pengisian soal, radio/checkbox accent di form Likert/Holland, border card instrumen saat hover.
 
 ## 5. Semantic / Status
-Dipakai KHUSUS untuk status sistem (draft/published/archived, sukses/gagal, validasi form). JANGAN dipakai untuk kebutuhan dekoratif/kategorikal lain.
-- **Success**: `bg-success`, `text-success`, `bg-success-soft` (Hijau — status published, submission completed, validasi sukses).
-- **Warning**: `bg-warning`, `text-warning`, `bg-warning-soft` (Emas/Kuning — status draft, submission in_progress).
-- **Danger**: `bg-danger`, `text-danger`, `border-danger`, `bg-danger-soft` (Merah — status archived, error, delete action, field wajib `*`).
+Dipakai KHUSUS untuk status sistem (active/inactive, sukses/gagal, validasi form). JANGAN dipakai untuk kebutuhan dekoratif/kategorikal lain.
+- **Success**: `bg-success`, `text-success`, `bg-success-soft` (Hijau — status active, submission completed, validasi sukses).
+- **Warning**: `bg-warning`, `text-warning`, `bg-warning-soft` (Emas/Kuning — status inactive, submission in_progress).
+- **Danger**: `bg-danger`, `text-danger`, `border-danger`, `bg-danger-soft` (Merah — error, delete action, field wajib `*`).
 
 ## 6. Categorical / Data-viz (dot indicator, chart, legend banyak warna)
 Dipakai KHUSUS untuk elemen yang butuh banyak warna berbeda demi keterbacaan (misal dot indikator kategori Likert yang jumlahnya dinamis, chart legend). BUKAN token semantik — jangan diasosiasikan dengan makna tertentu (sukses/gagal/dst).

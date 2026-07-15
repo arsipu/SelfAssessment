@@ -63,12 +63,12 @@
         </ol>
       </div>
 
-      <!-- CTA — pilih instrumen dari daftar published -->
-      <div v-if="publishedHollands.length > 0" class="space-y-3">
+      <!-- CTA — pilih instrumen dari daftar actived -->
+      <div v-if="activedHollands.length > 0" class="space-y-3">
         <p class="text-sm font-medium text-text-primary">Pilih instrumen yang tersedia:</p>
         <div class="flex flex-wrap gap-3">
           <router-link
-            v-for="h in publishedHollands"
+            v-for="h in activedHollands"
             :key="h.id"
             :to="{ name: 'holland-form', params: { id: h.id } }"
             class="px-5 py-2.5 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover transition-colors"
@@ -98,13 +98,13 @@ import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import AppTopBar from '@/components/AppTopBar.vue'
 import { useHollandStore } from '@/stores/holland/holland'
-import { PUBLISHED } from '@/apps/status'
+import { ACTIVE } from '@/apps/status'
 
 const hollandStore = useHollandStore()
 const { hollands } = storeToRefs(hollandStore)
 
-const publishedHollands = computed(() =>
-  hollands.value.filter((h) => h.status === PUBLISHED)
+const activedHollands = computed(() =>
+  hollands.value.filter((h) => h.status === ACTIVE)
 )
 
 onMounted(async () => {

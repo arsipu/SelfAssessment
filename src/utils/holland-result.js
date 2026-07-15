@@ -23,17 +23,19 @@ export function formatBirthDateAge(respondent) {
 }
 
 export function buildScoreBreakdown(scores, topCode = '') {
+  if (!scores) return []
+
   return RIASEC_CATEGORY_ORDER
     .map((code) => ({
       code,
-      count: scores?.[code]?.count ?? 0,
-      total: scores?.[code]?.total ?? 0,
-      percentage: scores?.[code]?.percentage ?? 0,
+      count: scores[code]?.count ?? 0,
+      total: scores[code]?.total ?? 0,
+      percentage: scores[code]?.percentage ?? 0,
     }))
     .sort((a, b) => b.percentage - a.percentage)
     .map((row) => ({
       ...row,
-      isTop: topCode.includes(row.code),
+      isTop: topCode ? topCode.includes(row.code) : false,
     }))
 }
 

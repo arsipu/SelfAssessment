@@ -21,7 +21,6 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
   // ── Fetch questions for ONE riasec category ───────────────
 
   const fetchQuestions = async (hollandId, riasecId) => {
-    loading.value = true
     try {
       const snap = await getDocs(
         collection(db, 'holland', hollandId, 'riasec', riasecId, 'questions')
@@ -35,8 +34,6 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
     } catch (error) {
       console.error('Error fetching questions:', error)
       return []
-    } finally {
-      loading.value = false
     }
   }
 

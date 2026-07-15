@@ -76,7 +76,7 @@ import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
-import { PUBLISHED } from '@/apps/status'
+import { ACTIVE } from '@/apps/status'
 
 const likertStore = useLikertStore()
 const likertSubmissionsStore = useLikertSubmissionsStore()
@@ -150,19 +150,19 @@ onMounted(async () => {
   try {
     await Promise.all([likertStore.fetchLikerts(), hollandStore.fetchHollands()])
 
-    const publishedLikerts = (likertStore.likerts || []).filter((l) => l.status === PUBLISHED)
-    const publishedHollands = (hollandStore.hollands || []).filter((h) => h.status === PUBLISHED)
+    const activedLikers = (likertStore.likerts || []).filter((l) => l.status === ACTIVE)
+    const activedLikerts = (hollandStore.hollands || []).filter((h) => h.status === ACTIVE)
 
     // Fetch submissions tiap instrumen secara paralel
     const [likertResults, hollandResults] = await Promise.all([
       Promise.all(
-        publishedLikerts.map(async (l) => {
+        activedLikers.map(async (l) => {
           await likertSubmissionsStore.fetchSubmissions(l.id)
           return { instrument: l, submissions: [...likertSubmissionsStore.submissions] }
         })
       ),
       Promise.all(
-        publishedHollands.map(async (h) => {
+        activedLikerts.map(async (h) => {
           await hollandSubmissionsStore.fetchSubmissions(h.id)
           return { instrument: h, submissions: [...hollandSubmissionsStore.submissions] }
         })

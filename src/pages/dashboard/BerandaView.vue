@@ -111,31 +111,31 @@ import AppTopBar from '@/components/AppTopBar.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useHollandStore } from '@/stores/holland/holland'
-import { PUBLISHED } from '@/apps/status'
+import { ACTIVE } from '@/apps/status'
 
 const likertStore = useLikertStore()
 const hollandStore = useHollandStore()
 
 const loading = ref(true)
 
-const publishedLikerts = computed(() =>
-  (likertStore.likerts || []).filter((l) => l.status === PUBLISHED)
+const activedLikerts = computed(() =>
+  (likertStore.likerts || []).filter((l) => l.status === ACTIVE)
 )
-const publishedHollands = computed(() =>
-  (hollandStore.hollands || []).filter((h) => h.status === PUBLISHED)
+const activedHollands = computed(() =>
+  (hollandStore.hollands || []).filter((h) => h.status === ACTIVE)
 )
 
 // Gabungkan kedua jenis instrumen jadi 1 grid, ditandai `type` biar
 // tag & route tujuannya beda tanpa perlu 2 blok terpisah di template.
 const allInstruments = computed(() => [
-  ...publishedLikerts.value.map((l) => ({
+  ...activedLikerts.value.map((l) => ({
     key: `likert-${l.id}`,
     type: 'likert',
     name: l.name,
     description: l.description,
     to: { name: 'likert-form', params: { id: l.id } },
   })),
-  ...publishedHollands.value.map((h) => ({
+  ...activedHollands.value.map((h) => ({
     key: `holland-${h.id}`,
     type: 'holland',
     name: h.name,

@@ -199,7 +199,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
 import { storeToRefs } from 'pinia'
-import { DRAFT, PUBLISHED, ARCHIVED, statusText } from '@/apps/status'
+import { ACTIVE, INACTIVE, statusText } from '@/apps/status'
 
 const router = useRouter()
 const likertStore = useLikertStore()
@@ -219,9 +219,8 @@ const isFormValid = computed(() => form.value.name.trim() !== '')
 const openStatusMenuId = ref(null)
 
 const statusOptions = [
-  { value: DRAFT, label: statusText(DRAFT), dot: 'bg-text-muted' },
-  { value: PUBLISHED, label: statusText(PUBLISHED), dot: 'bg-success' },
-  { value: ARCHIVED, label: statusText(ARCHIVED), dot: 'bg-danger' },
+  { value: ACTIVE, label: statusText(ACTIVE), dot: 'bg-success' },
+  { value: INACTIVE, label: statusText(INACTIVE), dot: 'bg-text-muted' },
 ]
 
 onMounted(async () => {
@@ -240,10 +239,8 @@ const statusDotClass = (status) => {
 
 const statusBadgeClass = (status) => {
   switch (status) {
-    case PUBLISHED:
+    case ACTIVE:
       return 'bg-success-soft text-success hover:bg-success'
-    case ARCHIVED:
-      return 'bg-danger-soft text-danger hover:bg-danger'
     default:
       return 'bg-surface-muted text-text-secondary hover:bg-border'
   }
@@ -257,27 +254,9 @@ const closeStatusMenu = () => {
   openStatusMenuId.value = null
 }
 
-// const changeStatus = async (id, status) => {
-//   closeStatusMenu()
-//   try {
-//     await likertStore.updateLikertStatus(id, status)
-//   } catch (e) {
-//     console.error(e)
-//   }
-// }
-
 const changeStatus = async (id, status) => {
   closeStatusMenu()
   try {
-    if (status === PUBLISHED) {
-      // cari likert lain yang masih published, turunkan jadi draft dulu
-      const others = likerts.value.filter(
-        (l) => l.id !== id && l.status === PUBLISHED
-      )
-      for (const other of others) {
-        await likertStore.updateLikertStatus(other.id, DRAFT)
-      }
-    }
     await likertStore.updateLikertStatus(id, status)
   } catch (e) {
     console.error(e)

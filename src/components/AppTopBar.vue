@@ -161,7 +161,7 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useHollandStore } from '@/stores/holland/holland'
-import { PUBLISHED } from '@/apps/status'
+import { ACTIVE } from '@/apps/status'
 
 const route = useRoute()
 
@@ -176,24 +176,24 @@ const { likerts } = storeToRefs(likertStore)
 const hollandStore = useHollandStore()
 const { hollands } = storeToRefs(hollandStore)
 
-const publishedLikerts = computed(() =>
-  likerts.value.filter((l) => l.status === PUBLISHED)
+const activedLikerts = computed(() =>
+  likerts.value.filter((l) => l.status === ACTIVE)
 )
 
-const publishedHollands = computed(() =>
-  hollands.value.filter((h) => h.status === PUBLISHED)
+const activedHollands = computed(() =>
+  hollands.value.filter((h) => h.status === ACTIVE)
 )
 
 // Gabungan Instrumen (Dipakai di Desktop & Mobile)
 const allInstruments = computed(() => [
-  ...publishedLikerts.value.map((l) => ({
+  ...activedLikerts.value.map((l) => ({
     key: `likert-${l.id}`,
     type: 'likert',
     name: l.name,
     description: l.description,
     to: { name: 'likert-form', params: { id: l.id } },
   })),
-  ...publishedHollands.value.map((h) => ({
+  ...activedHollands.value.map((h) => ({
     key: `holland-${h.id}`,
     type: 'holland',
     name: h.name || 'RIASEC',

@@ -22,14 +22,14 @@
       </div>
 
       <!-- Empty -->
-      <div v-else-if="publishedLikerts.length === 0" class="bg-surface border border-border rounded-xl p-12 text-center">
+      <div v-else-if="activedLikerts.length === 0" class="bg-surface border border-border rounded-xl p-12 text-center">
         <p class="text-sm text-text-muted">Belum ada formulir yang tersedia saat ini.</p>
       </div>
 
       <!-- List formulir -->
       <div v-else class="space-y-3">
         <button
-          v-for="likert in publishedLikerts"
+          v-for="likert in activedLikerts"
           :key="likert.id"
           @click="selectLikert(likert.id)"
           class="w-full text-left bg-surface border border-border rounded-xl p-5 hover:border-instrument transition-colors flex items-center justify-between gap-4"
@@ -50,7 +50,7 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
-import { PUBLISHED } from '@/apps/status'
+import { ACTIVE } from '@/apps/status'
 
 import AppTopBar from '@/components/AppTopBar.vue'
 
@@ -58,8 +58,8 @@ const router = useRouter()
 const likertStore = useLikertStore()
 const { likerts, loading } = storeToRefs(likertStore)
 
-const publishedLikerts = computed(() =>
-  likerts.value.filter((l) => l.status === PUBLISHED)
+const activedLikerts = computed(() =>
+  likerts.value.filter((l) => l.status === ACTIVE)
 )
 
 onMounted(async () => {
