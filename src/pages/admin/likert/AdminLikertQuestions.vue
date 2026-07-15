@@ -7,7 +7,7 @@
         class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1 cursor-pointer"
       >
         <font-awesome-icon icon="fa-solid fa-chevron-left" class="h-4 w-4 shrink-0" />
-        Likert Scale
+        Survei
       </button>
       <span class="text-text-muted">/</span>
       <span class="text-sm text-text-primary font-medium truncate max-w-[200px] md:max-w-none">{{ currentLikert?.name ?? '...' }}</span>

@@ -6,7 +6,7 @@
         @click="router.push({ name: 'admin-likert' })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer"
       >
-        Likert Scale
+        Survei
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
