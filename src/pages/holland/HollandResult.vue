@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-bg">
 
-    <div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+    <div class="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
       <div v-if="!result || loading" class="text-center text-sm text-text-muted py-20">
         Memuat hasil...
       </div>
@@ -182,22 +182,58 @@
           </button>
 
           <Transition name="expand">
-            <div v-if="showDetails" class="mt-4">
-              <div v-for="section in answerSections" :key="section.key" class="mb-5 last:mb-0">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
-                  <span class="text-xs font-medium text-text-secondary">
-                    {{ riasecInfo(section.key)?.label }} ({{ section.key }})
-                  </span>
+            <div v-if="showDetails" class="mt-4 space-y-4">
+              <div
+                v-for="section in detailSections"
+                :key="section.key"
+                class="border border-border rounded-xl p-4"
+              >
+                <div class="flex items-center gap-2 mb-4">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full shrink-0"
+                    :style="{ backgroundColor: section.dot }"
+                  ></span>
+                  <span class="text-base font-semibold text-text-primary">{{ section.label }}</span>
+                  <span class="text-sm text-text-muted">({{ section.code }})</span>
                 </div>
 
-                <div class="space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div
-                    v-for="item in section.items"
-                    :key="item.questionId"
-                    class="py-2.5 px-3 rounded-lg bg-surface-muted"
+                    v-for="col in section.columns"
+                    :key="col.key"
+                    class="md:border-l md:border-border md:pl-6 md:first:border-l-0 md:first:pl-0"
                   >
-                    <p class="text-sm text-text-primary leading-relaxed">{{ item.questionText }}</p>
+                    <p class="text-xs font-semibold text-text-secondary mb-2">{{ col.label }}</p>
+
+                    <div class="space-y-2">
+                      <div
+                        v-for="q in col.questions"
+                        :key="q.id"
+                        class="flex items-start gap-2.5 rounded-lg p-2.5 border transition-colors"
+                        :class="answeredIds.has(q.id)
+                          ? 'border-instrument bg-instrument-soft'
+                          : 'border-border bg-surface-muted/40'"
+                      >
+                        <span
+                          class="mt-0.5 w-4 h-4 shrink-0 rounded flex items-center justify-center border"
+                          :class="answeredIds.has(q.id) ? 'bg-instrument border-instrument' : 'border-border'"
+                        >
+                          <svg
+                            v-if="answeredIds.has(q.id)"
+                            class="w-3 h-3 text-text-on-primary"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"
+                          >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                        <span
+                          class="text-xs leading-relaxed"
+                          :class="answeredIds.has(q.id) ? 'text-text-primary' : 'text-text-muted'"
+                        >
+                          {{ q.question }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -269,11 +305,13 @@
 import HollandScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections } from '@/utils/holland-result'
+import { HOLLAND_COLUMNS } from '@/apps/holland'
 import RiasecHexChart from '@/components/RiasecHexChart.vue'
 
 const route = useRoute()
@@ -349,6 +387,47 @@ const answerSections = computed(() =>
     riasecInfo,
   })
 )
+
+const answeredIds = computed(() => {
+  return new Set((result.value?.answers || []).map((a) => a.questionId))
+})
+
+const dotColors = [
+  'var(--color-viz-1)',
+  'var(--color-viz-2)',
+  'var(--color-viz-3)',
+  'var(--color-viz-4)',
+  'var(--color-viz-5)',
+  'var(--color-viz-6)',
+]
+
+// Rincian jawaban buat tampilan layar: SEMUA soal per kategori & kolom
+// (bukan cuma yang dipilih), ditandai lewat answeredIds. Struktur sengaja
+// mirip `sections` di HollandQuestions.vue biar tata letaknya konsisten.
+const detailSections = computed(() => {
+  return riasecStore.riasecList
+    .map((cat, index) => {
+      const categoryQuestions = questionsStore.allQuestions.filter((q) => q.riasecId === cat.id)
+      if (categoryQuestions.length === 0) return null
+
+      const columns = HOLLAND_COLUMNS
+        .map((col) => ({
+          key: col.key,
+          label: col.label,
+          questions: categoryQuestions.filter((q) => q.column === col.key),
+        }))
+        .filter((col) => col.questions.length > 0)
+
+      return {
+        key: cat.id,
+        code: cat.id,
+        label: cat.label || cat.id,
+        dot: dotColors[index % dotColors.length],
+        columns,
+      }
+    })
+    .filter(Boolean)
+})
 
 onMounted(async () => {
   if (!result.value) {

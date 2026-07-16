@@ -71,7 +71,7 @@
           </div>
           <div>
             <p class="text-text-muted text-xs mb-1">Usia / Gender</p>
-            <p class="text-text-primary">{{ submission.age }} tahun, {{ submission.gender }}</p>
+            <p class="text-text-primary">{{ submission.age }} tahun, {{ submission.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
           </div>
           <div>
             <p class="text-text-muted text-xs mb-1">Kode Tracking</p>
@@ -195,7 +195,7 @@ const route = useRoute()
 const router = useRouter()
 const likertSlug = route.params.slug
 const likertId = ref(null)
-const submissionId = route.params.submissionId
+const submissionSlug = route.params.submissionSlug
 
 const likertStore = useLikertStore()
 const categoryStore = useLikertCategoryStore()
@@ -286,7 +286,7 @@ onMounted(async () => {
   likertId.value = likert.id
 
   await Promise.all([
-    submissionsStore.fetchSubmissionById(likertId.value, submissionId),
+    submissionsStore.fetchSubmissionBySlug(likertId.value, submissionSlug),
     questionsStore.fetchQuestions(likertId.value),
     categoryStore.fetchCategories(),
     likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId.value),

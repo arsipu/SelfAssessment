@@ -79,7 +79,7 @@
           </div>
           <div>
             <p class="text-text-muted text-xs mb-1">Tanggal Lahir/Usia / Gender</p>
-            <p class="text-text-primary">{{ formattedBirthDateAge }}, {{ submission.gender }}</p>
+            <p class="text-text-primary">{{ submission.age }} tahun, {{ submission.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
           </div>
           <div>
             <p class="text-text-muted text-xs mb-1">Kode Tracking</p>
@@ -324,7 +324,7 @@ const route = useRoute()
 const router = useRouter()
 const hollandSlug = route.params.slug
 const hollandId = ref(null)
-const submissionId = route.params.submissionId
+const submissionSlug = route.params.submissionSlug
 
 const hollandStore = useHollandStore()
 const submissionsStore = useHollandSubmissionsStore()
@@ -430,7 +430,8 @@ onMounted(async () => {
   
   hollandId.value = holland.id
   await Promise.all([
-    submissionsStore.fetchSubmissionById(hollandId.value, submissionId),
+    // submissionsStore.fetchSubmissionById(hollandId.value, submissionId),
+    submissionsStore.fetchSubmissionBySlug(hollandId.value, submissionSlug),
     riasecStore.fetchRiasecList(hollandId.value),
     questionsStore.fetchAllQuestions(hollandId.value),
   ])

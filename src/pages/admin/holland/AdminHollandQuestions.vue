@@ -6,7 +6,6 @@
         @click="router.push({ name: 'admin-holland' })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1 cursor-pointer"
       >
-        <font-awesome-icon icon="fa-solid fa-chevron-left" class="h-4 w-4" />
         Holland RIASEC
       </button>
       <span class="text-text-muted">/</span>

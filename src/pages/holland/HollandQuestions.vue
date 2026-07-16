@@ -2,7 +2,7 @@
   <div class="min-h-screen">
     <AppTopBar />
 
-    <div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
 
       <!-- Header -->
       <div class="mb-6">
@@ -12,39 +12,32 @@
         </p>
       </div>
 
-      <!-- Progress -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs text-text-muted">Pernyataan dipilih</span>
-          <span class="text-xs text-text-secondary font-medium">{{ answeredCount }}/{{ allQuestions.length }}</span>
-        </div>
-        <div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
-          <div
-            class="h-full bg-instrument rounded-full transition-all duration-300"
-            :style="{ width: progressPct + '%' }"
-          ></div>
-        </div>
-      </div>
-
       <!-- Category sections — grouped by riasecId from riasecList -->
-      <div v-for="section in sections" :key="section.key" class="mb-8">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="h-px flex-1 bg-border"></div>
-          <div class="flex items-center gap-2 shrink-0">
-            <span
-              class="w-2 h-2 rounded-full"
-              :style="{ backgroundColor: section.dot }"
-            ></span>
-            <span class="text-xs font-medium text-text-secondary">{{ section.label }} ({{ section.code }})</span>
-          </div>
-          <div class="h-px flex-1 bg-border"></div>
+      <div
+        v-for="section in sections"
+        :key="section.key"
+        class="mb-6 border border-border rounded-xl p-4 md:p-5 bg-surface"
+      >
+        <!-- Section header -->
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-2.5 h-2.5 rounded-full shrink-0"
+            :style="{ backgroundColor: section.dot }"
+          ></span>
+          <span class="text-sm font-semibold text-text-primary">{{ section.label }}</span>
+          <span class="text-xs text-text-muted">({{ section.code }})</span>
         </div>
 
-        <div class="space-y-5">
-          <div v-for="col in section.columns" :key="col.key">
+        <!-- 3 sub-kolom sejajar di desktop, stack di mobile -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-4">
+          <div
+            v-for="col in section.columns"
+            :key="col.key"
+            class="md:border-l md:border-border md:pl-4 md:first:border-l-0 md:first:pl-0"
+          >
             <p class="text-xs font-semibold text-text-secondary mb-2">{{ col.label }}</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="space-y-2">
               <label
                 v-for="q in col.questions"
                 :key="q.id"
@@ -57,7 +50,7 @@
                   :checked="isChecked(q.id)"
                   @change="toggleAnswer(q)"
                 />
-                <span class="text-sm text-text-primary leading-relaxed">{{ q.question }}</span>
+                <span class="text-xs text-text-primary leading-relaxed">{{ q.question }}</span>
               </label>
             </div>
           </div>

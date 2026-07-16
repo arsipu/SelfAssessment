@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 
 import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
+import { slugify } from '@/utils/slug'
 
 export const useLikertSubmissionsStore = defineStore('likert-submissions', () => {
   const submissions = ref([])
@@ -62,6 +63,29 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
     return currentSubmission.value
   }
 
+  const fetchSubmissionBySlug = async (likertId, submissionSlug) => {
+    loading.value = true
+    try {
+      const q = query(
+        collection(db, 'likert', likertId, 'submissions'),
+        where('slug', '==', submissionSlug)
+      )
+      const snap = await getDocs(q)
+      if (!snap.empty) {
+        const docSnap = snap.docs[0]
+        currentSubmission.value = { id: docSnap.id, ...docSnap.data() }
+      } else {
+        currentSubmission.value = null
+      }
+    } catch (error) {
+      console.error('Error fetching submission detail by slug:', error)
+      currentSubmission.value = null
+    } finally {
+      loading.value = false
+    }
+    return currentSubmission.value
+  }
+
   
   // Dipanggil begitu form responden disubmit (belum ngerjain soal)
   const createSubmission = async (likertId, respondentData) => {
@@ -82,6 +106,7 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
         status: SUBMISSION_IN_PROGRESS,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        slug: slugify(respondentData.nama), // untuk URL friendly, mis. "john-doe"
       })
       console.log('Submission created:', ref.id)
       // return ref.id
@@ -140,6 +165,7 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
     loading,
     fetchSubmissions,
     fetchSubmissionById,
+    fetchSubmissionBySlug,
     createSubmission,
     completeSubmission,
     updateSubmissionAnswers,

@@ -143,6 +143,7 @@ function formatBirthDateAge(birthDate, age) {
 }
 
 onMounted(async () => {
+  // ambil data instrumen holland berdasarkan slug
   await hollandStore.getHollandBySlug(hollandSlug)
 
   // jika instrumen tidak ditemukan, lempar ke halaman not-available

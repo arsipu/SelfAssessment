@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 
 import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
+import { slugify } from '@/utils/slug'
 
 export const useHollandSubmissionsStore = defineStore('holland-submissions', () => {
   const submissions = ref([])
@@ -62,6 +63,29 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     return currentSubmission.value
   }
 
+  const fetchSubmissionBySlug = async (hollandId, slug) => {
+    loading.value = true
+    try {
+      const q = query(
+        collection(db, 'holland', hollandId, 'submissions'),
+        where('slug', '==', slug)
+      )
+      const snap = await getDocs(q)
+      if (!snap.empty) {
+        const docSnap = snap.docs[0]
+        currentSubmission.value = { id: docSnap.id, ...docSnap.data() }
+      } else {
+        currentSubmission.value = null
+      }
+    } catch (error) {
+      console.error('Error fetching submission detail:', error)
+      currentSubmission.value = null
+    } finally {
+      loading.value = false
+    }
+    return currentSubmission.value
+  }
+
   // Dipanggil begitu form respondent disubmit (belum ngerjain soal).
   // Field disamakan dengan dokumen sumber Holland:
   // name, major, school, gender, birthDate, age, occupation, testDate, testPurpose
@@ -85,6 +109,7 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
         status: SUBMISSION_IN_PROGRESS,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        slug: slugify(respondentData.name), // untuk URL friendly, mis. "john-doe"
       })
       return { id: ref.id, code }
     } catch (error) {
@@ -148,6 +173,7 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     loading,
     fetchSubmissions,
     fetchSubmissionById,
+    fetchSubmissionBySlug,
     createSubmission,
     updateSubmissionAnswers,
     completeSubmission,

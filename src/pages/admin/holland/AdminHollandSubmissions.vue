@@ -64,7 +64,7 @@
             <tr
               v-for="s in submissions"
               :key="s.id"
-              @click="router.push({ name: 'admin-holland-submission-detail', params: { slug: hollandSlug, submissionId: s.id } })"
+              @click="router.push({ name: 'admin-holland-submission-detail', params: { slug: hollandSlug, submissionSlug: s.slug } })"
               class="hover:bg-surface-muted transition-colors cursor-pointer"
             >
               <td class="px-4 md:px-5 py-3 text-sm text-text-primary font-medium">{{ s.name }}</td>

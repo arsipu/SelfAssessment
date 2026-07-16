@@ -102,7 +102,7 @@ const routes = [
                 component: AdminLikertSubmissions,
             },
             {
-                path: "likert/:slug/submissions/:submissionId",
+                path: "likert/:slug/submissions/:submissionSlug",
                 name: 'admin-likert-submission-detail',
                 component: AdminLikertSubmissionDetail,
             },
@@ -123,7 +123,7 @@ const routes = [
                 component: AdminHollandSubmissions,
             },
             {
-                path: "holland/:slug/submissions/:submissionId",
+                path: "holland/:slug/submissions/:submissionSlug",
                 name: "admin-holland-submission-detail",
                 component: AdminHollandSubmissionDetail,
             },

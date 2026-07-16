@@ -9,7 +9,7 @@
 export const RIASEC_GUIDE = Object.freeze({
   R: {
     code: 'R',
-    label: 'Realistic',
+    label: 'Realistis',
     description:
       'Suka bekerja terutama dengan tangan, membuat, memperbaiki, merakit atau membangun sesuatu, menggunakan dan mengoperasikan peralatan, alat atau mesin. Seringkali suka bekerja di luar ruangan.',
     skills: [
@@ -48,7 +48,7 @@ export const RIASEC_GUIDE = Object.freeze({
 
   I: {
     code: 'I',
-    label: 'Investigative',
+    label: 'Investigatif',
     description:
       'Suka menemukan dan meneliti ide, mengamati, menyelidiki, dan bereksperimen, mengajukan pertanyaan, dan menyelesaikan masalah.',
     skills: [
@@ -74,7 +74,7 @@ export const RIASEC_GUIDE = Object.freeze({
 
   A: {
     code: 'A',
-    label: 'Artistic',
+    label: 'Artistik',
     description:
       'Suka menggunakan kata-kata, seni, musik atau drama untuk berkomunikasi, melakukan, atau mengekspresikan diri, membuat dan merancang sesuatu.',
     skills: [
@@ -115,7 +115,7 @@ export const RIASEC_GUIDE = Object.freeze({
 
   S: {
     code: 'S',
-    label: 'Social',
+    label: 'Sosial',
     description:
       'Suka mengajar, melatih dan memberi informasi, membantu, mengobati, menyembuhkan dan melayani dan menyapa, peduli dengan kesejahteraan diri dan kesejahteraan orang lain.',
     skills: [
@@ -187,7 +187,7 @@ export const RIASEC_GUIDE = Object.freeze({
 
   C: {
     code: 'C',
-    label: 'Conventional',
+    label: 'Konvensional',
     description:
       'Suka bekerja di dalam ruangan dan pada tugas-tugas yang melibatkan pengorganisasian data, merekam dan menyimpan catatan.',
     skills: [
