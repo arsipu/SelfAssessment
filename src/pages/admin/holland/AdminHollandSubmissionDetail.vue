@@ -7,14 +7,14 @@
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-holland-questions', params: { id: hollandId } })"
+        @click="router.push({ name: 'admin-holland-questions', params: { slug: hollandSlug } })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer"
       >
         Pertanyaan
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-holland-submissions', params: { id: hollandId } })"
+        @click="router.push({ name: 'admin-holland-submissions', params: { slug: hollandSlug } })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         Submissions
@@ -313,6 +313,7 @@ import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
@@ -321,9 +322,11 @@ import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections } from '@/
 
 const route = useRoute()
 const router = useRouter()
-const hollandId = route.params.id
+const hollandSlug = route.params.slug
+const hollandId = ref(null)
 const submissionId = route.params.submissionId
 
+const hollandStore = useHollandStore()
 const submissionsStore = useHollandSubmissionsStore()
 const questionsStore = useHollandQuestionsStore()
 const riasecStore = useHollandRiasecStore()
@@ -418,10 +421,18 @@ async function confirmExportPDF() {
 }
 
 onMounted(async () => {
+  const holland = await hollandStore.getHollandBySlug(hollandSlug)
+  
+  if (!holland) {
+    router.push({ name: 'admin-holland' })
+    return
+  }
+  
+  hollandId.value = holland.id
   await Promise.all([
-    submissionsStore.fetchSubmissionById(hollandId, submissionId),
-    riasecStore.fetchRiasecList(hollandId),
-    questionsStore.fetchAllQuestions(hollandId),
+    submissionsStore.fetchSubmissionById(hollandId.value, submissionId),
+    riasecStore.fetchRiasecList(hollandId.value),
+    questionsStore.fetchAllQuestions(hollandId.value),
   ])
 })
 </script>

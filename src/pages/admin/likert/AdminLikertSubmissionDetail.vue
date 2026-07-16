@@ -7,7 +7,7 @@
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-likert-submissions', params: { id: likertId } })"
+        @click="router.push({ name: 'admin-likert-submissions', params: { slug: likertSlug } })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         Submissions
@@ -193,7 +193,8 @@ import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
 
 const route = useRoute()
 const router = useRouter()
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = ref(null)
 const submissionId = route.params.submissionId
 
 const likertStore = useLikertStore()
@@ -275,14 +276,23 @@ const sections = computed(() => {
 })
 
 onMounted(async () => {
+
+  const likert = await likertStore.getLikertBySlug(likertSlug)
+  if (!likert) {
+    router.push({ name: 'admin-likert' })
+    return
+  }
+
+  likertId.value = likert.id
+
   await Promise.all([
-    submissionsStore.fetchSubmissionById(likertId, submissionId),
-    questionsStore.fetchQuestions(likertId),
+    submissionsStore.fetchSubmissionById(likertId.value, submissionId),
+    questionsStore.fetchQuestions(likertId.value),
     categoryStore.fetchCategories(),
-    likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId),
+    likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId.value),
   ])
   
-  scales.value = await likertStore.fetchLikertScales(likertId)
+  scales.value = await likertStore.fetchLikertScales(likertId.value)
   console.log(scales.value)
 })
 </script>

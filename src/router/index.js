@@ -38,17 +38,17 @@ const routes = [
 	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
-	// Holland — parameterized by :id like Likert
+	// Holland — parameterized by :slug
 	{ path: "/holland", name: "holland", component: Holland },
-    { path: "/holland/:id", name: "holland-form", component: HollandForm },
-    { path: "/holland/:id/questions", name: "holland-questions", component: HollandQuestions },
-    { path: "/holland/:id/result", name: "holland-result", component: HollandResult },
+    { path: "/holland/:slug", name: "holland-form", component: HollandForm },
+    { path: "/holland/:slug/questions", name: "holland-questions", component: HollandQuestions },
+    { path: "/holland/:slug/result", name: "holland-result", component: HollandResult },
 
-	// Likert — parameterized by :id like Holland
+	// Likert — parameterized by :slug
     { path: "/likert", name: "likert", component: Likert },
-    { path: "/likert/:id", name: "likert-form", component: LikertForm },
-    { path: "/likert/:id/questions", name: "likert-questions", component: LikertQuestions },
-    { path: "/likert/:id/result", name: "likert-result", component: LikertResult },
+    { path: "/likert/:slug", name: "likert-form", component: LikertForm },
+    { path: "/likert/:slug/questions", name: "likert-questions", component: LikertQuestions },
+    { path: "/likert/:slug/result", name: "likert-result", component: LikertResult },
 
     // Route untuk Halaman Kosong / Tidak Tersedia
     {
@@ -92,38 +92,38 @@ const routes = [
                 component: AdminLikert,
             },
             {
-                path: "likert/:id",
+                path: "likert/:slug",
                 name: "admin-likert-questions",
                 component: AdminLikertQuestions,
             },
             {
-                path: "likert/:id/submissions",
+                path: "likert/:slug/submissions",
                 name: "admin-likert-submissions",
                 component: AdminLikertSubmissions,
             },
             {
-                path: "likert/:id/submissions/:submissionId",
+                path: "likert/:slug/submissions/:submissionId",
                 name: 'admin-likert-submission-detail',
                 component: AdminLikertSubmissionDetail,
             },
-            // Holland admin — parameterized by :id like Likert
+            // Holland admin — parameterized by :slug
             {
                 path: "holland",
                 name: "admin-holland",
                 component: AdminHolland,
             },
             {
-                path: "holland/:id",
+                path: "holland/:slug",
                 name: "admin-holland-questions",
                 component: AdminHollandQuestions,
             },
             {
-                path: "holland/:id/submissions",
+                path: "holland/:slug/submissions",
                 name: "admin-holland-submissions",
                 component: AdminHollandSubmissions,
             },
             {
-                path: "holland/:id/submissions/:submissionId",
+                path: "holland/:slug/submissions/:submissionId",
                 name: "admin-holland-submission-detail",
                 component: AdminHollandSubmissionDetail,
             },

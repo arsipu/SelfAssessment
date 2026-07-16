@@ -31,7 +31,7 @@
         <button
           v-for="likert in activedLikerts"
           :key="likert.id"
-          @click="selectLikert(likert.id)"
+          @click="selectLikert(likert)"
           class="w-full text-left bg-surface border border-border rounded-xl p-5 hover:border-instrument transition-colors flex items-center justify-between gap-4"
         >
           <div>
@@ -66,7 +66,7 @@ onMounted(async () => {
   await likertStore.fetchLikerts()
 })
 
-const selectLikert = (id) => {
-  router.push({ name: 'likert-form', params: { id } })
+const selectLikert = (likert) => {
+  router.push({ name: 'likert-form', params: { slug: likert.slug } })
 }
 </script>

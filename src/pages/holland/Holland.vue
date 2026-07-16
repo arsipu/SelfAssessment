@@ -70,7 +70,7 @@
           <router-link
             v-for="h in activedHollands"
             :key="h.id"
-            :to="{ name: 'holland-form', params: { id: h.id } }"
+            :to="{ name: 'holland-form', params: { slug: h.slug } }"
             class="px-5 py-2.5 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover transition-colors"
           >
             {{ h.name || 'Mulai asesmen' }}

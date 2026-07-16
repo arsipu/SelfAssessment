@@ -128,7 +128,8 @@ import { LikertAnswer, LIKERT_SCALE_OPTIONS, LIKERT_SCORE_MAP, LIKERT_SCORE_MAP_
 
 const route = useRoute()
 const router = useRouter()
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = computed(() => likertStore?.currentLikert?.id || null)
 
 const likertStore = useLikertStore()
 const likertQuestionsStore = useLikertQuestionsStore()
@@ -144,17 +145,22 @@ let session = null
 const scaleOptions = LIKERT_SCALE_OPTIONS
 
 onMounted(async () => {
-  session = likertSessionStore.getSession(likertId)
+  // Pastikan currentLikert terisi
+  if (!likertStore.currentLikert) {
+    await likertStore.getLikertBySlug(likertSlug)
+  }
+
+  session = likertSessionStore.getSession(likertId.value)
 
   if (!session) {
     // ga ada sesi -> balik ke form
-    router.push({ name: 'likert-form', params: { id: likertId } })
+    router.push({ name: 'likert-form', params: { slug: likertSlug } })
     return
   }
 
   answers.value = { ...session.answers }
 
-  await likertQuestionsStore.fetchQuestions(likertId)
+  await likertQuestionsStore.fetchQuestions(likertId.value)
   await categoryStore.fetchCategories()
 })
 
@@ -182,7 +188,7 @@ watch(
   (newAnswers) => {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
-      likertSessionStore.updateAnswers(likertId, newAnswers, buildSubmissionResult())
+      likertSessionStore.updateAnswers(likertId.value, newAnswers, buildSubmissionResult())
     }, 800) // sesuaikan delay-nya sesuai selera
   },
   { deep: true }
@@ -230,8 +236,8 @@ const handleSubmit = async () => {
   const totalScore = submissionResult.reduce((sum, r) => sum + (r.point ?? 0), 0)
 
   try {
-    await likertSessionStore.finishSession(likertId, submissionResult, totalScore)
-    router.push({ name: 'likert-result', params: { id: likertId } })
+    await likertSessionStore.finishSession(likertId.value, submissionResult, totalScore)
+    router.push({ name: 'likert-result', params: { slug: likertSlug } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
   }

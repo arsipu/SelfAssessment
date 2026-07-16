@@ -30,7 +30,7 @@
             Kelola Skala
           </button>
           <button
-            @click="router.push({ name: 'admin-likert-submissions', params: { id: likertId } })"
+            @click="router.push({ name: 'admin-likert-submissions', params: { slug: likertSlug } })"
             class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
           >
             <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
@@ -391,7 +391,8 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const router = useRouter()
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = ref(null)
 
 const likertStore = useLikertStore()
 const likertQuestionsStore = useLikertQuestionsStore()
@@ -433,9 +434,18 @@ const deletingScaleId = ref(null)
 // ── Lifecycle ──────────────────────────────────────────────
 
 onMounted(async () => {
+
+  const likert = await likertStore.getLikertBySlug(likertSlug)
+  if (!likert) {
+    router.push({ name: 'admin-likert' })
+    return
+  }
+
+  likertId.value = likert.id
+
   await Promise.all([
-    likertStore.getLikertById(likertId),
-    likertQuestionsStore.fetchQuestions(likertId),
+    likertStore.getLikertById(likertId.value),
+    likertQuestionsStore.fetchQuestions(likertId.value),
     categoryStore.fetchCategories(),
   ])
 })

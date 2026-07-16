@@ -117,6 +117,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
@@ -124,8 +125,10 @@ import { HOLLAND_COLUMNS, getTopRiasecCode, computeRiasecScores } from '@/apps/h
 
 const route = useRoute()
 const router = useRouter()
-const hollandId = route.params.id
+const hollandSlug = route.params.slug
+const hollandId = computed(() => hollandStore?.currentHolland?.id || null)
 
+const hollandStore = useHollandStore()
 const questionsStore = useHollandQuestionsStore()
 const { allQuestions } = storeToRefs(questionsStore)
 
@@ -139,11 +142,16 @@ const checkedMap = reactive({})
 let session = null
 
 onMounted(async () => {
-  session = sessionStore.getSession(hollandId)
+  // Pastikan currentHolland terisi (mungkin dari halaman sebelumnya)
+  if (!hollandStore.currentHolland) {
+    await hollandStore.getHollandBySlug(hollandSlug)
+  }
+
+  session = sessionStore.getSession(hollandId.value)
 
   if (!session) {
     // ga ada sesi -> balik ke form
-    router.push({ name: 'holland-form', params: { id: hollandId } })
+    router.push({ name: 'holland-form', params: { slug: hollandSlug } })
     return
   }
 
@@ -154,8 +162,8 @@ onMounted(async () => {
 
   // Fetch riasec list (labels, descriptions) AND all questions in parallel
   await Promise.all([
-    riasecStore.fetchRiasecList(hollandId),
-    questionsStore.fetchAllQuestions(hollandId),
+    riasecStore.fetchRiasecList(hollandId.value),
+    questionsStore.fetchAllQuestions(hollandId.value),
   ])
 })
 
@@ -188,7 +196,7 @@ watch(
   () => {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
-      sessionStore.updateAnswers(hollandId, buildAnswers())
+      sessionStore.updateAnswers(hollandId.value, buildAnswers())
     }, 800)
   },
   { deep: true }
@@ -248,8 +256,8 @@ const handleSubmit = async () => {
   const topCode = getTopRiasecCode(scores)
 
   try {
-    await sessionStore.finishSession(hollandId, answers, scores, topCode)
-    router.push({ name: 'holland-result', params: { id: hollandId } })
+    await sessionStore.finishSession(hollandId.value, answers, scores, topCode)
+    router.push({ name: 'holland-result', params: { slug: hollandSlug } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
     console.error(error)

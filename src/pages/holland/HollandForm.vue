@@ -94,7 +94,8 @@ const router = useRouter()
 const hollandStore = useHollandStore()
 const hollandSessionStore = useHollandSessionStore()
 
-const hollandId = route.params.id
+const hollandSlug = route.params.slug
+const hollandId = computed(() => hollandStore.currentHolland?.id || null)
 
 const responden = ref({
   name: '',
@@ -142,7 +143,7 @@ function formatBirthDateAge(birthDate, age) {
 }
 
 onMounted(async () => {
-  await hollandStore.getHollandById(hollandId)
+  await hollandStore.getHollandBySlug(hollandSlug)
 
   // jika instrumen tidak ditemukan, lempar ke halaman not-available
   if (hollandStore.currentHolland === null) {
@@ -156,10 +157,10 @@ onMounted(async () => {
     return
   }
 
-  const saved = hollandSessionStore.getSession(hollandId)
+  const saved = hollandSessionStore.getSession(hollandId.value)
   if (saved) {
     // udah pernah mulai sesi -> langsung lempar ke kuesioner
-    router.push({ name: 'holland-questions', params: { id: hollandId } })
+    router.push({ name: 'holland-questions', params: { slug: hollandSlug } })
   }
 })
 
@@ -167,11 +168,11 @@ async function goToKuesioner() {
   if (submitting.value) return
   submitting.value = true
   try {
-    await hollandSessionStore.startSession(hollandId, {
+    await hollandSessionStore.startSession(hollandId.value, {
       ...responden.value,
       age: computedAge.value,
     })
-    router.push({ name: 'holland-questions', params: { id: hollandId } })
+    router.push({ name: 'holland-questions', params: { slug: hollandSlug } })
   } catch (error) {
     alert('Gagal memulai sesi, coba lagi.')
   } finally {

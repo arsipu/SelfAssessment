@@ -10,7 +10,7 @@
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-holland-questions', params: { id: hollandId } })"
+        @click="router.push({ name: 'admin-holland-questions', params: { slug: hollandSlug } })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer"
       >
         Pertanyaan
@@ -64,7 +64,7 @@
             <tr
               v-for="s in submissions"
               :key="s.id"
-              @click="router.push({ name: 'admin-holland-submission-detail', params: { id: hollandId, submissionId: s.id } })"
+              @click="router.push({ name: 'admin-holland-submission-detail', params: { slug: hollandSlug, submissionId: s.id } })"
               class="hover:bg-surface-muted transition-colors cursor-pointer"
             >
               <td class="px-4 md:px-5 py-3 text-sm text-text-primary font-medium">{{ s.name }}</td>
@@ -137,13 +137,16 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { exportSubmissionsToExcel } from '@/utils/holland-excel-export'
 
 const route = useRoute()
 const router = useRouter()
-const hollandId = route.params.id
+const hollandSlug = route.params.slug
+const hollandId = ref(null)
 
+const hollandStore = useHollandStore()
 const submissionsStore = useHollandSubmissionsStore()
 const { submissions, loading } = storeToRefs(submissionsStore)
 
@@ -171,6 +174,12 @@ async function confirmExportExcel() {
 }
 
 onMounted(async () => {
-  await submissionsStore.fetchSubmissions(hollandId)
+  const holland = await hollandStore.getHollandBySlug(hollandSlug)
+  if (!holland) {
+    router.push({ name: 'admin-holland' })
+    return
+  }
+  hollandId.value = holland.id
+  await submissionsStore.fetchSubmissions(hollandId.value)
 })
 </script>

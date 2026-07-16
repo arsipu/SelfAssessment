@@ -10,7 +10,7 @@
       </button>
       <span class="text-text-muted shrink-0">/</span>
       <button
-        @click="router.push({ name: 'admin-likert-questions', params: { id: likertId } })"
+        @click="router.push({ name: 'admin-likert-questions', params: { slug: likertSlug } })"
         class="text-sm text-text-secondary hover:text-text-primary transition-colors truncate max-w-[120px] md:max-w-none cursor-pointer"
       >
         {{ currentLikert?.name ?? '...' }}
@@ -143,7 +143,8 @@ import { exportSubmissionsToExcel } from '@/utils/likert-excel-export'
 
 const route = useRoute()
 const router = useRouter()
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = ref(null)
 
 const likertStore = useLikertStore()
 const submissionsStore = useLikertSubmissionsStore()
@@ -177,10 +178,18 @@ async function confirmExportExcel() {
 }
 
 onMounted(async () => {
+
+  const likert = await likertStore.getLikertBySlug(likertSlug)
+  if (!likert) {
+    router.push({ name: 'admin-likert' })
+    return
+  }
+  likertId.value = likert.id
+
   await Promise.all([
-    likertStore.getLikertById(likertId),
-    submissionsStore.fetchSubmissions(likertId),
+    likertStore.getLikertById(likertId.value),
+    submissionsStore.fetchSubmissions(likertId.value),
   ])
-  scales.value = await likertStore.fetchLikertScales(likertId)
+  scales.value = await likertStore.fetchLikertScales(likertId.value)
 })
 </script>

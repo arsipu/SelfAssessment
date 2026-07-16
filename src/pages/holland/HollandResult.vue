@@ -278,8 +278,10 @@ import RiasecHexChart from '@/components/RiasecHexChart.vue'
 
 const route = useRoute()
 const router = useRouter()
-const hollandId = route.params.id
+const hollandSlug = route.params.slug
+const hollandId = computed(() => hollandStore?.currentHolland?.id || null)
 
+const hollandStore = useHollandStore()
 const sessionStore = useHollandSessionStore()
 const questionsStore = useHollandQuestionsStore()
 const riasecStore = useHollandRiasecStore()
@@ -290,7 +292,7 @@ const expandedCodes = ref([])
 const showExportPDFModal = ref(false)
 const showDetails = ref(false)
 
-const result = computed(() => sessionStore.getResult(hollandId))
+const result = computed(() => sessionStore.getResult(hollandId.value))
 const respondentName = computed(() => result.value?.respondentName || '-')
 
 // map kode -> persentase, dipakai buat kirim ke RiasecHexChart
@@ -350,15 +352,15 @@ const answerSections = computed(() =>
 
 onMounted(async () => {
   if (!result.value) {
-    router.replace({ name: 'holland-form', params: { id: hollandId } })
+    router.replace({ name: 'holland-form', params: { slug: hollandSlug } })
     return
   }
 
   loading.value = true
   try {
     await Promise.all([
-      riasecStore.fetchRiasecList(hollandId),
-      questionsStore.fetchAllQuestions(hollandId),
+      riasecStore.fetchRiasecList(hollandId.value),
+      questionsStore.fetchAllQuestions(hollandId.value),
     ])
   } finally {
     loading.value = false

@@ -133,14 +133,14 @@ const allInstruments = computed(() => [
     type: 'likert',
     name: l.name,
     description: l.description,
-    to: { name: 'likert-form', params: { id: l.id } },
+    to: { name: 'likert-form', params: { slug: l.slug } },
   })),
   ...activedHollands.value.map((h) => ({
     key: `holland-${h.id}`,
     type: 'holland',
     name: h.name,
     description: h.description,
-    to: { name: 'holland-form', params: { id: h.id } },
+    to: { name: 'holland-form', params: { slug: h.slug } },
   })),
 ])
 

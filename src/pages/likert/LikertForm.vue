@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
@@ -91,7 +91,8 @@ const router = useRouter()
 const likertStore = useLikertStore()
 const likertSessionStore = useLikertSessionStore()
 
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = computed(() => likertStore.currentLikert?.id || null)
 
 const { currentLikert } = storeToRefs(likertStore)
 
@@ -103,9 +104,9 @@ const responden = ref({
 const submitting = ref(false)
 
 onMounted(async () => {
-  console.log('LikertForm mounted, likertId:', likertId)
+  console.log('LikertForm mounted, likertSlug:', likertSlug)
 
-  await likertStore.getLikertById(likertId)
+  await likertStore.getLikertBySlug(likertSlug)
 
   // jika kuesioner tidak ditemukan, lempar ke halaman not-available
   if (currentLikert.value === null) {
@@ -119,11 +120,11 @@ onMounted(async () => {
     return
   }
 
-  const saved = likertSessionStore.getSession(likertId)
+  const saved = likertSessionStore.getSession(likertId.value)
 
   if (saved) {
     // udah pernah mulai sesi -> langsung lempar ke kuesioner
-    router.push({ name: 'likert-questions', params: { id: likertId } })
+    router.push({ name: 'likert-questions', params: { slug: likertSlug } })
   }
 })
 
@@ -131,8 +132,8 @@ async function goToKuesioner() {
   if (submitting.value) return
   submitting.value = true
   try {
-    await likertSessionStore.startSession(likertId, { ...responden.value })
-    router.push({ name: 'likert-questions', params: { id: likertId } })
+    await likertSessionStore.startSession(likertId.value, { ...responden.value })
+    router.push({ name: 'likert-questions', params: { slug: likertSlug } })
   } catch (error) {
     alert('Gagal memulai sesi, coba lagi.')
   } finally {

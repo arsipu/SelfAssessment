@@ -11,10 +11,14 @@ import {
   deleteDoc,
   writeBatch,
   serverTimestamp,
+  query,
+  where,
+  limit,
 } from 'firebase/firestore'
 
 import { ACTIVE, INACTIVE } from '@/apps/status'
 import { RIASEC_GUIDE, RIASEC_CATEGORY_ORDER } from '@/apps/holland'
+import { slugify } from '@/utils/slug'
 
 export const useHollandStore = defineStore('holland', () => {
   const hollands = ref([])
@@ -79,12 +83,35 @@ export const useHollandStore = defineStore('holland', () => {
     await batch.commit()
   }
 
+  // ── Detail 1 instrumen berdasarkan slug ───────────────────
+
+  const getHollandBySlug = async (slug) => {
+    try {
+      const q = query(
+        collection(db, 'holland'),
+        where('slug', '==', slug),
+        limit(1)
+      )
+      const snap = await getDocs(q)
+      if (!snap.empty) {
+        const d = snap.docs[0]
+        currentHolland.value = { id: d.id, ...d.data() }
+      } else {
+        currentHolland.value = null
+      }
+    } catch (error) {
+      console.error('Error fetching holland by slug:', error)
+    }
+    return currentHolland.value
+  }
+
   // ── Buat instrumen baru (+ otomatis seed 6 kategori riasec) ──
 
   const addHolland = async ({ name, description, direction }) => {
     try {
       const ref = await addDoc(collection(db, 'holland'), {
         name,
+        slug: slugify(name),
         description: description || '',
         direction: direction || '',
         status: INACTIVE,
@@ -118,6 +145,7 @@ export const useHollandStore = defineStore('holland', () => {
     try {
       await updateDoc(doc(db, 'holland', hollandId), {
         name,
+        slug: slugify(name),
         description: description || '',
         direction: direction || '',
         updatedAt: serverTimestamp(),
@@ -196,6 +224,7 @@ export const useHollandStore = defineStore('holland', () => {
     loading,
     fetchHollands,
     getHollandById,
+    getHollandBySlug,
     addHolland,
     updateHolland,
     updateRiasecContent,

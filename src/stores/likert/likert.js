@@ -13,9 +13,11 @@ import {
   collectionGroup,
   query,
   where,
+  limit,
 } from 'firebase/firestore'
 
 import { ACTIVE, INACTIVE } from '@/apps/status'
+import { slugify } from '@/utils/slug'
 
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
@@ -54,11 +56,37 @@ export const useLikertStore = defineStore('likert', () => {
     return currentLikert.value
   }
 
+  // ── Detail 1 survei berdasarkan slug ──────────────────────
+
+  const getLikertBySlug = async (slug) => {
+    console.log('Fetching likert by slug:', slug)
+    try {
+      const q = query(
+        collection(db, 'likert'),
+        where('slug', '==', slug),
+        limit(1)
+      )
+      const snap = await getDocs(q)
+      if (!snap.empty) {
+        const d = snap.docs[0]
+        currentLikert.value = { id: d.id, ...d.data() }
+        console.log('Likert fetched by slug:', currentLikert.value.name)
+      } else {
+        console.log('No such likert document for slug:', slug)
+        currentLikert.value = null
+      }
+    } catch (error) {
+      console.error('Error fetching likert by slug:', error)
+    }
+    return currentLikert.value
+  }
+
   const addLikert = async ({ name, description }) => {
     console.log('Adding likert:', name)
     try {
       const ref = await addDoc(collection(db, 'likert'), { 
         name,
+        slug: slugify(name),
         description,
         status: INACTIVE,
         createdAt: serverTimestamp(),
@@ -77,7 +105,8 @@ export const useLikertStore = defineStore('likert', () => {
     console.log('Updating likert:', likertId)
     try {
       await updateDoc(doc(db, 'likert', likertId), { 
-        name, 
+        name,
+        slug: slugify(name),
         description,
         updatedAt: serverTimestamp(),
       })
@@ -202,6 +231,7 @@ export const useLikertStore = defineStore('likert', () => {
     currentLikertScales,
     fetchLikerts,
     getLikertById,
+    getLikertBySlug,
     addLikert,
     updateLikert,
     deleteLikert,

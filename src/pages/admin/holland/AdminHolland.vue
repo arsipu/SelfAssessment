@@ -53,7 +53,7 @@
               <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
               <td class="px-4 md:px-5 py-3">
                 <button
-                  @click="goToQuestions(h.id)"
+                  @click="goToQuestions(h)"
                   class="text-sm font-medium text-text-primary hover:text-instrument hover:underline transition-colors text-left cursor-pointer"
                 >
                   {{ h.name }}
@@ -94,7 +94,7 @@
               <td class="px-4 md:px-5 py-3">
                 <div class="flex items-center gap-2">
                   <button
-                    @click="goToQuestions(h.id)"
+                    @click="goToQuestions(h)"
                     class="p-2.5 md:p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Kelola Pertanyaan"
                   >
@@ -272,8 +272,8 @@ const changeStatus = async (id, status) => {
   }
 }
 
-const goToQuestions = (id) => {
-  router.push({ name: 'admin-holland-questions', params: { id } })
+const goToQuestions = (item) => {
+  router.push({ name: 'admin-holland-questions', params: { slug: item.slug } })
 }
 
 const openEditModal = (h) => {

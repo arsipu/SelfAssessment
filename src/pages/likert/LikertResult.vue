@@ -152,7 +152,8 @@ import { exportResultToPDF } from '@/utils/likert-pdf-export'
 
 const route = useRoute()
 const router = useRouter()
-const likertId = route.params.id
+const likertSlug = route.params.slug
+const likertId = computed(() => likertStore?.currentLikert?.id || null)
 
 const likertStore = useLikertStore()
 const likertSessionStore = useLikertSessionStore()
@@ -190,7 +191,7 @@ const answerLabelMap = Object.fromEntries(
   LIKERT_SCALE_OPTIONS.map((opt) => [opt.value, opt.label])
 )
 
-const result = computed(() => likertSessionStore.getResult(likertId))
+const result = computed(() => likertSessionStore.getResult(likertId.value))
 const respondentName = computed(() => result.value?.respondentName || '-')
 const maxScore = computed(() => categories.value[0]?.max ?? categories.value[0]?.min ?? '-')
 
@@ -236,19 +237,19 @@ const sections = computed(() => {
 
 onMounted(async () => {
   if (!result.value) {
-    router.replace({ name: 'likert-form', params: { id: likertId } })
+    router.replace({ name: 'likert-form', params: { slug: likertSlug } })
     return
   }
 
   loading.value = true
   try {
     await Promise.all([
-      likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId),
-      likertQuestionsStore.fetchQuestions(likertId),
+      likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertBySlug(likertSlug),
+      likertQuestionsStore.fetchQuestions(likertId.value),
       categoryStore.fetchCategories(),
     ])
 
-    const scales = await likertStore.fetchLikertScales(likertId)
+    const scales = await likertStore.fetchLikertScales(likertId.value)
     categories.value = scales.map((s) => ({
       ...s,
       bg: badgeStyleMap[s.label]?.bg || 'var(--color-surface-muted)',
