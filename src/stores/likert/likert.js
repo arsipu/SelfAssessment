@@ -154,10 +154,52 @@ export const useLikertStore = defineStore('likert', () => {
   }
 }
 
+  // ── Scale CRUD ────────────────────────────────────────────
+
+  const addScale = async (likertId, { score, range, description }) => {
+    try {
+      const ref = await addDoc(collection(db, 'likert', likertId, 'scale'), {
+        score,
+        range,
+        description,
+      })
+      console.log('Scale added with ID:', ref.id)
+      return ref.id
+    } catch (error) {
+      console.error('Error adding scale:', error)
+      throw error
+    }
+  }
+
+  const updateScale = async (likertId, scaleId, { score, range, description }) => {
+    try {
+      await updateDoc(doc(db, 'likert', likertId, 'scale', scaleId), {
+        score,
+        range,
+        description,
+      })
+      console.log('Scale updated:', scaleId)
+    } catch (error) {
+      console.error('Error updating scale:', error)
+      throw error
+    }
+  }
+
+  const deleteScale = async (likertId, scaleId) => {
+    try {
+      await deleteDoc(doc(db, 'likert', likertId, 'scale', scaleId))
+      console.log('Scale deleted:', scaleId)
+    } catch (error) {
+      console.error('Error deleting scale:', error)
+      throw error
+    }
+  }
+
   return {
     likerts,
     currentLikert,
     loading,
+    currentLikertScales,
     fetchLikerts,
     getLikertById,
     addLikert,
@@ -165,5 +207,8 @@ export const useLikertStore = defineStore('likert', () => {
     deleteLikert,
     updateLikertStatus,
     fetchLikertScales,
+    addScale,
+    updateScale,
+    deleteScale,
   }
 })

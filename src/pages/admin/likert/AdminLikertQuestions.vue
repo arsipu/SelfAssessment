@@ -20,14 +20,24 @@
           <h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">{{ currentLikert?.name ?? 'Memuat...' }}</h1>
           <p class="text-sm text-text-secondary max-w-3xl">{{ currentLikert?.description }}</p>
         </div>
-        <button
-          @click="router.push({ name: 'admin-likert-submissions', params: { id: likertId } })"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
-        >
-          <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
+        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <button
+            @click="openScaleModal"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+          >
+            <font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 shrink-0" />
 
-          Lihat Submissions
-        </button>
+            Kelola Skala
+          </button>
+          <button
+            @click="router.push({ name: 'admin-likert-submissions', params: { id: likertId } })"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+          >
+            <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
+
+            Lihat Submissions
+          </button>
+        </div>
       </div>
     </div>
 
@@ -223,7 +233,7 @@
       </div>
     </div>
 
-    <!-- Modal Hapus -->
+    <!-- Modal Hapus Soal -->
     <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
         <div class="p-4 md:p-6 overflow-y-auto">
@@ -234,6 +244,136 @@
           <button @click="showDeleteModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
           <button @click="confirmDelete" :disabled="saving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
             {{ saving ? 'Menghapus...' : 'Hapus' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Kelola Skala -->
+    <div v-if="showScaleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh]">
+        <div class="px-4 md:px-6 py-4 border-b border-border flex justify-between items-center shrink-0">
+          <h3 class="text-base font-semibold text-text-primary">Kelola Skala Penilaian</h3>
+          <button @click="closeScaleModal" class="text-text-muted hover:text-text-secondary transition-colors p-1 cursor-pointer">
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
+          </button>
+        </div>
+
+        <div class="p-4 md:p-6 overflow-y-auto space-y-4">
+          <!-- Daftar Skala -->
+          <div v-if="scales.length === 0" class="text-center text-sm text-text-muted py-8">
+            Belum ada skala penilaian. Tambah skala baru untuk mulai.
+          </div>
+
+          <div
+            v-for="(s, index) in scales"
+            :key="s.id"
+            class="bg-surface border border-border rounded-lg overflow-hidden"
+          >
+            <div class="px-4 py-3 bg-surface-muted flex items-center justify-between gap-4 border-b border-border">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold text-text-muted bg-surface px-2 py-0.5 rounded border border-border">
+                  {{ s.min }} – {{ s.max }}
+                </span>
+                <span class="text-sm font-medium text-text-primary">{{ s.label }}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button
+                  @click="editScaleItem(s)"
+                  class="p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors cursor-pointer"
+                  title="Edit skala"
+                >
+                  <font-awesome-icon icon="fa-solid fa-pen" class="w-4 h-4 shrink-0" />
+                </button>
+                <button
+                  @click="deleteScaleItem(s.id)"
+                  class="p-2 rounded-lg text-danger hover:bg-danger-soft transition-colors cursor-pointer"
+                  title="Hapus skala"
+                >
+                  <font-awesome-icon icon="fa-solid fa-trash" class="w-4 h-4 shrink-0" />
+                </button>
+              </div>
+            </div>
+            <div v-if="s.description" class="px-4 py-3">
+              <p class="text-sm text-text-secondary">{{ s.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form tambah skala -->
+        <div class="px-4 md:px-6 py-4 border-t border-border bg-surface-muted">
+          <h4 class="text-sm font-medium text-text-primary mb-3">
+            {{ editingScaleId ? 'Edit Skala' : 'Tambah Skala Baru' }}
+          </h4>
+          <div class="grid grid-cols-12 gap-3 items-start">
+            <div class="col-span-3">
+              <label class="block text-xs font-medium text-text-secondary mb-1">Label</label>
+              <input
+                v-model="scaleForm.score"
+                type="text"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                placeholder="Contoh: Sangat Tinggi"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-text-secondary mb-1">Min</label>
+              <input
+                v-model.number="scaleForm.min"
+                type="number"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                placeholder="0"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-text-secondary mb-1">Max</label>
+              <input
+                v-model.number="scaleForm.max"
+                type="number"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                placeholder="100"
+              />
+            </div>
+            <div class="col-span-3">
+              <label class="block text-xs font-medium text-text-secondary mb-1">Deskripsi</label>
+              <input
+                v-model="scaleForm.description"
+                type="text"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                placeholder="Deskripsi (opsional)"
+              />
+            </div>
+            <div class="col-span-2 flex gap-2 pt-5">
+              <button
+                @click="saveScale"
+                :disabled="!scaleForm.score.trim() || scaleSaving"
+                class="flex-1 px-3 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
+              >
+                {{ scaleSaving ? '...' : editingScaleId ? 'Simpan' : 'Tambah' }}
+              </button>
+              <button
+                v-if="editingScaleId"
+                @click="cancelScaleEdit"
+                class="px-3 py-2.5 md:py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus Skala -->
+    <div v-if="showDeleteScaleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
+        <div class="p-4 md:p-6 overflow-y-auto">
+          <h3 class="text-lg font-semibold text-text-primary">Hapus Skala</h3>
+          <p class="mt-2 text-sm text-text-secondary">Apakah Anda yakin ingin menghapus skala ini? Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="px-4 md:px-6 py-4 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
+          <button @click="showDeleteScaleModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
+          <button @click="confirmDeleteScale" :disabled="scaleSaving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
+            {{ scaleSaving ? 'Menghapus...' : 'Hapus' }}
           </button>
         </div>
       </div>
@@ -277,6 +417,18 @@ const editForm = ref({ question: '', favorable: 'favorable', categoryId: '' })
 // Delete modal
 const showDeleteModal = ref(false)
 const deletingId = ref(null)
+
+// ── Scale State ────────────────────────────────────────────
+
+const showScaleModal = ref(false)
+const scales = ref([])
+const scaleSaving = ref(false)
+const scaleForm = ref({ score: '', min: '', max: '', description: '' })
+const editingScaleId = ref(null)
+
+// Delete scale
+const showDeleteScaleModal = ref(false)
+const deletingScaleId = ref(null)
 
 // ── Lifecycle ──────────────────────────────────────────────
 
@@ -370,6 +522,93 @@ const confirmDelete = async () => {
     console.error(e)
   } finally {
     saving.value = false
+  }
+}
+
+// ── Scale Management ───────────────────────────────────────
+
+const openScaleModal = async () => {
+  showScaleModal.value = true
+  await fetchScales()
+}
+
+const closeScaleModal = () => {
+  showScaleModal.value = false
+  resetScaleForm()
+}
+
+const resetScaleForm = () => {
+  scaleForm.value = { score: '', min: '', max: '', description: '' }
+  editingScaleId.value = null
+}
+
+const fetchScales = async () => {
+  try {
+    const data = await likertStore.fetchLikertScales(likertId)
+    scales.value = data
+  } catch (e) {
+    console.error(e)
+    scales.value = []
+  }
+}
+
+const saveScale = async () => {
+  if (!scaleForm.value.score.trim() || scaleForm.value.min === '' || scaleForm.value.max === '') return
+  scaleSaving.value = true
+  try {
+    const range = `${scaleForm.value.min} – ${scaleForm.value.max}`
+    if (editingScaleId.value) {
+      await likertStore.updateScale(likertId, editingScaleId.value, {
+        score: scaleForm.value.score.trim(),
+        range,
+        description: scaleForm.value.description.trim(),
+      })
+    } else {
+      await likertStore.addScale(likertId, {
+        score: scaleForm.value.score.trim(),
+        range,
+        description: scaleForm.value.description.trim(),
+      })
+    }
+    resetScaleForm()
+    await fetchScales()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    scaleSaving.value = false
+  }
+}
+
+const cancelScaleEdit = () => {
+  resetScaleForm()
+}
+
+const editScaleItem = (s) => {
+  editingScaleId.value = s.id
+  scaleForm.value = {
+    score: s.label,
+    min: s.min,
+    max: s.max,
+    description: s.description || '',
+  }
+}
+
+const deleteScaleItem = (scaleId) => {
+  deletingScaleId.value = scaleId
+  showDeleteScaleModal.value = true
+}
+
+const confirmDeleteScale = async () => {
+  scaleSaving.value = true
+  try {
+    await likertStore.deleteScale(likertId, deletingScaleId.value)
+    showDeleteScaleModal.value = false
+    deletingScaleId.value = null
+    await fetchScales()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    scaleSaving.value = false
   }
 }
 </script>
