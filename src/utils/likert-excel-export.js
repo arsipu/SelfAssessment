@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import { createAndDownloadExcel } from './excel-helper'
 
 export function exportSubmissionsToExcel(submissions, likertName = 'Likert', scales = []) {
   const getScaleLabel = (score) => {
@@ -25,14 +25,6 @@ export function exportSubmissionsToExcel(submissions, likertName = 'Likert', sca
       : '-',
   }))
 
-  const worksheet = XLSX.utils.json_to_sheet(rows)
-
-  // biar kolom gak kegencet, auto width kasar
-  worksheet['!cols'] = Object.keys(rows[0] || {}).map((key) => ({
-    wch: Math.max(key.length, ...rows.map((r) => String(r[key] ?? '').length)) + 2,
-  }))
-
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap')
-  XLSX.writeFile(workbook, `rekap-${likertName}.xlsx`.replace(/\s+/g, '_'))
+  const fileName = `rekap-${likertName}.xlsx`.replace(/\s+/g, '_')
+  return createAndDownloadExcel(rows, 'Rekap', fileName)
 }

@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import { createAndDownloadExcel } from './excel-helper'
 import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE } from '@/apps/holland'
 
 /**
@@ -38,14 +38,6 @@ export function exportSubmissionsToExcel(submissions, hollandName = 'Holland RIA
     }
   })
 
-  const worksheet = XLSX.utils.json_to_sheet(rows)
-
-  // auto width kasar biar kolom gak kegencet
-  worksheet['!cols'] = Object.keys(rows[0] || {}).map((key) => ({
-    wch: Math.max(key.length, ...rows.map((r) => String(r[key] ?? '').length)) + 2,
-  }))
-
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap')
-  XLSX.writeFile(workbook, `rekap-${hollandName}.xlsx`.replace(/\s+/g, '_'))
+  const fileName = `rekap-${hollandName}.xlsx`.replace(/\s+/g, '_')
+  return createAndDownloadExcel(rows, 'Rekap', fileName)
 }
