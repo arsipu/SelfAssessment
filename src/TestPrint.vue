@@ -11,7 +11,7 @@
 
     <div class="print-area bg-white rounded-2xl p-6 shadow-xl border border-dashed border-slate-300">
       <div class="text-center mb-3">
-        <h2 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent">
+        <h2 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent print:bg-none print:text-indigo-600">
           Toko Contoh Jaya
         </h2>
         <p class="text-xs text-slate-500 mt-1">Jl. Testing No. 123, Malang</p>
@@ -61,13 +61,14 @@ function handlePrint() {
 </script>
 
 <style>
-/* Struktural "isolate print-area" — ini gak bisa full Tailwind karena butuh selector body * */
 @media print {
   body * {
     visibility: hidden;
   }
   .print-area, .print-area * {
     visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .print-area {
     position: absolute;

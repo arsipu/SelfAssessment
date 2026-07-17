@@ -30,7 +30,7 @@
 
     <template v-else-if="submission">
       <!-- Tambahkan ref="pdfContent" pada elemen wrapper utamanya -->
-      <div ref="pdfContent" class="pdf-export-wrapper">
+      <div ref="pdfContent" class="pdf-export-wrapper print-area">
 
         <!-- Alert untuk submission yang belum selesai -->
         <div
@@ -58,12 +58,12 @@
               <button
                 v-if="isCompleted"
                 @click="showExportPDFModal = true"
-                class="text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-muted transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
+                class="print:hidden text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-muted transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
               >
                 Unduh PDF
               </button>
               <span
-                class="text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
+                class="print:hidden text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
                 :class="submission.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
               >
                 {{ submission.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
@@ -330,7 +330,7 @@
             Batal
           </button>
           <button
-            @click="confirmExportPDF"
+            @click="handlePrint()"
             :disabled="exportingPDF"
             class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
           >
@@ -539,6 +539,15 @@ onMounted(async () => {
     questionsStore.fetchAllQuestions(hollandId.value),
   ])
 })
+
+
+function handlePrint() {
+  window.print()
+  // Tutup modal jika sukses
+  showExportPDFModal.value = false;
+}
+
+
 </script>
 
 <style scoped>
@@ -546,5 +555,23 @@ onMounted(async () => {
 .avoid-break {
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
 }
 </style>
