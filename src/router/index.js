@@ -6,6 +6,8 @@ import BerandaView from '@/pages/dashboard/BerandaView.vue';
 
 import NotAvailableView from '@/components/NotAvailable.vue';
 
+import TestPrintView from '@/TestPrint.vue';
+
 import Holland from '@/pages/holland/Holland.vue';
 import HollandForm from '@/pages/holland/HollandForm.vue';
 import HollandQuestions from '@/pages/holland/HollandQuestions.vue';
@@ -37,6 +39,8 @@ const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
 	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
+
+    { path: "/print", name: "print", component: TestPrintView },
 
 	// Holland — parameterized by :slug
 	{ path: "/holland", name: "holland", component: Holland },
