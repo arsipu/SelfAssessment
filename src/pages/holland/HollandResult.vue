@@ -1,21 +1,17 @@
 <template>
   <div class="min-h-screen bg-bg">
-
     <div class="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
       <div v-if="!result || loading" class="text-center text-sm text-text-muted py-20">
         Memuat hasil...
       </div>
 
       <div v-else class="space-y-6">
-        <!-- Kartu kode dominan -->
+        
+        <!-- 1. KARTU HASIL UTAMA (Hasil Holland RIASEC) -->
         <div class="bg-surface border border-border rounded-2xl p-5 md:p-8 shadow-sm">
-          <div class="text-center mb-8">
+          <div class="text-center">
             <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
               Hasil Holland RIASEC
-            </p>
-            <h1 class="text-base md:text-lg font-semibold text-text-primary">{{ respondentName }}</h1>
-            <p class="text-xs text-text-muted mt-1 font-mono">
-              Kode: <span class="font-semibold text-text-secondary">{{ result.code }}</span>
             </p>
           </div>
 
@@ -28,7 +24,7 @@
           </div>
 
           <!-- Riasec Hex Chart -->
-           <div class="flex flex-col items-center mb-8">
+          <div class="flex flex-col items-center mb-8">
             <div class="w-full max-w-[240px]">
               <RiasecHexChart 
                 :scores="scorePercentMap" 
@@ -51,7 +47,9 @@
               <p class="text-sm font-semibold text-text-primary mb-1">
                 {{ riasecInfo(code)?.label }} ({{ code }})
               </p>
-              <p class="text-xs text-text-secondary leading-relaxed mb-3">{{ riasecInfo(code)?.description }}</p>
+              <p class="text-xs text-text-secondary leading-relaxed mb-3">
+                {{ riasecInfo(code)?.description }}
+              </p>
 
               <button
                 @click="toggleExpandedCode(code)"
@@ -119,7 +117,7 @@
           </div>
         </div>
 
-        <!-- Breakdown persentase per kategori -->
+        <!-- 2. BREAKDOWN SKOR -->
         <div class="bg-surface border border-border rounded-2xl p-5 md:p-6 shadow-sm">
           <p class="text-xs font-medium text-text-muted mb-4">Rincian skor per kategori</p>
 
@@ -149,10 +147,46 @@
           </p>
         </div>
 
-        <!-- Tombol aksi -->
+        <!-- 3. DATA RESPONDEN (Dipindah ke sini sebagai rekap data) -->
+        <div class="bg-surface border border-border rounded-2xl p-5 md:p-6 shadow-sm">
+          <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-4">
+            Data Responden
+          </p>
+          <!-- Ubah ke 3 kolom di desktop agar tidak terlalu memakan space vertikal -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+            <div>
+              <p class="text-text-muted text-xs mb-1">Nama</p>
+              <p class="text-text-primary font-medium">{{ result?.respondent?.name }}</p>
+            </div>
+            <div>
+              <p class="text-text-muted text-xs mb-1">Usia / Gender</p>
+              <p class="text-text-primary font-medium">
+                {{ formattedBirthDateAge }}, {{ result?.respondent?.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-text-muted text-xs mb-1">Sekolah / Universitas</p>
+              <p class="text-text-primary font-medium">{{ result?.respondent?.school }}</p>
+            </div>
+            <div>
+              <p class="text-text-muted text-xs mb-1">Jurusan</p>
+              <p class="text-text-primary font-medium">{{ result?.respondent?.major }}</p>
+            </div>
+            <div v-if="result?.respondent?.occupation">
+              <p class="text-text-muted text-xs mb-1">Pekerjaan</p>
+              <p class="text-text-primary font-medium">{{ result.respondent.occupation }}</p>
+            </div>
+            <div v-if="result?.respondent?.testPurpose">
+              <p class="text-text-muted text-xs mb-1">Tujuan Tes</p>
+              <p class="text-text-primary font-medium">{{ result.respondent.testPurpose }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. TOMBOL AKSI -->
         <div class="flex flex-col md:flex-row gap-3">
           <button
-            @click="showExportPDFModal = true"
+            @click="handleExportPDF"
             class="w-full md:flex-1 py-3 h-10 border border-border text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition"
           >
             Unduh PDF
@@ -165,7 +199,7 @@
           </router-link>
         </div>
 
-        <!-- Rincian jawaban per soal -->
+        <!-- 5. RINCIAN JAWABAN PER SOAL (Dibiarkan paling bawah karena bisa panjang) -->
         <div class="bg-surface border border-border rounded-2xl p-4 md:p-6 shadow-sm">
           <button
             @click="showDetails = !showDetails"
@@ -240,77 +274,20 @@
             </div>
           </Transition>
         </div>
+        
       </div>
     </div>
-  </div>
-
-  <!-- Modal konfirmasi export PDF -->
-  <Transition name="fade">
-    <div
-      v-if="showExportPDFModal"
-      class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
-      @click.self="showExportPDFModal = false"
-    >
-      <div class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 class="text-base font-semibold text-text-primary mb-2">Unduh hasil PDF?</h2>
-        <p class="text-sm text-text-secondary leading-relaxed mb-6">
-          Rekap hasil akan diunduh dalam format .pdf.
-        </p>
-
-        <div class="flex gap-3">
-          <button
-            @click="showExportPDFModal = false"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
-          >
-            Batal
-          </button>
-          <button
-            @click="confirmExportPDF"
-            :disabled="exportingPDF"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
-          >
-            {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </Transition>
-
-  <!-- Template tersembunyi khusus buat di-screenshot -->
-  <div style="position: fixed; left: -9999px; top: 0;">
-    <HollandScoreCardTemplate
-      ref="scoreCardRef"
-      holland-name="Holland RIASEC"
-      :code="result?.code"
-      :respondent="{
-        name: result?.respondent?.name,
-        school: result?.respondent?.school,
-        major: result?.respondent?.major,
-        birthDateAge: formattedBirthDateAge,
-        gender: result?.respondent?.gender,
-        occupation: result?.respondent?.occupation,
-        testPurpose: result?.respondent?.testPurpose,
-        testDate: result?.respondent?.testDate,
-      }"
-      :top-code="result?.topCode"
-      :scales-label="topCodeChars.map((c) => riasecInfo(c)?.label).join(' · ')"
-      :scales-description="topCodeChars.map((c) => riasecInfo(c)?.description).join(' ')"
-      :scores="scorePercentMap"
-      :riasec-labels="riasecLabelMap"
-    />
   </div>
 </template>
 
 <script setup>
-import HollandScoreCardTemplate from '@/components/HollandScoreCardTemplate.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
-import { exportHollandResultToPDF } from '@/utils/holland-pdf-export'
-import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections } from '@/utils/holland-result'
+import { formatBirthDateAge, buildScoreBreakdown } from '@/utils/holland-result'
 import { HOLLAND_COLUMNS } from '@/apps/holland'
 import RiasecHexChart from '@/components/RiasecHexChart.vue'
 
@@ -326,12 +303,9 @@ const riasecStore = useHollandRiasecStore()
 
 const loading = ref(true)
 const expandedCodes = ref([])
-
-const showExportPDFModal = ref(false)
 const showDetails = ref(false)
 
 const result = computed(() => sessionStore.getResult(hollandId.value))
-const respondentName = computed(() => result.value?.respondentName || '-')
 
 // map kode -> persentase, dipakai buat kirim ke RiasecHexChart
 const scorePercentMap = computed(() => {
@@ -342,20 +316,10 @@ const scorePercentMap = computed(() => {
   return map
 })
 
-const riasecLabelMap = computed(() => {
-  const map = {}
-  for (const item of riasecStore.riasecList) {
-    map[item.id] = item.label
-  }
-  return map
-})
-
-// urutan huruf topCode ("SAE" -> ["S", "A", "E"]), dipakai buat nampilin
-// deskripsi kategori dominan sesuai urutan skor tertinggi
+// urutan huruf topCode ("SAE" -> ["S", "A", "E"])
 const topCodeChars = computed(() => (result.value?.topCode || '').split(''))
 
 // cari data 1 kategori (label, description, skills, careers, subjects)
-// dari riasecList yang sudah di-fetch dari Firestore
 function riasecInfo(code) {
   return riasecStore.riasecList.find((r) => r.id === code) || null
 }
@@ -373,20 +337,11 @@ function toggleExpandedCode(code) {
   }
 }
 
-// breakdown semua 6 kategori buat progress bar, diurutkan dari persentase tertinggi
+// breakdown semua 6 kategori buat progress bar
 const scoreBreakdown = computed(() => {
   const scores = result.value?.scores || {}
   return buildScoreBreakdown(scores, result.value?.topCode)
 })
-
-// rincian jawaban per kategori, pakai teks soal dari questions store
-const answerSections = computed(() =>
-  buildAnswerSections({
-    answers: result.value?.answers,
-    questions: questionsStore.allQuestions,
-    riasecInfo,
-  })
-)
 
 const answeredIds = computed(() => {
   return new Set((result.value?.answers || []).map((a) => a.questionId))
@@ -401,9 +356,7 @@ const dotColors = [
   'var(--color-viz-6)',
 ]
 
-// Rincian jawaban buat tampilan layar: SEMUA soal per kategori & kolom
-// (bukan cuma yang dipilih), ditandai lewat answeredIds. Struktur sengaja
-// mirip `sections` di HollandQuestions.vue biar tata letaknya konsisten.
+// Rincian jawaban buat tampilan layar
 const detailSections = computed(() => {
   return riasecStore.riasecList
     .map((cat, index) => {
@@ -446,25 +399,7 @@ onMounted(async () => {
   }
 })
 
-const scoreCardRef = ref(null)
-const exportingPDF = ref(false)
-
-async function handleExportPDF() {
-  await exportHollandResultToPDF({
-    scoreCardElement: scoreCardRef.value.cardRef,
-    sections: answerSections.value,
-    filename: `hasil-holland-${respondentName.value}.pdf`.replace(/\s+/g, '_'),
-  })
-}
-
-async function confirmExportPDF() {
-  if (exportingPDF.value) return
-  exportingPDF.value = true
-  try {
-    await handleExportPDF()
-    showExportPDFModal.value = false
-  } finally {
-    exportingPDF.value = false
-  }
+function handleExportPDF() {
+  // TODO: Implement PDF export functionality
 }
 </script>

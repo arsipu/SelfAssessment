@@ -64,6 +64,11 @@
 
   --color-danger: #b3503f;
   --color-danger-soft: #f3e2de;
+
+  /* ── Tambahan Opacity Manual (HEX + Alpha) untuk PDF ── */
+  --color-warning-30: #b8863a4d;      /* Sama dengan warning/30 */
+  --color-warning-80: #b8863acc;      /* Sama dengan warning/80 */
+  --color-surface-muted-40: #f7f6ee66; /* Sama dengan surface-muted/40 */
 }
 
 html {
@@ -72,4 +77,48 @@ html {
 
 body {
 	background-color: var(--color-bg);
+}
+
+/* ── PDF Export Styles ── */
+.pdf-export-wrapper.pdf-exporting .pdf-breadcrumb {
+  display: none !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .pdf-actions {
+  display: none !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .pdf-expand-toggle {
+  display: none !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .pdf-expand-content {
+  display: block !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .pdf-alert-warning {
+  display: none !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .bg-surface {
+  background-color: #ffffff !important;
+  border: 1px solid #e8e6d9 !important;
+}
+
+.pdf-export-wrapper.pdf-exporting .bg-surface-muted {
+  background-color: #f7f6ee !important;
+}
+
+/* ── PDF Export Styles for Likert ── */
+.pdf-export-wrapper.pdf-exporting table {
+  border-collapse: collapse !important;
+}
+
+.pdf-export-wrapper.pdf-exporting th,
+.pdf-export-wrapper.pdf-exporting td {
+  border: 1px solid #e8e6d9 !important;
+}
+
+.pdf-export-wrapper.pdf-exporting thead {
+  background-color: #f7f6ee !important;
 }

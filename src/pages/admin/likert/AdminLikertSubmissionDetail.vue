@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <div class="pdf-breadcrumb flex items-center gap-2 mb-4 flex-wrap">
       <button @click="router.push({ name: 'admin-likert' })" class="text-sm text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap cursor-pointer">
         Survei
       </button>
@@ -22,10 +22,12 @@
     </div>
 
     <template v-else-if="submission">
+      <!-- pdf-content wrapper untuk export -->
+      <div ref="pdfContent" class="pdf-export-wrapper">
       <!-- Alert untuk submission yang belum selesai -->
       <div
         v-if="!isCompleted"
-        class="bg-warning-soft border border-warning/30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
+        class="pdf-alert-warning bg-warning-soft border border-warning/30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
       >
         <div class="flex items-start gap-3">
           <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +46,7 @@
       <div class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
           <h1 class="text-lg md:text-xl font-semibold text-text-primary">{{ submission.name }}</h1>
-          <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="pdf-actions flex items-center gap-2 w-full sm:w-auto">
             <button
               v-if="isCompleted"
               @click="showExportPDFModal = true"
@@ -92,14 +94,14 @@
       <div
         v-for="section in sections"
         :key="section.key"
-        class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6 last:mb-0"
+        class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6 last:mb-0 avoid-break"
       >
         <div class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-text-muted shrink-0"></span>
           <h2 class="text-sm font-medium text-text-primary">{{ section.label }}</h2>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse table-fixed">
+          <table class="w-full text-left border-collapse table-fixed avoid-break">
             <thead>
               <tr class="bg-surface border-b border-border">
                 <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">No</th>
@@ -108,7 +110,7 @@
                 <th class="w-[12%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Poin</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border avoid-break">
               <tr v-for="(item, index) in section.items" :key="item.questionId">
                 <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
                 <td class="px-4 md:px-5 py-3 text-sm text-text-primary">{{ item.questionText }}</td>
@@ -119,6 +121,7 @@
           </table>
         </div>
       </div>
+      </div> <!-- Tutup div ref="pdfContent" -->
     </template>
 
     <div v-else class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
@@ -155,32 +158,12 @@
           </button>
         </div>
       </div>
-    </div>
-  </Transition>
-  <div style="position: fixed; left: -9999px; top: 0;">
-    <ScoreCardTemplate
-      ref="scoreCardRef"
-      :likert-name="currentLikert?.name"
-      :code="submission?.code"
-      :respondent="{
-        nama: submission?.name,
-        kelas: submission?.class,
-        sekolah: submission?.school,
-        jurusan: submission?.major,
-        usia: submission?.age,
-        jenisKelamin: submission?.gender,
-        pkl: submission?.internship,
-      }"
-      :total-score="submission?.totalScore"
-      :scales-label="scalesLabel"
-      :scales-description="scalesDescription"
-    />
   </div>
+  </Transition>
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
-import { exportResultToPDF } from '@/utils/likert-pdf-export'
+import { exportToPDF } from '@/utils/likert-pdf-export-v2'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -211,7 +194,7 @@ const scales = ref([])
 
 const showExportPDFModal = ref(false)
 const exportingPDF = ref(false)
-const scoreCardRef = ref(null)
+const pdfContent = ref(null)
 
 const isCompleted = computed(() =>
   submission.value?.status === 'completed'
@@ -230,17 +213,38 @@ const scalesDescription = computed(() => {
 })
 
 async function confirmExportPDF() {
-  if (exportingPDF.value) return
-  exportingPDF.value = true
+  if (!pdfContent.value) return;
+
+  exportingPDF.value = true;
+  
   try {
-    await exportResultToPDF({
-      scoreCardElement: scoreCardRef.value.cardRef,
-      sections: sections.value,
-      filename: `hasil-${currentLikert.value?.name}-${submission.value?.name}.pdf`.replace(/\s+/g, '_'),
-    })
-    showExportPDFModal.value = false
+    // Tentukan nama file yang dinamis
+    const fileName = `Hasil_Likert_${submission.value?.name?.replace(/\s+/g, '_') || 'Responden'}.pdf`;
+    
+    // Tambahkan class untuk styling PDF sebelum export
+    pdfContent.value.classList.add('pdf-exporting');
+    
+    // Beri waktu untuk Vue merender perubahan
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Panggil fungsi ekspor yang sederhana (mirip Holland)
+    await exportToPDF(pdfContent.value, fileName);
+    
+    // Hapus class setelah export
+    pdfContent.value.classList.remove('pdf-exporting');
+    
+    // Tutup modal jika sukses
+    showExportPDFModal.value = false;
+  } catch (error) {
+    console.error('Gagal mengekspor PDF:', error);
+    alert('Terjadi kesalahan saat mengekspor PDF.');
+    
+    // Hapus class jika terjadi error
+    if (pdfContent.value) {
+      pdfContent.value.classList.remove('pdf-exporting');
+    }
   } finally {
-    exportingPDF.value = false
+    exportingPDF.value = false;
   }
 }
 
@@ -296,3 +300,11 @@ onMounted(async () => {
   console.log(scales.value)
 })
 </script>
+
+<style scoped>
+/* Tambahkan class ini */
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+</style>
