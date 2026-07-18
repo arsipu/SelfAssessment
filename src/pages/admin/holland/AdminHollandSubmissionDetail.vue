@@ -155,87 +155,63 @@
           </div>
         </div>
 
-        <!-- Detail keterampilan, pekerjaan, dan mata pelajaran untuk kode dominan -->
-        <div v-if="topCodeChars.length" class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+        <!-- Detail keterampilan, pekerjaan, dan mata pelajaran untuk kode dominan (1 kode teratas) -->
+        <div v-if="submission.topCode && topCodeInfo" class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
           <p class="text-xs font-medium text-text-muted mb-4">Detail minat dominan</p>
 
-          <div class="space-y-3">
-            <div
-              v-for="code in topCodeChars"
-              :key="code"
-              class="bg-surface-muted border border-border rounded-xl p-4 avoid-break"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-semibold text-text-primary">
-                  {{ riasecMap[code]?.label || RIASEC_GUIDE_FALLBACK[code]?.label }} ({{ code }})
-                </p>
-              </div>
-              <p class="text-xs text-text-secondary leading-relaxed mb-3">
-                {{ riasecMap[code]?.description || RIASEC_GUIDE_FALLBACK[code]?.description }}
+          <div class="bg-surface-muted border border-border rounded-xl p-4 avoid-break">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-semibold text-text-primary">
+                {{ topCodeInfo.label || RIASEC_GUIDE_FALLBACK[submission.topCode]?.label }} ({{ submission.topCode }})
               </p>
+            </div>
+            <p class="text-xs text-text-secondary leading-relaxed mb-3">
+              {{ topCodeInfo.description || RIASEC_GUIDE_FALLBACK[submission.topCode]?.description }}
+            </p>
 
-              <button
-                @click="toggleExpandedCode(code)"
-                class="pdf-expand-toggle flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-              >
-                {{ expandedCodes.includes(code) ? 'Sembunyikan detail' : 'Lihat keterampilan & rekomendasi' }}
-                <svg
-                  class="w-3.5 h-3.5 transition-transform duration-200"
-                  :class="{ 'rotate-180': expandedCodes.includes(code) }"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            <div v-if="(topCodeInfo.skills || RIASEC_GUIDE_FALLBACK[submission.topCode]?.skills)?.length" class="mb-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Keterampilan kunci
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="skill in (topCodeInfo.skills || RIASEC_GUIDE_FALLBACK[submission.topCode]?.skills)"
+                  :key="skill"
+                  class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
 
-              <Transition name="expand">
-                <div v-if="expandedCodes.includes(code)" class="pdf-expand-content mt-3 pt-3 border-t border-border space-y-3">
-                  <div v-if="(riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Keterampilan kunci
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="skill in (riasecMap[code]?.skills || RIASEC_GUIDE_FALLBACK[code]?.skills)"
-                        :key="skill"
-                        class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ skill }}
-                      </span>
-                    </div>
-                  </div>
+            <div v-if="(topCodeInfo.careers || RIASEC_GUIDE_FALLBACK[submission.topCode]?.careers)?.length" class="mb-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Contoh pekerjaan relevan
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="career in (topCodeInfo.careers || RIASEC_GUIDE_FALLBACK[submission.topCode]?.careers)"
+                  :key="career"
+                  class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
+                >
+                  {{ career }}
+                </span>
+              </div>
+            </div>
 
-                  <div v-if="(riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Contoh pekerjaan relevan
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="career in (riasecMap[code]?.careers || RIASEC_GUIDE_FALLBACK[code]?.careers)"
-                        :key="career"
-                        class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ career }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div v-if="(riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Mata pelajaran pendukung
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="subject in (riasecMap[code]?.subjects || RIASEC_GUIDE_FALLBACK[code]?.subjects)"
-                        :key="subject"
-                        class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ subject }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Transition>
+            <div v-if="(topCodeInfo.subjects || RIASEC_GUIDE_FALLBACK[submission.topCode]?.subjects)?.length">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Mata pelajaran pendukung
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="subject in (topCodeInfo.subjects || RIASEC_GUIDE_FALLBACK[submission.topCode]?.subjects)"
+                  :key="subject"
+                  class="inline-flex items-center justify-center text-xs px-2.5 py-1.5 rounded-md bg-surface border border-border text-text-primary"
+                >
+                  {{ subject }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -379,8 +355,12 @@ const isCompleted = computed(() =>
   submission.value?.status === 'completed'
 )
 
-// urutan huruf topCode ("SAE" -> ["S", "A", "E"])
-const topCodeChars = computed(() => (submission.value?.topCode || '').split(''))
+// data 1 kategori dominan (label, description, skills, careers, subjects)
+const topCodeInfo = computed(() => {
+  const code = submission.value?.topCode
+  if (!code) return null
+  return riasecMap.value[code] || null
+})
 
 // riasecMap[code] -> { label, description, skills, careers } dari Firestore
 const riasecMap = computed(() => {
@@ -399,17 +379,6 @@ const formattedBirthDateAge = computed(() =>
 const scoreBreakdown = computed(() => {
   return buildScoreBreakdown(submission.value?.scores, submission.value?.topCode)
 })
-
-const expandedCodes = ref([])
-
-function toggleExpandedCode(code) {
-  const idx = expandedCodes.value.indexOf(code)
-  if (idx === -1) {
-    expandedCodes.value.push(code)
-  } else {
-    expandedCodes.value.splice(idx, 1)
-  }
-}
 
 const answeredIds = computed(() => {
   return new Set((submission.value?.answers || []).map((a) => a.questionId))
@@ -493,11 +462,6 @@ async function confirmExportPDF() {
     
     // Tambahkan class untuk styling PDF sebelum export
     pdfContent.value.classList.add('pdf-exporting');
-    
-    // Auto-expand semua section untuk PDF
-    if (topCodeChars.value.length > 0) {
-      expandedCodes.value = [...topCodeChars.value];
-    }
     
     // Beri waktu untuk Vue merender perubahan
     await new Promise(resolve => setTimeout(resolve, 100));

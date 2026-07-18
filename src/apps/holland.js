@@ -251,7 +251,7 @@ export const RIASEC_COLUMNS = HOLLAND_COLUMNS
  * @param {number} topN
  * @returns {string} contoh: "SAE"
  */
-export function getTopRiasecCode(scores, topN = 3) {
+export function getTopRiasecCode(scores, topN = 1) {
   return Object.entries(scores)
     .map(([code, s]) => [code, s.total ? (s.count / s.total) * 100 : 0])
     .sort((a, b) => b[1] - a[1])

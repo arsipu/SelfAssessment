@@ -20,7 +20,7 @@
             <div class="text-4xl md:text-5xl font-bold tracking-widest text-text-primary mb-1">
               {{ result.topCode }}
             </div>
-            <p class="text-xs text-text-muted">Kode minat dominan (3 kategori tertinggi)</p>
+            <p class="text-xs text-text-muted">Kode minat dominan (kategori tertinggi)</p>
           </div>
 
           <!-- Riasec Hex Chart -->
@@ -37,82 +37,58 @@
             </p>
           </div>
 
-          <!-- Deskripsi tiap kategori dalam topCode -->
-          <div class="space-y-3">
-            <div
-              v-for="code in topCodeChars"
-              :key="code"
-              class="bg-surface-muted border border-border rounded-xl p-4"
-            >
-              <p class="text-sm font-semibold text-text-primary mb-1">
-                {{ riasecInfo(code)?.label }} ({{ code }})
-              </p>
-              <p class="text-xs text-text-secondary leading-relaxed mb-3">
-                {{ riasecInfo(code)?.description }}
-              </p>
+          <!-- Deskripsi kategori dominan (1 kode teratas) -->
+          <div v-if="topCodeInfo" class="bg-surface-muted border border-border rounded-xl p-4">
+            <p class="text-sm font-semibold text-text-primary mb-1">
+              {{ topCodeInfo.label }} ({{ result.topCode }})
+            </p>
+            <p class="text-xs text-text-secondary leading-relaxed mb-4">
+              {{ topCodeInfo.description }}
+            </p>
 
-              <button
-                @click="toggleExpandedCode(code)"
-                class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-              >
-                {{ expandedCodes.includes(code) ? 'Sembunyikan detail' : 'Lihat keterampilan & rekomendasi' }}
-                <svg
-                  class="w-3.5 h-3.5 transition-transform duration-200"
-                  :class="{ 'rotate-180': expandedCodes.includes(code) }"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            <div v-if="topCodeInfo.skills?.length" class="mb-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Keterampilan kunci
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="skill in topCodeInfo.skills"
+                  :key="skill"
+                  class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
 
-              <Transition name="expand">
-                <div v-if="expandedCodes.includes(code)" class="mt-3 pt-3 border-t border-border space-y-3">
-                  <div v-if="riasecInfo(code)?.skills?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Keterampilan kunci
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="skill in riasecInfo(code).skills"
-                        :key="skill"
-                        class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ skill }}
-                      </span>
-                    </div>
-                  </div>
+            <div v-if="topCodeInfo.careers?.length" class="mb-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Contoh pekerjaan relevan
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="career in topCodeInfo.careers"
+                  :key="career"
+                  class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
+                >
+                  {{ career }}
+                </span>
+              </div>
+            </div>
 
-                  <div v-if="riasecInfo(code)?.careers?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Contoh pekerjaan relevan
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="career in riasecInfo(code).careers"
-                        :key="career"
-                        class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ career }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div v-if="riasecInfo(code)?.subjects?.length">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
-                      Mata pelajaran pendukung
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="subject in riasecInfo(code).subjects"
-                        :key="subject"
-                        class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
-                      >
-                        {{ subject }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Transition>
+            <div v-if="topCodeInfo.subjects?.length">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+                Mata pelajaran pendukung
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="subject in topCodeInfo.subjects"
+                  :key="subject"
+                  class="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text-primary"
+                >
+                  {{ subject }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -302,7 +278,6 @@ const questionsStore = useHollandQuestionsStore()
 const riasecStore = useHollandRiasecStore()
 
 const loading = ref(true)
-const expandedCodes = ref([])
 const showDetails = ref(false)
 
 const result = computed(() => sessionStore.getResult(hollandId.value))
@@ -316,10 +291,14 @@ const scorePercentMap = computed(() => {
   return map
 })
 
-// urutan huruf topCode ("SAE" -> ["S", "A", "E"])
-const topCodeChars = computed(() => (result.value?.topCode || '').split(''))
+// data 1 kategori dominan (label, description, skills, careers, subjects)
+const topCodeInfo = computed(() => {
+  const code = result.value?.topCode
+  if (!code) return null
+  return riasecStore.riasecList.find((r) => r.id === code) || null
+})
 
-// cari data 1 kategori (label, description, skills, careers, subjects)
+// cari data 1 kategori (untuk progress bar labels)
 function riasecInfo(code) {
   return riasecStore.riasecList.find((r) => r.id === code) || null
 }
@@ -327,15 +306,6 @@ function riasecInfo(code) {
 const formattedBirthDateAge = computed(() =>
   formatBirthDateAge(result.value?.respondent)
 )
-
-function toggleExpandedCode(code) {
-  const idx = expandedCodes.value.indexOf(code)
-  if (idx === -1) {
-    expandedCodes.value.push(code)
-  } else {
-    expandedCodes.value.splice(idx, 1)
-  }
-}
 
 // breakdown semua 6 kategori buat progress bar
 const scoreBreakdown = computed(() => {
