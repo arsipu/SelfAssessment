@@ -7,10 +7,13 @@
       </div>
 
       <div v-else class="space-y-6">
-        <!-- Kartu skor -->
-        <div class="bg-surface border border-border rounded-2xl p-5 md:p-8 shadow-sm">
-          <div class="text-center mb-8">
-            <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+
+        <!-- CARD RAPOR -->
+        <div class="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+
+          <!-- Kop -->
+          <div class="p-5 md:p-6 border-b border-border text-center">
+            <p class="text-[11px] text-text-muted uppercase tracking-wide mb-1">
               Hasil {{ likertStore.currentLikert?.name || 'Kuesioner' }}
             </p>
             <h1 class="text-base md:text-lg font-semibold text-text-primary">{{ respondentName }}</h1>
@@ -19,22 +22,41 @@
             </p>
           </div>
 
-          <div class="flex flex-col items-center mb-8">
-            <div class="text-4xl md:text-5xl font-bold text-text-primary mb-1">{{ result.totalScore }}</div>
+          <!-- Ringkasan: total skor + badge + deskripsi -->
+          <div class="p-5 md:p-8 border-b border-border">
+            <LikertScoreSummary
+              :total-score="result.totalScore"
+              :scale-label="category?.label"
+              :scale-description="category?.description"
+              :badge-bg="category?.bg"
+              :badge-text="category?.text"
+              variant="center"
+            />
+          </div>
 
-            <span
-              class="px-4 py-1.5 rounded-full text-sm font-semibold"
-              :style="{ backgroundColor: category?.bg, color: category?.text }"
+          <!-- Rincian jawaban (collapsible, nempel di card) -->
+          <div class="p-4 md:p-6">
+            <button
+              @click="showDetails = !showDetails"
+              class="w-full flex items-center justify-between gap-2"
             >
-              {{ category?.label || '-' }}
-            </span>
+              <p class="text-xs font-medium text-text-muted">Rincian jawaban</p>
+              <font-awesome-icon
+                icon="fa-solid fa-chevron-down"
+                class="w-4 h-4 text-text-muted transition-transform duration-200"
+                :class="{ 'fa-rotate-180': showDetails }"
+              />
+            </button>
+
+            <Transition name="expand">
+              <div v-if="showDetails" class="mt-4">
+                <LikertAnswerSections :sections="sections" variant="list" />
+              </div>
+            </Transition>
           </div>
 
-          <div class="bg-surface-muted border border-border rounded-xl p-5">
-            <p class="text-sm text-text-secondary leading-relaxed">{{ category?.description }}</p>
-          </div>
         </div>
-        
+
         <!-- Tombol aksi -->
         <div class="flex flex-col md:flex-row gap-3">
           <button
@@ -50,58 +72,19 @@
             Selesai
           </router-link>
         </div>
-        <!-- Rincian jawaban per soal -->
-        <div class="bg-surface border border-border rounded-2xl p-4 md:p-6 shadow-sm">
-          <button
-            @click="showDetails = !showDetails"
-            class="w-full flex items-center justify-between gap-2"
-          >
-            <p class="text-xs font-medium text-text-muted">Rincian jawaban</p>
-            <font-awesome-icon
-              icon="fa-solid fa-chevron-down"
-              class="w-4 h-4 text-text-muted transition-transform duration-200"
-              :class="{ 'fa-rotate-180': showDetails }"
-            />
-          </button>
 
-          <Transition name="expand">
-            <div v-if="showDetails" class="mt-4">
-              <div v-for="section in sections" :key="section.key" class="mb-5 last:mb-0">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
-                  <span class="text-xs font-medium text-text-secondary">{{ section.label }}</span>
-                </div>
-
-                <div class="space-y-2">
-                  <div
-                    v-for="(item, i) in section.items"
-                    :key="item.questionId"
-                    class="flex items-start justify-between gap-3 py-2.5 px-3 rounded-lg bg-surface-muted"
-                  >
-                    <p class="text-sm text-text-primary leading-relaxed flex-1">
-                      <span class="text-text-muted mr-1">{{ i + 1 }}.</span>{{ item.questionText }}
-                    </p>
-                    <span class="shrink-0 text-[11px] md:text-xs font-semibold px-2 py-1 rounded-md bg-surface border border-border text-text-primary whitespace-nowrap">
-                      {{ item.answerLabel }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Transition>
-        </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Modal konfirmasi export PDF -->
-   <Transition name="fade">
+  <Transition name="fade">
     <div
       v-if="showExportPDFModal"
       class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
       @click.self="showExportPDFModal = false"
     >
-        <div class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
+      <div class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto">
         <h2 class="text-base font-semibold text-text-primary mb-2">Unduh hasil PDF?</h2>
         <p class="text-sm text-text-secondary leading-relaxed mb-6">
           Rekap jawaban akan diunduh dalam format .pdf.
@@ -125,6 +108,7 @@
       </div>
     </div>
   </Transition>
+
   <!-- Template tersembunyi khusus buat di-screenshot -->
   <div style="position: fixed; left: -9999px; top: 0;">
     <ScoreCardTemplate
@@ -141,6 +125,8 @@
 
 <script setup>
 import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
+import LikertScoreSummary from '@/components/likert/LikertScoreSummary.vue'
+import LikertAnswerSections from '@/components/likert/LikertAnswerSections.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
@@ -164,7 +150,6 @@ const categories = ref([])
 const loading = ref(true)
 
 const showExportPDFModal = ref(false)
-
 const showDetails = ref(false)
 
 async function confirmExportPDF() {
@@ -186,7 +171,6 @@ const badgeStyleMap = {
   'Sangat Rendah': { bg: 'var(--color-level-1-soft)', text: 'var(--color-level-1)' },
 }
 
-// map value jawaban (SS/S/TS/STS) -> label tampilan
 const answerLabelMap = Object.fromEntries(
   LIKERT_SCALE_OPTIONS.map((opt) => [opt.value, opt.label])
 )
@@ -209,8 +193,6 @@ const category = computed(() => {
   return null
 })
 
-// gabungkan submissionResult (jawaban) dengan teks soal & nama kategori,
-// dikelompokkan per kategori — sama kayak tampilan LikertQuestions.vue
 const sections = computed(() => {
   const answers = result.value?.answers || []
   const grouped = {}
@@ -260,7 +242,6 @@ onMounted(async () => {
   }
 })
 
-
 const scoreCardRef = ref(null)
 const exportingPDF = ref(false)
 
@@ -278,3 +259,36 @@ async function handleExportPDF() {
   }
 }
 </script>
+
+<style scoped>
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  body {
+    margin: 1cm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+</style>

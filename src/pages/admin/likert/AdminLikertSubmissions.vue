@@ -48,31 +48,31 @@
     <!-- Table -->
     <div v-else class="bg-surface border border-border rounded-xl overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="app-table">
           <thead>
-            <tr class="bg-surface-muted border-b border-border">
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Nama</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Sekolah</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Kelas</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Kode</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Skor</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Tanggal</th>
-              <th class="px-4 md:px-5 py-3 w-12"></th>
+            <tr>
+              <th>Nama</th>
+              <th>Sekolah</th>
+              <th>Kelas</th>
+              <th>Kode</th>
+              <th>Status</th>
+              <th>Skor</th>
+              <th>Tanggal</th>
+              <th class="w-12"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-border">
+          <tbody>
             <tr
               v-for="s in submissions"
               :key="s.id"
               @click="router.push({ name: 'admin-likert-submission-detail', params: { slug: likertSlug, submissionSlug: s.slug } })"
-              class="hover:bg-surface-muted transition-colors cursor-pointer"
+              class="cursor-pointer"
             >
-              <td class="px-4 md:px-5 py-3 text-sm text-text-primary font-medium">{{ s.name }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.school }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.class }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-muted font-mono">{{ s.code }}</td>
-              <td class="px-4 md:px-5 py-3">
+              <td class="font-medium">{{ s.name }}</td>
+              <td>{{ s.school }}</td>
+              <td>{{ s.class }}</td>
+              <td class="font-mono">{{ s.code }}</td>
+              <td>
                 <span
                   class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap"
                   :class="s.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
@@ -80,9 +80,9 @@
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.totalScore ?? '-' }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
-              <td class="px-4 md:px-5 py-3 text-right">
+              <td class="">{{ s.totalScore ?? '-' }}</td>
+              <td class="whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
+              <td class="text-right">
                 <font-awesome-icon
                   icon="fa-solid fa-chevron-right"
                   class="w-5 h-5 text-text-muted group-hover:text-text-secondary transition-colors shrink-0"

@@ -69,6 +69,12 @@
   --color-warning-30: #b8863a4d;      /* Sama dengan warning/30 */
   --color-warning-80: #b8863acc;      /* Sama dengan warning/80 */
   --color-surface-muted-40: #f7f6ee66; /* Sama dengan surface-muted/40 */
+
+  --color-table-header: #754c35;
+  --color-table-value: #eef29d;
+
+  --color-table-header-text: #ffffff;
+  --color-table-value-text: #000000;
 }
 
 html {
@@ -77,6 +83,14 @@ html {
 
 body {
 	background-color: var(--color-bg);
+}
+
+tr.bg-table-header {
+  background-color: var(--color-table-header);
+}
+
+tr.bg-table-value {
+  background-color: var(--color-table-value);
 }
 
 /* ── PDF Export Styles ── */
@@ -121,4 +135,40 @@ body {
 
 .pdf-export-wrapper.pdf-exporting thead {
   background-color: #f7f6ee !important;
+}
+
+@layer components {
+  .app-table {
+    /* nilai default, bisa dioverride per instance */
+    --table-header-bg: var(--color-table-header);
+    --table-header-text: var(--color-table-header-text);
+    --table-value-bg: var(--color-table-value);
+    --table-value-text: var(--color-table-value-text);
+
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+  }
+
+  .app-table thead {
+    background-color: var(--table-header-bg);
+  }
+
+  .app-table thead th {
+    @apply px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider;
+    color: var(--table-header-text);
+  }
+
+  .app-table tbody {
+    @apply divide-y divide-border;
+  }
+
+  .app-table tbody tr {
+    background-color: var(--table-value-bg);
+  }
+
+  .app-table tbody td {
+    @apply px-4 md:px-5 py-3 text-sm;
+    color: var(--table-value-text);
+  }
 }

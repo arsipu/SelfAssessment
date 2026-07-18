@@ -47,31 +47,31 @@
     <!-- Table -->
     <div v-else class="bg-surface border border-border rounded-xl overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="app-table">
           <thead>
-            <tr class="bg-surface-muted border-b border-border">
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Nama</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Sekolah</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Jurusan</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Kode</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Kode RIASEC</th>
-              <th class="px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Tanggal</th>
-              <th class="px-4 md:px-5 py-3 w-12"></th>
+            <tr>
+              <th>Nama</th>
+              <th>Sekolah</th>
+              <th>Jurusan</th>
+              <th>Kode</th>
+              <th>Status</th>
+              <th>Kode RIASEC</th>
+              <th>Tanggal</th>
+              <th class="w-12"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-border">
+          <tbody>
             <tr
               v-for="s in submissions"
               :key="s.id"
               @click="router.push({ name: 'admin-holland-submission-detail', params: { slug: hollandSlug, submissionSlug: s.slug } })"
-              class="hover:bg-surface-muted transition-colors cursor-pointer"
+              class="cursor-pointer"
             >
-              <td class="px-4 md:px-5 py-3 text-sm text-text-primary font-medium">{{ s.name }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.school }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.major }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-muted font-mono">{{ s.code }}</td>
-              <td class="px-4 md:px-5 py-3">
+              <td class="font-medium">{{ s.name }}</td>
+              <td>{{ s.school }}</td>
+              <td>{{ s.major }}</td>
+              <td class="font-mono">{{ s.code }}</td>
+              <td>
                 <span
                   class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap"
                   :class="s.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
@@ -79,9 +79,9 @@
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-primary font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
-              <td class="px-4 md:px-5 py-3 text-right">
+              <td class="font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
+              <td class="text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
+              <td class="text-right">
                 <font-awesome-icon
                   icon="fa-solid fa-chevron-right"
                   class="w-5 h-5 text-text-muted group-hover:text-text-secondary transition-colors shrink-0"
@@ -90,7 +90,7 @@
             </tr>
 
             <tr v-if="submissions.length === 0">
-              <td colspan="8" class="px-4 md:px-5 py-6 text-center text-sm text-text-muted">
+              <td colspan="8" class="text-center text-text-muted">
                 Belum ada responden yang mengerjakan.
               </td>
             </tr>

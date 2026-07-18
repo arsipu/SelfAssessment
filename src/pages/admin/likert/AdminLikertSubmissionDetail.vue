@@ -22,106 +22,92 @@
     </div>
 
     <template v-else-if="submission">
-      <!-- pdf-content wrapper untuk export -->
-      <div ref="pdfContent" class="pdf-export-wrapper">
-      <!-- Alert untuk submission yang belum selesai -->
-      <div
-        v-if="!isCompleted"
-        class="pdf-alert-warning bg-warning-soft border border-warning/30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
-      >
-        <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <div>
-            <p class="text-sm font-medium text-warning">Responden belum menyelesaikan tes</p>
-            <p class="text-xs text-warning/80 mt-1">
-              Data skor dan rincian jawaban belum tersedia karena responden masih dalam tahap mengerjakan kuesioner.
-            </p>
-          </div>
-        </div>
-      </div>
+      <div ref="pdfContent" class="pdf-export-wrapper print-area">
 
-      <!-- Info Responden -->
-      <div class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-          <h1 class="text-lg md:text-xl font-semibold text-text-primary">{{ submission.name }}</h1>
-          <div class="pdf-actions flex items-center gap-2 w-full sm:w-auto">
-            <button
-              v-if="isCompleted"
-              @click="showExportPDFModal = true"
-              class="text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-muted transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
-            >
-              Unduh PDF
-            </button>
-            <span
-              class="text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
-              :class="submission.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
-            >
-              {{ submission.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
-            </span>
+        <!-- Alert untuk submission yang belum selesai -->
+        <div
+          v-if="!isCompleted"
+          class="pdf-alert-warning bg-warning-soft border border-warning/30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
+        >
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-warning">Responden belum menyelesaikan tes</p>
+              <p class="text-xs text-warning/80 mt-1">
+                Data skor dan rincian jawaban belum tersedia karena responden masih dalam tahap mengerjakan kuesioner.
+              </p>
+            </div>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
-          <div>
-            <p class="text-text-muted text-xs mb-1">Sekolah</p>
-            <p class="text-text-primary">{{ submission.school }}</p>
-          </div>
-          <div>
-            <p class="text-text-muted text-xs mb-1">Kelas / Jurusan</p>
-            <p class="text-text-primary">{{ submission.class }} - {{ submission.major }}</p>
-          </div>
-          <div>
-            <p class="text-text-muted text-xs mb-1">Usia / Gender</p>
-            <p class="text-text-primary">{{ submission.age }} tahun, {{ submission.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
-          </div>
-          <div>
-            <p class="text-text-muted text-xs mb-1">Kode Tracking</p>
-            <p class="text-text-primary font-mono">{{ submission.code }}</p>
-          </div>
-          <div v-if="submission.totalScore != null">
-            <p class="text-text-muted text-xs mb-1">Total Skor</p>
-            <p class="text-text-primary font-semibold">{{ submission.totalScore }}</p>
-          </div>
-          <div v-if="scalesLabel !== '-'">
-            <p class="text-text-muted text-xs mb-1">Nilai</p>
-            <p class="text-text-primary font-semibold">{{ scalesLabel }}</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Jawaban per kategori -->
-      <div
-        v-for="section in sections"
-        :key="section.key"
-        class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6 last:mb-0 avoid-break"
-      >
-        <div class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-text-muted shrink-0"></span>
-          <h2 class="text-sm font-medium text-text-primary">{{ section.label }}</h2>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse table-fixed avoid-break">
-            <thead>
-              <tr class="bg-surface border-b border-border">
-                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">No</th>
-                <th class="w-[54%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Pertanyaan</th>
-                <th class="w-[26%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Jawaban</th>
-                <th class="w-[12%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Poin</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border avoid-break">
-              <tr v-for="(item, index) in section.items" :key="item.questionId">
-                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-text-primary">{{ item.questionText }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary whitespace-nowrap">{{ item.answerLabel }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ item.point }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- CARD RAPOR -->
+        <div class="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+
+          <!-- Kop -->
+          <div class="p-4 md:p-6 border-b border-border">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+              <div>
+                <p class="text-[11px] text-text-muted uppercase tracking-wide mb-1">Laporan hasil survei</p>
+                <h1 class="text-lg md:text-xl font-semibold text-text-primary">{{ submission.name }}</h1>
+              </div>
+              <div class="pdf-actions flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  v-if="isCompleted"
+                  @click="showExportPDFModal = true"
+                  class="print:hidden text-xs px-3 py-2.5 md:py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-muted transition-colors h-10 flex-1 sm:flex-none cursor-pointer"
+                >
+                  Unduh PDF
+                </button>
+                <span
+                  class="print:hidden text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
+                  :class="submission.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
+                >
+                  {{ submission.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
+                </span>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-sm">
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Sekolah</p>
+                <p class="text-text-primary font-medium">{{ submission.school }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Kelas / Jurusan</p>
+                <p class="text-text-primary font-medium">{{ submission.class }} - {{ submission.major }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Usia / Gender</p>
+                <p class="text-text-primary font-medium">{{ submission.age }} tahun, {{ submission.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Kode Tracking</p>
+                <p class="text-text-primary font-medium font-mono">{{ submission.code }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- "Ringkasan: total skor + label nilai" -->
+          <div
+            v-if="isCompleted && submission.totalScore != null"
+            class="p-4 md:p-6 border-b border-border"
+          >
+            <LikertScoreSummary
+              :total-score="submission.totalScore"
+              :scale-label="scalesLabel !== '-' ? scalesLabel : ''"
+              :scale-description="scalesDescription"
+              variant="inline"
+            />
+          </div>
+
+          <!-- "Jawaban per kategori" -->
+          <div class="px-4 md:px-6">
+            <LikertAnswerSections :sections="sections" variant="table" />
+          </div>
+
         </div>
       </div>
-      </div> <!-- Tutup div ref="pdfContent" -->
     </template>
 
     <div v-else class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
@@ -130,7 +116,7 @@
   </div>
 
   <!-- Modal konfirmasi export PDF -->
-   <Transition name="fade">
+  <Transition name="fade">
     <div
       v-if="showExportPDFModal"
       class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
@@ -150,20 +136,21 @@
             Batal
           </button>
           <button
-            @click="confirmExportPDF"
-            :disabled="exportingPDF"
+            @click="handlePrint()"
+            :disabled="false"
             class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
           >
-            {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
+            Ya, unduh
           </button>
         </div>
       </div>
-  </div>
+    </div>
   </Transition>
 </template>
 
 <script setup>
-import { exportToPDF } from '@/utils/likert-pdf-export-v2'
+import LikertScoreSummary from '@/components/likert/LikertScoreSummary.vue'
+import LikertAnswerSections from '@/components/likert/LikertAnswerSections.vue'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -172,7 +159,6 @@ import { useLikertCategoryStore } from '@/stores/likert/likert-category'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
-
 
 const route = useRoute()
 const router = useRouter()
@@ -193,12 +179,9 @@ const { currentLikert } = storeToRefs(likertStore)
 const scales = ref([])
 
 const showExportPDFModal = ref(false)
-const exportingPDF = ref(false)
 const pdfContent = ref(null)
 
-const isCompleted = computed(() =>
-  submission.value?.status === 'completed'
-)
+const isCompleted = computed(() => submission.value?.status === 'completed')
 
 const scalesLabel = computed(() => {
   const score = submission.value?.totalScore ?? 0
@@ -212,43 +195,11 @@ const scalesDescription = computed(() => {
   return found?.description || ''
 })
 
-async function confirmExportPDF() {
-  if (!pdfContent.value) return;
-
-  exportingPDF.value = true;
-  
-  try {
-    // Tentukan nama file yang dinamis
-    const fileName = `Hasil_Likert_${submission.value?.name?.replace(/\s+/g, '_') || 'Responden'}.pdf`;
-    
-    // Tambahkan class untuk styling PDF sebelum export
-    pdfContent.value.classList.add('pdf-exporting');
-    
-    // Beri waktu untuk Vue merender perubahan
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Panggil fungsi ekspor yang sederhana (mirip Holland)
-    await exportToPDF(pdfContent.value, fileName);
-    
-    // Hapus class setelah export
-    pdfContent.value.classList.remove('pdf-exporting');
-    
-    // Tutup modal jika sukses
-    showExportPDFModal.value = false;
-  } catch (error) {
-    console.error('Gagal mengekspor PDF:', error);
-    alert('Terjadi kesalahan saat mengekspor PDF.');
-    
-    // Hapus class jika terjadi error
-    if (pdfContent.value) {
-      pdfContent.value.classList.remove('pdf-exporting');
-    }
-  } finally {
-    exportingPDF.value = false;
-  }
+function handlePrint() {
+  window.print()
+  showExportPDFModal.value = false
 }
 
-// code untuk override jawaban dengan label dari LIKERT_SCALE_OPTIONS (SS => Sangat Setuju)
 const answerLabel = (value) => {
   const opt = LIKERT_SCALE_OPTIONS.find((o) => o.value === value)
   return opt?.label ?? value
@@ -259,8 +210,6 @@ const questionText = (questionId) => {
   return q?.question ?? '(soal tidak ditemukan)'
 }
 
-
-// adapter: ubah submission.submission (flat array) jadi format `sections`
 const sections = computed(() => {
   if (!submission.value) return []
   const grouped = {}
@@ -280,7 +229,6 @@ const sections = computed(() => {
 })
 
 onMounted(async () => {
-
   const likert = await likertStore.getLikertBySlug(likertSlug)
   if (!likert) {
     router.push({ name: 'admin-likert' })
@@ -295,16 +243,40 @@ onMounted(async () => {
     categoryStore.fetchCategories(),
     likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId.value),
   ])
-  
+
   scales.value = await likertStore.fetchLikertScales(likertId.value)
-  console.log(scales.value)
 })
 </script>
 
 <style scoped>
-/* Tambahkan class ini */
 .avoid-break {
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  body {
+    margin: 1cm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
 }
 </style>
