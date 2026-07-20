@@ -13,7 +13,10 @@
         <span class="text-sm text-text-muted">({{ section.code }})</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div 
+        class="grid grid-cols-1 gap-6 [>*]:w-full"
+        :style="{ gridTemplateColumns: `repeat(${section.columns.length}, minmax(0, 1fr))` }"
+      >
         <div
           v-for="col in section.columns"
           :key="col.key"

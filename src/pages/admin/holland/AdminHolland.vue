@@ -30,8 +30,8 @@
     </div>
 
     <!-- Tabel -->
-    <div v-else class="bg-surface border border-border rounded-xl overflow-hidden">
-      <div class="overflow-x-auto">
+    <div v-else class="bg-surface border border-border rounded-xl" :class="{ 'overflow-hidden': !isAnyMenuOpen }">
+      <div class="overflow-x-auto" :class="{ 'overflow-y-visible': isAnyMenuOpen }">
         <table class="app-table">
           <thead>
             <tr>
@@ -125,7 +125,105 @@
       </div>
     </div>
 
-    <!-- Modal Tambah/Edit, Modal Hapus tetap sama seperti punyamu -->
+    <!-- Modal Tambah / Edit Instrumen -->
+    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-auto flex flex-col max-h-[90vh]">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center shrink-0">
+          <div>
+            <h3 class="text-base font-semibold text-text-primary">
+              {{ isEditing ? 'Edit Instrumen' : 'Tambah Instrumen' }}
+            </h3>
+            <p class="text-xs text-text-muted mt-0.5">
+              {{ isEditing ? 'Ubah nama, deskripsi, atau petunjuk instrumen.' : 'Buat instrumen Holland RIASEC baru.' }}
+            </p>
+          </div>
+          <button @click="closeModal" class="text-text-muted hover:text-text-secondary transition-colors cursor-pointer">
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4 overflow-y-auto">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-1">Nama Instrumen <span class="text-danger">*</span></label>
+            <input
+              v-model="form.name"
+              type="text"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              placeholder="Misal: Tes Minat Holland"
+              autofocus
+              @keyup.enter="saveForm"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-1">Deskripsi</label>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              placeholder="Deskripsi singkat tentang instrumen ini..."
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-1">Petunjuk Pengerjaan</label>
+            <textarea
+              v-model="form.direction"
+              rows="4"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              placeholder="Teks petunjuk yang akan ditampilkan di awal tes..."
+            ></textarea>
+            <p class="text-xs text-text-muted mt-1">Ditampilkan di halaman instrumen sebelum tes dimulai.</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3 shrink-0">
+          <button
+            @click="closeModal"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="saveForm"
+            :disabled="!isFormValid || saving"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+          >
+            {{ saving ? 'Menyimpan...' : 'Simpan' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Hapus Instrumen -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-text-primary">Hapus Instrumen</h3>
+          <p class="mt-2 text-sm text-text-secondary">
+            Apakah Anda yakin ingin menghapus instrumen ini? Semua data terkait — termasuk kategori RIASEC, pertanyaan, dan submission — <strong class="text-text-primary">tidak akan terhapus otomatis</strong> dan perlu dibersihkan secara terpisah.
+          </p>
+          <p class="mt-2 text-xs text-text-muted">
+            Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </div>
+        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
+          <button
+            @click="showDeleteModal = false"
+            class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="confirmDelete"
+            :disabled="saving"
+            class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer"
+          >
+            {{ saving ? 'Menghapus...' : 'Hapus' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -152,6 +250,8 @@ const form = ref({ name: '', description: '', direction: '' })
 const isFormValid = computed(() => form.value.name.trim() !== '')
 
 const openStatusMenuId = ref(null)
+
+const isAnyMenuOpen = computed(() => openStatusMenuId.value !== null)
 
 const statusOptions = [
   { value: ACTIVE, label: statusText(ACTIVE), dot: 'bg-success' },

@@ -145,9 +145,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
+import { useHollandColumnsStore } from '@/stores/holland/holland-columns'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { formatBirthDateAge, buildScoreBreakdown, buildDetailSections } from '@/utils/holland-result'
 import RiasecSummaryHeader from '@/components/holland/RiasecSummaryHeader.vue'
@@ -162,6 +164,8 @@ const hollandSlug = route.params.slug
 const hollandStore = useHollandStore()
 const sessionStore = useHollandSessionStore()
 const questionsStore = useHollandQuestionsStore()
+const columnsStore = useHollandColumnsStore()
+const { columnsByRiasec } = storeToRefs(columnsStore)
 const riasecStore = useHollandRiasecStore()
 
 const showExportPDFModal = ref(false)
@@ -196,12 +200,19 @@ const scoreBreakdown = computed(() => {
   return buildScoreBreakdown(scores, result.value?.topCode)
 })
 
+// answers sekarang array LENGKAP semua soal + isChecked, jadi
+// answeredIds harus filter isChecked === true dulu (bukan ambil semua
+// questionId begitu saja seperti sebelumnya).
 const answeredIds = computed(() => {
-  return new Set((result.value?.answers || []).map((a) => a.questionId))
+  return new Set(
+    (result.value?.answers || [])
+      .filter((a) => a.isChecked)
+      .map((a) => a.questionId)
+  )
 })
 
 const detailSections = computed(() => {
-  return buildDetailSections(riasecStore.riasecList, questionsStore.allQuestions)
+  return buildDetailSections(riasecStore.riasecList, questionsStore.allQuestions, columnsByRiasec.value)
 })
 
 onMounted(async () => {
@@ -211,10 +222,10 @@ onMounted(async () => {
   }
   loading.value = true
   try {
-    await Promise.all([
-      riasecStore.fetchRiasecList(hollandId.value),
-      questionsStore.fetchAllQuestions(hollandId.value),
-    ])
+    await riasecStore.fetchRiasecList(hollandId.value)
+    const riasecIds = riasecStore.riasecList.map((c) => c.id)
+    await columnsStore.fetchAllColumns(hollandId.value, riasecIds)
+    await questionsStore.fetchAllQuestions(hollandId.value, columnsByRiasec.value)
   } finally {
     loading.value = false
   }

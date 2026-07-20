@@ -18,8 +18,7 @@
           <td class="py-2 px-1">
             <div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
               <div
-                class="h-full rounded-full transition-all duration-300"
-                :class="row.isTop ? 'bg-instrument' : 'bg-border'"
+                class="h-full rounded-full transition-all duration-300 bg-instrument"
                 :style="{ width: row.percentage + '%' }"
               ></div>
             </div>

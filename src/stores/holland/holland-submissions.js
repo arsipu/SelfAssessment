@@ -87,9 +87,18 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   }
 
   // Dipanggil begitu form respondent disubmit (belum ngerjain soal).
-  // Field disamakan dengan dokumen sumber Holland:
-  // name, major, school, gender, birthDate, age, occupation, testDate, testPurpose
-  const createSubmission = async (hollandId, respondentData) => {
+  // `initialAnswers` HARUS sudah berisi SEMUA soal (dari semua kategori
+  // & kolom) dengan isChecked: false — dibangun via
+  // buildInitialAnswers() di holland-scoring.js, dipanggil dari sisi
+  // komponen/session store yang punya akses ke allQuestions.
+  //
+  // CATATAN PENTING: `scores` dan `topCode` SENGAJA TIDAK disimpan sama
+  // sekali di sini (dan di manapun di store ini). Keduanya selalu
+  // dihitung ulang dari `answers` pas dibutuhkan (lihat holland-scoring.js
+  // -> computeScoresFromAnswers / computeTopCode), supaya hasil akhir
+  // selalu konsisten dengan jawaban aktual, bukan snapshot yang bisa basi
+  // kalau soal/kolom berubah belakangan.
+  const createSubmission = async (hollandId, respondentData, initialAnswers) => {
     try {
       const code = generateSessionCode()
       const ref = await addDoc(collection(db, 'holland', hollandId, 'submissions'), {
@@ -102,9 +111,9 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
         occupation: respondentData.occupation,
         testDate: respondentData.testDate,
         testPurpose: respondentData.testPurpose,
-        answers: [], // array of { questionId, category, column }
-        scores: null, // diisi pas completeSubmission: { R, I, A, S, E, C }
-        topCode: null, // diisi pas completeSubmission: mis. "SAE"
+        // array of { questionId, riasecId, columnId, isChecked }
+        // — SEMUA soal, bukan cuma yang dicentang
+        answers: initialAnswers || [],
         code,
         status: SUBMISSION_IN_PROGRESS,
         createdAt: serverTimestamp(),
@@ -119,7 +128,9 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   }
 
   // Sync jawaban tiap kali checkbox di-toggle (dipanggil dengan debounce
-  // dari komponen pengisian, mengikuti pola likert-submissions.js)
+  // dari komponen pengisian, mengikuti pola likert-submissions.js).
+  // `answers` yang dikirim tetap array LENGKAP semua soal (dengan
+  // isChecked yang sudah di-update), bukan cuma delta.
   const updateSubmissionAnswers = async (hollandId, submissionId, answers) => {
     try {
       await updateDoc(doc(db, 'holland', hollandId, 'submissions', submissionId), {
@@ -132,13 +143,12 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     }
   }
 
-  // Dipanggil pas user submit kuesioner (final)
-  const completeSubmission = async (hollandId, submissionId, answers, scores, topCode) => {
+  // Dipanggil pas user submit kuesioner (final). Cuma nulis `answers`
+  // final + status — TIDAK ada scores/topCode yang ditulis ke Firestore.
+  const completeSubmission = async (hollandId, submissionId, answers) => {
     try {
       await updateDoc(doc(db, 'holland', hollandId, 'submissions', submissionId), {
         answers,
-        scores,
-        topCode,
         status: SUBMISSION_COMPLETED,
         updatedAt: serverTimestamp(),
       })

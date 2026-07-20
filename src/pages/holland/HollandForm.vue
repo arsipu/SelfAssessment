@@ -74,9 +74,11 @@
           </div>
         </div>
 
-        <button type="submit" :disabled="submitting"
+        <p v-if="loadError" class="text-xs text-danger">{{ loadError }}</p>
+
+        <button type="submit" :disabled="submitting || preparing"
           class="w-full mt-2 py-3 bg-instrument text-text-on-primary text-sm font-semibold rounded-xl hover:bg-instrument-hover transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none">
-          {{ submitting ? 'Menyimpan...' : 'Lanjut ke Kuesioner →' }}
+          {{ submitButtonLabel }}
         </button>
       </form>
     </div>
@@ -86,13 +88,26 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
+import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
+import { useHollandColumnsStore } from '@/stores/holland/holland-columns'
+import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 
 const route = useRoute()
 const router = useRouter()
 const hollandStore = useHollandStore()
 const hollandSessionStore = useHollandSessionStore()
+
+const riasecStore = useHollandRiasecStore()
+const { riasecList } = storeToRefs(riasecStore)
+
+const columnsStore = useHollandColumnsStore()
+const { columnsByRiasec } = storeToRefs(columnsStore)
+
+const questionsStore = useHollandQuestionsStore()
+const { allQuestions } = storeToRefs(questionsStore)
 
 const hollandSlug = route.params.slug
 const hollandId = computed(() => hollandStore.currentHolland?.id || null)
@@ -109,6 +124,17 @@ const responden = ref({
 })
 
 const submitting = ref(false)
+// true selama riasec/columns/questions masih di-fetch di background
+// (dimulai pas onMounted, biasanya udah selesai duluan sebelum user
+// selesai isi form — tapi tetap dijaga biar gak startSession dgn data kosong)
+const preparing = ref(true)
+const loadError = ref('')
+
+const submitButtonLabel = computed(() => {
+  if (submitting.value) return 'Menyimpan...'
+  if (preparing.value) return 'Menyiapkan soal...'
+  return 'Lanjut ke Kuesioner →'
+})
 
 // Usia dihitung dari birthDate vs testDate (bukan hari ini),
 // biar akurat sesuai kapan tesnya beneran dilakukan
@@ -142,6 +168,29 @@ function formatBirthDateAge(birthDate, age) {
   return age !== null ? `${formatted} / ${age} tahun` : formatted
 }
 
+// Ambil semua soal (via riasec -> columns -> questions) lebih awal,
+// supaya begitu user submit form, `allQuestions` udah siap dipakai
+// buat bangun `answers` awal (semua soal, isChecked: false).
+async function prepareQuestions() {
+  preparing.value = true
+  loadError.value = ''
+  try {
+    await riasecStore.fetchRiasecList(hollandId.value)
+    const riasecIds = riasecList.value.map((c) => c.id)
+    await columnsStore.fetchAllColumns(hollandId.value, riasecIds)
+    await questionsStore.fetchAllQuestions(hollandId.value, columnsByRiasec.value)
+
+    if (allQuestions.value.length === 0) {
+      loadError.value = 'Belum ada pertanyaan yang tersedia untuk instrumen ini.'
+    }
+  } catch (error) {
+    console.error('Gagal menyiapkan soal:', error)
+    loadError.value = 'Gagal memuat soal, silakan muat ulang halaman.'
+  } finally {
+    preparing.value = false
+  }
+}
+
 onMounted(async () => {
   // ambil data instrumen holland berdasarkan slug
   await hollandStore.getHollandBySlug(hollandSlug)
@@ -162,19 +211,34 @@ onMounted(async () => {
   if (saved) {
     // udah pernah mulai sesi -> langsung lempar ke kuesioner
     router.push({ name: 'holland-questions', params: { slug: hollandSlug } })
+    return
   }
+
+  await prepareQuestions()
 })
 
 async function goToKuesioner() {
   if (submitting.value) return
+
+  // jaga-jaga kalau user submit form secepat kilat sebelum prepareQuestions selesai
+  if (preparing.value || allQuestions.value.length === 0) {
+    alert('Soal belum siap, tunggu sebentar lalu coba lagi.')
+    return
+  }
+
   submitting.value = true
   try {
-    await hollandSessionStore.startSession(hollandId.value, {
-      ...responden.value,
-      age: computedAge.value,
-    })
+    await hollandSessionStore.startSession(
+      hollandId.value,
+      {
+        ...responden.value,
+        age: computedAge.value,
+      },
+      allQuestions.value
+    )
     router.push({ name: 'holland-questions', params: { slug: hollandSlug } })
   } catch (error) {
+    console.error(error)
     alert('Gagal memulai sesi, coba lagi.')
   } finally {
     submitting.value = false

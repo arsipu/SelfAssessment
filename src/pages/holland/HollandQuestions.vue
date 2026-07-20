@@ -28,12 +28,16 @@
           <span class="text-xs text-text-muted">({{ section.code }})</span>
         </div>
 
-        <!-- 3 sub-kolom sejajar di desktop, stack di mobile -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-4">
+        <!-- Kolom sejajar di desktop (sejumlah kolom dinamis dari Firestore), stack di mobile -->
+        <div
+          class="grid grid-cols-1 gap-4 md:gap-4"
+          :style="{ gridTemplateColumns: `repeat(${section.columns.length}, minmax(0, 1fr))` }"
+        >
           <div
-            v-for="col in section.columns"
+            v-for="(col, colIndex) in section.columns"
             :key="col.key"
-            class="md:border-l md:border-border md:pl-4 md:first:border-l-0 md:first:pl-0"
+            class="md:border-l md:border-border md:pl-4"
+            :class="colIndex === 0 ? 'md:border-l-0 md:pl-0' : ''"
           >
             <p class="text-xs font-semibold text-text-secondary mb-2">{{ col.label }}</p>
 
@@ -112,9 +116,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
+import { useHollandColumnsStore } from '@/stores/holland/holland-columns'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { useHollandSessionStore } from '@/stores/holland/holland-session'
-import { HOLLAND_COLUMNS, getTopRiasecCode, computeRiasecScores } from '@/apps/holland'
 
 const route = useRoute()
 const router = useRouter()
@@ -122,15 +126,21 @@ const hollandSlug = route.params.slug
 const hollandId = computed(() => hollandStore?.currentHolland?.id || null)
 
 const hollandStore = useHollandStore()
+
 const questionsStore = useHollandQuestionsStore()
 const { allQuestions } = storeToRefs(questionsStore)
+
+const columnsStore = useHollandColumnsStore()
+const { columnsByRiasec } = storeToRefs(columnsStore)
 
 const riasecStore = useHollandRiasecStore()
 const { riasecList } = storeToRefs(riasecStore)
 
 const sessionStore = useHollandSessionStore()
 
-// checkedMap[questionId] = true  -> lookup cepat buat isChecked()
+// checkedMap[questionId] = true/false -> lookup cepat buat isChecked()
+// Diisi dari session.answers (array LENGKAP semua soal + isChecked),
+// bukan cuma soal yang kepilih seperti sebelumnya.
 const checkedMap = reactive({})
 let session = null
 
@@ -148,16 +158,25 @@ onMounted(async () => {
     return
   }
 
-  // restore jawaban dari sesi (array of { questionId, riasecId, column })
+  // restore jawaban dari sesi — sekarang array ini SUDAH LENGKAP semua
+  // soal (dibangun sejak startSession di HollandForm.vue), tinggal baca
+  // flag isChecked masing-masing.
   for (const a of session.answers || []) {
-    checkedMap[a.questionId] = true
+    checkedMap[a.questionId] = !!a.isChecked
   }
 
-  // Fetch riasec list (labels, descriptions) AND all questions in parallel
-  await Promise.all([
-    riasecStore.fetchRiasecList(hollandId.value),
-    questionsStore.fetchAllQuestions(hollandId.value),
-  ])
+  // Fetch riasec list dulu (buat urutan & label kategori), baru columns,
+  // baru questions — sesuai struktur baru riasec/{id}/columns/{id}/questions
+  await riasecStore.fetchRiasecList(hollandId.value)
+  const riasecIds = riasecList.value.map((c) => c.id)
+  await columnsStore.fetchAllColumns(hollandId.value, riasecIds)
+  await questionsStore.fetchAllQuestions(hollandId.value, columnsByRiasec.value)
+
+  // Jaga-jaga: kalau ternyata ada soal yang belum punya entry di checkedMap
+  // (mis. soal baru ditambah admin setelah sesi user dimulai), default-kan false
+  for (const q of allQuestions.value) {
+    if (!(q.id in checkedMap)) checkedMap[q.id] = false
+  }
 })
 
 function isChecked(questionId) {
@@ -165,21 +184,18 @@ function isChecked(questionId) {
 }
 
 function toggleAnswer(question) {
-  if (checkedMap[question.id]) {
-    delete checkedMap[question.id]
-  } else {
-    checkedMap[question.id] = true
-  }
+  checkedMap[question.id] = !checkedMap[question.id]
 }
 
+// Bangun array LENGKAP semua soal + isChecked (bukan cuma yang dicentang),
+// biar konsisten dengan struktur baru yang disimpan di Firestore.
 function buildAnswers() {
-  return allQuestions.value
-    .filter((q) => checkedMap[q.id])
-    .map((q) => ({
-      questionId: q.id,
-      riasecId: q.riasecId, // replaces old field `category`
-      column: q.column,
-    }))
+  return allQuestions.value.map((q) => ({
+    questionId: q.id,
+    riasecId: q.riasecId,
+    columnId: q.columnId,
+    isChecked: !!checkedMap[q.id],
+  }))
 }
 
 let debounceTimer = null
@@ -206,22 +222,26 @@ const dotColors = [
   'var(--color-viz-6)',
 ]
 
-// Kelompokkan questions per riasecId (kategori), lalu per kolom di dalamnya.
-// Urutan kategori dari riasecList (field `order` di Firestore).
-// Label/deskripsi dari riasecList (Firestore), bukan dari constants.
+// Kelompokkan questions per riasecId (kategori), lalu per column-nya
+// (dinamis dari Firestore, bukan constant HOLLAND_COLUMNS lagi).
+// Urutan kategori dari riasecList, urutan kolom dari field `order`
+// di columnsByRiasec (sudah di-sort di holland-columns.js store).
 const sections = computed(() => {
   return riasecList.value
     .map((cat, index) => {
       const categoryQuestions = allQuestions.value.filter((q) => q.riasecId === cat.id)
       if (categoryQuestions.length === 0) return null
 
-      const columns = HOLLAND_COLUMNS
+      const cols = columnsByRiasec.value[cat.id] || []
+      const columns = cols
         .map((col) => ({
-          key: col.key,
-          label: col.label,
-          questions: categoryQuestions.filter((q) => q.column === col.key),
+          key: col.id,
+          label: col.name,
+          questions: categoryQuestions.filter((q) => q.columnId === col.id),
         }))
         .filter((col) => col.questions.length > 0)
+
+      if (columns.length === 0) return null
 
       return {
         key: cat.id,
@@ -234,22 +254,21 @@ const sections = computed(() => {
     .filter(Boolean)
 })
 
-const answeredCount = computed(() => Object.keys(checkedMap).length)
+const answeredCount = computed(
+  () => Object.values(checkedMap).filter(Boolean).length
+)
 const progressPct = computed(() =>
   allQuestions.value.length ? (answeredCount.value / allQuestions.value.length) * 100 : 0
 )
 
-function buildScores() {
-  return computeRiasecScores(allQuestions.value, checkedMap)
-}
-
 const handleSubmit = async () => {
   const answers = buildAnswers()
-  const scores = buildScores()
-  const topCode = getTopRiasecCode(scores)
+  const riasecIds = riasecList.value.map((c) => c.id)
 
   try {
-    await sessionStore.finishSession(hollandId.value, answers, scores, topCode)
+    // scores & topCode dihitung di dalam finishSession (holland-scoring.js),
+    // TIDAK dikirim dari sini dan TIDAK disimpan ke Firestore.
+    await sessionStore.finishSession(hollandId.value, answers, riasecIds)
     router.push({ name: 'holland-result', params: { slug: hollandSlug } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')

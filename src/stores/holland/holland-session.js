@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useHollandSubmissionsStore } from './holland-submissions'
+import { buildInitialAnswers, computeScoreBreakdownFromAnswers, computeTopCode } from '@/utils/holland-scoring'
 
 export const useHollandSessionStore = defineStore(
   'hollandSession',
@@ -10,16 +11,27 @@ export const useHollandSessionStore = defineStore(
     // results.value[hollandId] = { scores, topCode, submissionId, code, respondentName, respondent, answers }
     const results = ref({})
 
-    // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
-    const startSession = async (hollandId, respondentData) => {
+    // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal.
+    //
+    // `allQuestions` WAJIB dikirim — flat array semua soal (dari
+    // useHollandQuestionsStore().allQuestions, harus sudah di-fetch duluan
+    // oleh komponen pemanggil). Dipakai buat bangun `answers` awal yang
+    // berisi SEMUA soal dengan isChecked: false, biar dari awal sesi
+    // strukturnya udah lengkap & konsisten.
+    const startSession = async (hollandId, respondentData, allQuestions) => {
       const submissionsStore = useHollandSubmissionsStore()
-      const { id: submissionId, code } = await submissionsStore.createSubmission(hollandId, respondentData)
+      const initialAnswers = buildInitialAnswers(allQuestions)
+      const { id: submissionId, code } = await submissionsStore.createSubmission(
+        hollandId,
+        respondentData,
+        initialAnswers
+      )
 
       sessions.value[hollandId] = {
         submissionId,
         code,
         respondent: respondentData,
-        answers: [], // array of { questionId, category, column }
+        answers: initialAnswers, // array of { questionId, riasecId, columnId, isChecked }
       }
 
       // lazy clear: hasil lama buat hollandId ini dianggap basi begitu sesi baru mulai
@@ -31,6 +43,7 @@ export const useHollandSessionStore = defineStore(
     const getSession = (hollandId) => sessions.value[hollandId] || null
 
     // dipanggil tiap checkbox di-toggle (auto-save LOKAL aja, gak nulis ke Firestore tiap klik)
+    // `answers` yang dikirim tetap array LENGKAP semua soal (dengan isChecked ter-update)
     const updateAnswers = async (hollandId, answers) => {
       const session = sessions.value[hollandId]
       if (!session) return
@@ -47,13 +60,24 @@ export const useHollandSessionStore = defineStore(
       }
     }
 
-    // dipanggil pas submit kuesioner: tulis final ke Firestore, simpan hasil, bersihkan sesi
-    const finishSession = async (hollandId, answers, scores, topCode) => {
+    // Dipanggil pas submit kuesioner: tulis final ke Firestore, hitung
+    // scores & topCode DI SINI (bukan diterima sebagai parameter, dan
+    // TIDAK dikirim ke Firestore), simpan hasil buat halaman result,
+    // baru bersihkan sesi.
+    //
+    // `riasecIds` — daftar id kategori RIASEC (mis. ['R','I','A','S','E','C']),
+    // dipakai buat computeScoresFromAnswers biar kategori dgn skor 0 tetap muncul.
+    const finishSession = async (hollandId, answers, riasecIds) => {
       const session = sessions.value[hollandId]
       if (!session) throw new Error('Sesi tidak ditemukan')
 
       const submissionsStore = useHollandSubmissionsStore()
-      await submissionsStore.completeSubmission(hollandId, session.submissionId, answers, scores, topCode)
+      await submissionsStore.completeSubmission(hollandId, session.submissionId, answers)
+
+      // `scores` di sini berbentuk { R: {count, total, percentage}, ... } —
+      // sesuai yang diharapkan buildScoreBreakdown() di utils/holland-result.js
+      const scores = computeScoreBreakdownFromAnswers(answers, riasecIds)
+      const topCode = computeTopCode(scores)
 
       results.value[hollandId] = {
         scores,

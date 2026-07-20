@@ -104,9 +104,9 @@
           </div>
 
           <!-- Ringkasan: hex chart + kode dominan (hanya jika completed) -->
-          <div v-if="isCompleted && submission.topCode" class="p-4 md:p-6 border-b border-border">
+          <div v-if="isCompleted && topCode" class="p-4 md:p-6 border-b border-border">
             <RiasecSummaryHeader
-              :top-code="submission.topCode"
+              :top-code="topCode"
               :top-code-info="topCodeInfo"
               :score-percent-map="scorePercentMap"
             />
@@ -122,7 +122,7 @@
           </div>
 
           <!-- Catatan -->
-          <div v-if="submission.topCode && topCodeInfo" class="p-4 md:p-6 border-b border-border avoid-break">
+          <div v-if="topCode && topCodeInfo" class="p-4 md:p-6 border-b border-border avoid-break">
             <p class="text-xs font-medium text-text-secondary mb-3">Catatan</p>
             <RiasecNotes :top-code-info="topCodeInfo" />
           </div>
@@ -187,9 +187,11 @@ import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
+import { useHollandColumnsStore } from '@/stores/holland/holland-columns'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { RIASEC_GUIDE as RIASEC_GUIDE_FALLBACK } from '@/apps/holland'
 import { formatBirthDateAge, buildScoreBreakdown, buildAnswerSections, buildDetailSections } from '@/utils/holland-result'
+import { computeScoreBreakdownFromAnswers, computeTopCode } from '@/utils/holland-scoring'
 import RiasecSummaryHeader from '@/components/holland/RiasecSummaryHeader.vue'
 import RiasecScoreBreakdown from '@/components/holland/RiasecScoreBreakdown.vue'
 import RiasecNotes from '@/components/holland/RiasecNotes.vue'
@@ -205,6 +207,8 @@ const submissionSlug = route.params.submissionSlug
 const hollandStore = useHollandStore()
 const submissionsStore = useHollandSubmissionsStore()
 const questionsStore = useHollandQuestionsStore()
+const columnsStore = useHollandColumnsStore()
+const { columnsByRiasec } = storeToRefs(columnsStore)
 const riasecStore = useHollandRiasecStore()
 
 const { currentSubmission: submission, loading } = storeToRefs(submissionsStore)
@@ -215,31 +219,53 @@ const exportingPDF = ref(false)
 
 const isCompleted = computed(() => submission.value?.status === 'completed')
 
-const topCodeInfo = computed(() => {
-  const code = submission.value?.topCode
-  if (!code) return null
-  return riasecMap.value[code] || null
-})
-
 const riasecMap = computed(() => {
   const map = {}
   for (const item of riasecStore.riasecList) map[item.id] = item
   return map
 })
 
+// `scores` dan `topCode` TIDAK ADA lagi di dokumen submission (Firestore).
+// Dihitung di sini dari submission.answers, cuma kalau statusnya completed
+// (submission yang masih in-progress answers-nya belum final/relevan buat
+// ditampilkan sebagai skor akhir).
+const riasecIds = computed(() => riasecStore.riasecList.map((c) => c.id))
+
+const scoreBreakdownRaw = computed(() => {
+  if (!isCompleted.value || !submission.value?.answers) return null
+  return computeScoreBreakdownFromAnswers(submission.value.answers, riasecIds.value)
+})
+
+const topCode = computed(() => {
+  if (!scoreBreakdownRaw.value) return null
+  return computeTopCode(scoreBreakdownRaw.value)
+})
+
+const topCodeInfo = computed(() => {
+  if (!topCode.value) return null
+  return riasecMap.value[topCode.value] || null
+})
+
 const formattedBirthDateAge = computed(() => formatBirthDateAge(submission.value))
 
-const scoreBreakdown = computed(() => buildScoreBreakdown(submission.value?.scores, submission.value?.topCode))
+const scoreBreakdown = computed(() => buildScoreBreakdown(scoreBreakdownRaw.value, topCode.value))
 
-const answeredIds = computed(() => new Set((submission.value?.answers || []).map((a) => a.questionId)))
+// answeredIds difilter isChecked === true, karena submission.answers
+// sekarang berisi SEMUA soal (bukan cuma yang dipilih)
+const answeredIds = computed(
+  () => new Set((submission.value?.answers || []).filter((a) => a.isChecked).map((a) => a.questionId))
+)
 
-const detailSections = computed(() => buildDetailSections(riasecStore.riasecList, allQuestions.value))
+const detailSections = computed(() =>
+  buildDetailSections(riasecStore.riasecList, allQuestions.value, columnsByRiasec.value)
+)
 
 const sections = computed(() =>
   buildAnswerSections({
     answers: submission.value?.answers,
     questions: allQuestions.value,
     riasecInfo: (code) => riasecMap.value[code] || RIASEC_GUIDE_FALLBACK[code],
+    columnsByRiasec: columnsByRiasec.value,
   })
 )
 
@@ -258,11 +284,17 @@ onMounted(async () => {
     return
   }
   hollandId.value = holland.id
+
+  // riasec dulu (buat riasecIds), baru columns, baru questions & submission
+  // (submission & riasec sebenarnya independen, tapi columns/questions
+  // saling bergantung urutan)
   await Promise.all([
     submissionsStore.fetchSubmissionBySlug(hollandId.value, submissionSlug),
     riasecStore.fetchRiasecList(hollandId.value),
-    questionsStore.fetchAllQuestions(hollandId.value),
   ])
+
+  await columnsStore.fetchAllColumns(hollandId.value, riasecIds.value)
+  await questionsStore.fetchAllQuestions(hollandId.value, columnsByRiasec.value)
 })
 
 function handlePrint() {

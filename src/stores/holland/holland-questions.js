@@ -8,46 +8,46 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   serverTimestamp,
 } from 'firebase/firestore'
 
-const RIASEC_IDS = ['R', 'I', 'A', 'S', 'E', 'C']
-
 export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
-  // allQuestions is a flat array with { id, riasecId, column, question, ... }
+  // Flat array across ALL riasec categories & columns:
+  // { id, riasecId, columnId, question, ... }
   const allQuestions = ref([])
   const loading = ref(false)
 
-  // ── Fetch questions for ONE riasec category ───────────────
+  const questionsPath = (hollandId, riasecId, columnId) =>
+    collection(db, 'holland', hollandId, 'riasec', riasecId, 'columns', columnId, 'questions')
 
-  const fetchQuestions = async (hollandId, riasecId) => {
+  // ── Fetch questions for ONE column ─────────────────────────
+
+  const fetchQuestions = async (hollandId, riasecId, columnId) => {
     try {
-      const snap = await getDocs(
-        collection(db, 'holland', hollandId, 'riasec', riasecId, 'questions')
-      )
-      const items = snap.docs.map((d) => ({
-        id: d.id,
-        riasecId,
-        ...d.data(),
-      }))
-      return items
+      const snap = await getDocs(questionsPath(hollandId, riasecId, columnId))
+      return snap.docs.map((d) => ({ id: d.id, riasecId, columnId, ...d.data() }))
     } catch (error) {
       console.error('Error fetching questions:', error)
       return []
     }
   }
 
-  // ── Fetch ALL questions across 6 RIASEC categories ────────
-  // Uses Promise.all for 6 parallel reads; each result is tagged
-  // with its riasecId (replaces old field `category`)
+  // ── Fetch ALL questions across every riasec category & column ──
+  // riasecColumnsMap: { [riasecId]: [{ id, name, order }, ...] }
+  // (ambil ini dari useHollandColumnsStore().columnsByRiasec setelah
+  // fetchAllColumns dipanggil)
 
-  const fetchAllQuestions = async (hollandId) => {
+  const fetchAllQuestions = async (hollandId, riasecColumnsMap) => {
     loading.value = true
     try {
-      const results = await Promise.all(
-        RIASEC_IDS.map((riasecId) => fetchQuestions(hollandId, riasecId))
-      )
-      // Flatten into single array; each item has { id, riasecId, column, question, ... }
+      const tasks = []
+      for (const [riasecId, cols] of Object.entries(riasecColumnsMap || {})) {
+        for (const col of cols) {
+          tasks.push(fetchQuestions(hollandId, riasecId, col.id))
+        }
+      }
+      const results = await Promise.all(tasks)
       allQuestions.value = results.flat()
       console.log('All questions fetched:', allQuestions.value.length)
     } catch (error) {
@@ -59,23 +59,18 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
     return allQuestions.value
   }
 
-  // ── Add question to a specific riasec category ────────────
+  // ── Add question to a specific column ──────────────────────
 
-  const addQuestion = async (hollandId, riasecId, { column, question }) => {
+  const addQuestion = async (hollandId, riasecId, columnId, { question }) => {
     const payload = {
-      column,
       question: question.trim(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
 
     try {
-      const ref = await addDoc(
-        collection(db, 'holland', hollandId, 'riasec', riasecId, 'questions'),
-        payload
-      )
-      // Add to local state with riasecId
-      allQuestions.value.push({ id: ref.id, riasecId, ...payload })
+      const ref = await addDoc(questionsPath(hollandId, riasecId, columnId), payload)
+      allQuestions.value.push({ id: ref.id, riasecId, columnId, ...payload })
       console.log('Question added with ID:', ref.id)
       return ref.id
     } catch (error) {
@@ -84,17 +79,39 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
     }
   }
 
-  // ── Update question ───────────────────────────────────────
+  // ── Update question ─────────────────────────────────────────
+  // Kalau `newColumnId` dikasih (beda dari columnId asal), pertanyaan
+  // dipindah ke kolom baru: karena Firestore gak punya "move" antar
+  // subcollection, ini dilakukan dengan create di path baru + delete
+  // di path lama.
 
-  const updateQuestion = async (hollandId, riasecId, questionId, payload) => {
+  const updateQuestion = async (hollandId, riasecId, columnId, questionId, { question, newColumnId }) => {
     try {
-      const ref = doc(
-        db, 'holland', hollandId, 'riasec', riasecId, 'questions', questionId
-      )
-      await updateDoc(ref, { ...payload, updatedAt: serverTimestamp() })
-      const idx = allQuestions.value.findIndex((q) => q.id === questionId)
+      const targetColumnId = newColumnId || columnId
+
+      if (newColumnId && newColumnId !== columnId) {
+        const oldRef = doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', columnId, 'questions', questionId)
+        const newPayload = {
+          question: question.trim(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+        const newRef = await addDoc(questionsPath(hollandId, riasecId, newColumnId), newPayload)
+        await deleteDoc(oldRef)
+
+        const idx = allQuestions.value.findIndex((q) => q.id === questionId && q.columnId === columnId)
+        if (idx !== -1) {
+          allQuestions.value[idx] = { id: newRef.id, riasecId, columnId: newColumnId, ...newPayload }
+        }
+        console.log('Question moved to new column:', newRef.id)
+        return
+      }
+
+      const ref = doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', targetColumnId, 'questions', questionId)
+      await updateDoc(ref, { question: question.trim(), updatedAt: serverTimestamp() })
+      const idx = allQuestions.value.findIndex((q) => q.id === questionId && q.columnId === targetColumnId)
       if (idx !== -1) {
-        allQuestions.value[idx] = { ...allQuestions.value[idx], ...payload }
+        allQuestions.value[idx] = { ...allQuestions.value[idx], question: question.trim() }
       }
       console.log('Question updated:', questionId)
     } catch (error) {
@@ -103,18 +120,39 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
     }
   }
 
-  // ── Delete question ───────────────────────────────────────
+  // ── Delete question ─────────────────────────────────────────
 
-  const deleteQuestion = async (hollandId, riasecId, questionId) => {
+  const deleteQuestion = async (hollandId, riasecId, columnId, questionId) => {
     try {
-      const ref = doc(
-        db, 'holland', hollandId, 'riasec', riasecId, 'questions', questionId
-      )
+      const ref = doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', columnId, 'questions', questionId)
       await deleteDoc(ref)
       allQuestions.value = allQuestions.value.filter((q) => q.id !== questionId)
       console.log('Question deleted:', questionId)
     } catch (error) {
       console.error('Error deleting question:', error)
+      throw error
+    }
+  }
+
+  // ── Delete ALL questions in a column ────────────────────────
+  // Dipakai saat kolom mau dihapus, karena Firestore gak cascade-delete
+  // subcollection. Pakai writeBatch biar 1 round-trip.
+
+  const deleteAllQuestionsInColumn = async (hollandId, riasecId, columnId) => {
+    try {
+      const snap = await getDocs(questionsPath(hollandId, riasecId, columnId))
+      if (snap.empty) return
+
+      const batch = writeBatch(db)
+      snap.docs.forEach((d) => batch.delete(d.ref))
+      await batch.commit()
+
+      allQuestions.value = allQuestions.value.filter(
+        (q) => !(q.riasecId === riasecId && q.columnId === columnId)
+      )
+      console.log(`Deleted ${snap.docs.length} questions in column:`, columnId)
+    } catch (error) {
+      console.error('Error deleting questions in column:', error)
       throw error
     }
   }
@@ -127,5 +165,6 @@ export const useHollandQuestionsStore = defineStore('hollandQuestions', () => {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    deleteAllQuestionsInColumn,
   }
 })
