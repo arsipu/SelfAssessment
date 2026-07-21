@@ -59,7 +59,7 @@ const chartData = computed(() => {
         data: order.map(code => props.scores[code] || 0),
         
         // CATATAN WARNA: 
-        // Chart.js menggunakan canvas, jadi tidak bisa baca class Tailwind seperti 'fill-instrument'.
+        // Chart.js menggunakan canvas, jadi tidak bisa baca class Tailwind seperti 'fill-primary'.
         // Kamu harus menggunakan hex code atau rgb/rgba di sini. 
         // Ganti warna di bawah ini agar match dengan warna tema 'instrument' kamu.
         backgroundColor: 'rgba(59, 130, 246, 0.15)', // Area dalam (contoh: biru transparan)

@@ -47,31 +47,31 @@
     <!-- Table -->
     <div v-else class="bg-surface border border-border rounded-xl overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="app-table">
+        <table class="app-table w-full text-left border-collapse">
           <thead>
             <tr>
-              <th>Nama</th>
-              <th>Sekolah</th>
-              <th>Jurusan</th>
-              <th>Kode</th>
-              <th>Status</th>
-              <th>Kode RIASEC</th>
-              <th>Tanggal</th>
-              <th class="w-12"></th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Nama</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Sekolah</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Jurusan</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Kode</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Status</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Kode RIASEC</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Tanggal</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider w-12"></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-border">
             <tr
               v-for="s in submissions"
               :key="s.id"
               @click="router.push({ name: 'admin-holland-submission-detail', params: { slug: hollandSlug, submissionSlug: s.slug } })"
               class="cursor-pointer"
             >
-              <td class="font-medium">{{ s.name }}</td>
-              <td>{{ s.school }}</td>
-              <td>{{ s.major }}</td>
-              <td class="font-mono">{{ s.code }}</td>
-              <td>
+              <td class="px-4 md:px-5 py-3 text-sm font-medium">{{ s.name }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">{{ s.school }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">{{ s.major }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm font-mono">{{ s.code }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">
                 <span
                   class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap"
                   :class="s.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
@@ -79,9 +79,9 @@
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
-              <td class="text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
-              <td class="text-right">
+              <td class="px-4 md:px-5 py-3 text-sm font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-right">
                 <font-awesome-icon
                   icon="fa-solid fa-chevron-right"
                   class="w-5 h-5 text-text-muted group-hover:text-text-secondary transition-colors shrink-0"
@@ -90,7 +90,7 @@
             </tr>
 
             <tr v-if="submissions.length === 0">
-              <td colspan="8" class="text-center text-text-muted">
+              <td colspan="8" class="px-4 md:px-5 py-6 text-sm text-center text-text-muted">
                 Belum ada responden yang mengerjakan.
               </td>
             </tr>
@@ -116,14 +116,14 @@
         <div class="flex flex-col-reverse sm:flex-row gap-3">
           <button
             @click="showExportModal = false"
-            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors h-10 cursor-pointer"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors h-10 cursor-pointer"
           >
             Batal
           </button>
           <button
             @click="confirmExportExcel"
             :disabled="exporting"
-            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
+            class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
           >
             {{ exporting ? 'Mengunduh...' : 'Ya, export' }}
           </button>

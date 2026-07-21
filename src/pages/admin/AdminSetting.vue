@@ -5,11 +5,11 @@
       <div class="space-y-3">
         <div>
           <label class="text-xs text-text-muted block mb-1">Nama lengkap</label>
-          <input type="text" :value="userName" class="w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface-muted text-text-primary focus:outline-none focus:border-instrument" />
+          <input type="text" :value="userName" class="w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface-muted text-text-primary focus:outline-none focus:border-primary" />
         </div>
         <div>
           <label class="text-xs text-text-muted block mb-1">Email</label>
-          <input type="email" :value="userStore.user?.email ?? ''" class="w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface-muted text-text-primary focus:outline-none focus:border-instrument" />
+          <input type="email" :value="userStore.user?.email ?? ''" class="w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface-muted text-text-primary focus:outline-none focus:border-primary" />
         </div>
       </div>
       <button class="mt-4 px-4 py-2 bg-primary text-text-on-primary text-sm rounded-lg hover:bg-primary-hover transition-colors">

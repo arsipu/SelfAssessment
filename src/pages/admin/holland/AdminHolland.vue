@@ -16,7 +16,7 @@
         </div>
         <button
           @click="showAddModal = true"
-          class="inline-flex items-center justify-center gap-2 bg-instrument hover:bg-instrument-hover text-text-on-primary px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+          class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-text-on-primary px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
           Tambah Instrumen
@@ -29,36 +29,40 @@
       <p class="text-sm text-text-muted">Memuat data...</p>
     </div>
 
-    <!-- Tabel -->
+    <!-- Tabel Data Responden -->
     <div v-else class="bg-surface border border-border rounded-xl" :class="{ 'overflow-hidden': !isAnyMenuOpen }">
       <div class="overflow-x-auto" :class="{ 'overflow-y-visible': isAnyMenuOpen }">
-        <table class="app-table">
+        <!-- Tambahan: w-full text-left border-collapse -->
+        <table class="app-table w-full text-left border-collapse">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Nama Instrumen</th>
-              <th>Deskripsi</th>
-              <th>Status</th>
-              <th>Aksi</th>
+              <!-- Tambahan class th: px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider -->
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">No</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Nama Instrumen</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Deskripsi</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Status</th>
+              <th class="px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <!-- Tambahan class tbody: divide-y divide-border -->
+          <tbody class="divide-y divide-border">
             <tr
               v-for="(h, index) in hollands"
               :key="h.id"
               class="cursor-pointer"
             >
-              <td class="text-text-secondary">{{ index + 1 }}</td>
-              <td>
+              <!-- Tambahan class td: px-4 md:px-5 py-3 text-sm -->
+              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">
                 <button
                   @click="goToQuestions(h)"
-                  class="text-sm font-medium hover:text-instrument hover:underline transition-colors text-left cursor-pointer"
+                  class="text-sm font-medium hover:text-primary hover:underline transition-colors text-left cursor-pointer"
                 >
                   {{ h.name }}
                 </button>
               </td>
-              <td class="max-w-xs truncate">{{ h.description }}</td>
-              <td>
+              <td class="px-4 md:px-5 py-3 text-sm max-w-xs truncate">{{ h.description }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">
                 <div class="relative inline-block">
                   <button
                     @click="toggleStatusMenu(h.id)"
@@ -89,11 +93,11 @@
                   </div>
                 </div>
               </td>
-              <td>
+              <td class="px-4 md:px-5 py-3 text-sm">
                 <div class="flex items-center gap-2">
                   <button
                     @click="goToQuestions(h)"
-                    class="p-2.5 md:p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
+                    class="p-2.5 md:p-2 rounded-lg text-primary hover:bg-primary-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Kelola Pertanyaan"
                   >
                     <font-awesome-icon icon="fa-solid fa-clipboard-list" class="w-5 h-5 shrink-0" />
@@ -116,7 +120,7 @@
               </td>
             </tr>
             <tr v-if="hollands.length === 0">
-              <td colspan="5" class="text-center text-text-muted py-8">
+              <td colspan="5" class="px-4 md:px-5 py-8 text-sm text-center text-text-muted">
                 Belum ada instrumen Holland.
               </td>
             </tr>
@@ -148,7 +152,7 @@
             <input
               v-model="form.name"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Misal: Tes Minat Holland"
               autofocus
               @keyup.enter="saveForm"
@@ -160,7 +164,7 @@
             <textarea
               v-model="form.description"
               rows="3"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
               placeholder="Deskripsi singkat tentang instrumen ini..."
             ></textarea>
           </div>
@@ -170,7 +174,7 @@
             <textarea
               v-model="form.direction"
               rows="4"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
               placeholder="Teks petunjuk yang akan ditampilkan di awal tes..."
             ></textarea>
             <p class="text-xs text-text-muted mt-1">Ditampilkan di halaman instrumen sebelum tes dimulai.</p>
@@ -187,7 +191,7 @@
           <button
             @click="saveForm"
             :disabled="!isFormValid || saving"
-            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>

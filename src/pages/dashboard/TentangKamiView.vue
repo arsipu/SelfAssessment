@@ -74,15 +74,15 @@ const instruments = [
     code: 'RIASEC',
     name: 'Holland RIASEC',
     desc: 'Dikembangkan oleh John L. Holland (1959). Mengklasifikasikan minat individu ke dalam 6 tipe kepribadian karier untuk membantu pemilihan karier yang sesuai.',
-    bg: 'var(--color-instrument-soft)',
-    text: 'var(--color-instrument)',
+    bg: 'var(--color-primary-soft)',
+    text: 'var(--color-primary)',
   },
   {
     code: 'WRS',
     name: 'Likert Scale',
     desc: 'Instrumen terstandar untuk mengukur kesiapan memasuki dunia kerja dari aspek pengetahuan, sikap, keterampilan, dan kemampuan adaptasi.',
-    bg: 'var(--color-instrument-soft)',
-    text: 'var(--color-instrument)',
+    bg: 'var(--color-primary-soft)',
+    text: 'var(--color-primary)',
   },
 ]
 

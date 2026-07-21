@@ -20,7 +20,7 @@
         </div>
         <div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
           <div
-            class="h-full bg-instrument rounded-full transition-all duration-300"
+            class="h-full bg-primary rounded-full transition-all duration-300"
             :style="{ width: progressPct + '%' }"
           ></div>
         </div>
@@ -58,8 +58,8 @@
                 @click="answers[q.id] = opt.value"
                 class="flex-1 min-w-[3rem] px-1.5 py-2 rounded-lg text-[11px] md:text-xs font-medium transition-all border leading-tight text-center"
                 :class="answers[q.id] === opt.value
-                  ? 'bg-instrument text-text-on-primary border-instrument'
-                  : 'bg-surface-muted text-text-secondary border-border hover:border-instrument hover:text-text-primary'"
+                  ? 'bg-primary text-text-on-primary border-primary'
+                  : 'bg-surface-muted text-text-secondary border-border hover:border-primary hover:text-text-primary'"
               >
                 {{ opt.label }}
               </button>
@@ -76,7 +76,7 @@
         <button
           @click="showConfirmModal = true"
           :disabled="unansweredCount > 0"
-          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Kirim jawaban
         </button>
@@ -98,14 +98,14 @@
           <div class="flex gap-3">
             <button
               @click="showConfirmModal = false"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors"
             >
               Batal
             </button>
             <button
               @click="confirmSubmit"
               :disabled="submitting"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors"
             >
               {{ submitting ? 'Mengirim...' : 'Ya, kirim' }}
             </button>

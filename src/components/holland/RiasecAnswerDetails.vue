@@ -28,11 +28,11 @@
               v-for="q in col.questions"
               :key="q.id"
               class="flex items-start gap-2.5 rounded-lg p-2.5 border transition-colors"
-              :class="answeredIds.has(q.id) ? 'border-instrument bg-instrument-soft' : unansweredClass"
+              :class="answeredIds.has(q.id) ? 'border-primary bg-primary-soft' : unansweredClass"
             >
               <span
                 class="mt-0.5 w-4 h-4 shrink-0 rounded flex items-center justify-center border"
-                :class="answeredIds.has(q.id) ? 'bg-instrument border-instrument' : 'border-border'"
+                :class="answeredIds.has(q.id) ? 'bg-primary border-primary' : 'border-border'"
               >
                 <svg
                   v-if="answeredIds.has(q.id)"
@@ -99,11 +99,11 @@
                   v-for="q in col.questions"
                   :key="q.id"
                   class="flex items-start gap-2.5 rounded-lg p-2.5 border transition-colors"
-                  :class="answeredIds.has(q.id) ? 'border-instrument bg-instrument-soft' : unansweredClass"
+                  :class="answeredIds.has(q.id) ? 'border-primary bg-primary-soft' : unansweredClass"
                 >
                   <span
                     class="mt-0.5 w-4 h-4 shrink-0 rounded flex items-center justify-center border"
-                    :class="answeredIds.has(q.id) ? 'bg-instrument border-instrument' : 'border-border'"
+                    :class="answeredIds.has(q.id) ? 'bg-primary border-primary' : 'border-border'"
                   >
                     <svg
                       v-if="answeredIds.has(q.id)"

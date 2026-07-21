@@ -18,19 +18,19 @@
           <div class="sm:col-span-2 flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Nama <span class="text-danger">*</span></label>
             <input v-model="responden.name" type="text" placeholder="Nama lengkap" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Jurusan <span class="text-danger">*</span></label>
             <input v-model="responden.major" type="text" placeholder="Contoh: Sistem Informasi" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Sekolah/Universitas <span class="text-danger">*</span></label>
             <input v-model="responden.school" type="text" placeholder="Nama sekolah/universitas" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
@@ -49,7 +49,7 @@
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Tanggal Lahir <span class="text-danger">*</span></label>
             <input v-model="responden.birthDate" type="date" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
             <p v-if="computedAge !== null" class="text-xs text-text-muted mt-0.5">
               Usia saat tes: {{ computedAge }} tahun
             </p>
@@ -58,26 +58,26 @@
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Pekerjaan</label>
             <input v-model="responden.occupation" type="text" placeholder="Contoh: Mahasiswa"
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Tanggal Tes <span class="text-danger">*</span></label>
             <input v-model="responden.testDate" type="date" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="sm:col-span-2 flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Tujuan Tes</label>
             <input v-model="responden.testPurpose" type="text" placeholder="Contoh: Bimbingan karier"
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
         </div>
 
         <p v-if="loadError" class="text-xs text-danger">{{ loadError }}</p>
 
         <button type="submit" :disabled="submitting || preparing"
-          class="w-full mt-2 py-3 bg-instrument text-text-on-primary text-sm font-semibold rounded-xl hover:bg-instrument-hover transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none">
+          class="w-full mt-2 py-3 bg-primary text-text-on-primary text-sm font-semibold rounded-xl hover:bg-primary-hover transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none">
           {{ submitButtonLabel }}
         </button>
       </form>

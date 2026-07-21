@@ -53,7 +53,7 @@
           class="block bg-surface border border-border rounded-2xl p-5 hover:border-primary hover:shadow-sm transition-all"
         >
           <span
-            class="inline-block text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 bg-instrument-soft text-instrument"
+            class="inline-block text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 bg-primary-soft text-primary"
           >
             {{ item.type === 'holland' ? 'RIASEC' : 'Likert' }}
           </span>

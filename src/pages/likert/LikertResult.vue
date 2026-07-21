@@ -67,7 +67,7 @@
           </button>
           <router-link
             to="/"
-            class="w-full md:flex-1 text-center py-3 h-10 bg-instrument text-text-on-primary text-sm font-semibold rounded-xl hover:bg-instrument-hover transition"
+            class="w-full md:flex-1 text-center py-3 h-10 bg-primary text-text-on-primary text-sm font-semibold rounded-xl hover:bg-primary-hover transition"
           >
             Selesai
           </router-link>
@@ -93,14 +93,14 @@
         <div class="flex gap-3">
           <button
             @click="showExportPDFModal = false"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors"
           >
             Batal
           </button>
           <button
             @click="confirmExportPDF"
             :disabled="exportingPDF"
-            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
+            class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors"
           >
             {{ exportingPDF ? 'Mengunduh...' : 'Ya, unduh' }}
           </button>

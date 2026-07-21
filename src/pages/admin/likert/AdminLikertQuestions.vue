@@ -22,7 +22,7 @@
         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <button
             @click="router.push({ name: 'admin-likert-submissions', params: { slug: likertSlug } })"
-            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
           >
             <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
             Lihat Submissions
@@ -60,7 +60,7 @@
                 <div class="flex items-center gap-2">
                   <button
                     @click="editScaleItem(s)"
-                    class="p-2.5 md:p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
+                    class="p-2.5 md:p-2 rounded-lg text-primary hover:bg-primary-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                     title="Edit"
                   >
                     <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5 shrink-0" />
@@ -93,25 +93,25 @@
             <input
               v-model="scaleForm.min"
               type="number"
-              class="w-full sm:w-24 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full sm:w-24 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Min"
             />
             <input
               v-model="scaleForm.max"
               type="number"
-              class="w-full sm:w-24 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full sm:w-24 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Max"
             />
             <input
               v-model="scaleForm.score"
               type="text"
-              class="w-full sm:w-48 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full sm:w-48 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Label, cth: Sangat Tinggi"
             />
             <input
               v-model="scaleForm.description"
               type="text"
-              class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Deskripsi (opsional)"
             />
 
@@ -119,7 +119,7 @@
               <button
                 @click="saveScale"
                 :disabled="!scaleForm.score.trim() || scaleSaving"
-                class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
+                class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
               >
                 {{ scaleSaving ? 'Menyimpan...' : 'Simpan' }}
               </button>
@@ -195,7 +195,7 @@
                   <div class="flex items-center gap-2">
                     <button
                       @click="openEditModal(q)"
-                      class="p-2.5 md:p-2 rounded-lg text-instrument hover:bg-instrument-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
+                      class="p-2.5 md:p-2 rounded-lg text-primary hover:bg-primary-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                       title="Edit"
                     >
                       <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5 shrink-0" />
@@ -229,7 +229,7 @@
               <textarea
                 v-model="inlineForm.question"
                 rows="2"
-                class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+                class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
                 placeholder="Masukkan teks pertanyaan..."
                 autofocus
               ></textarea>
@@ -249,7 +249,7 @@
                 <button
                   @click="saveInline(cat.id)"
                   :disabled="!inlineForm.question.trim() || saving"
-                  class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
+                  class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
                 >
                   {{ saving ? 'Menyimpan...' : 'Simpan' }}
                 </button>
@@ -301,7 +301,7 @@
             <textarea
               v-model="editForm.question"
               rows="3"
-              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
               placeholder="Masukkan teks pertanyaan..."
             ></textarea>
           </div>
@@ -328,7 +328,7 @@
           <button
             @click="saveEdit"
             :disabled="!editForm.question.trim() || saving"
-            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
+            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -368,7 +368,7 @@
             <input
               v-model="scaleForm.score"
               type="text"
-              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Contoh: Sangat Tinggi"
             />
           </div>
@@ -378,7 +378,7 @@
               <input
                 v-model.number="scaleForm.min"
                 type="number"
-                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               />
             </div>
             <div>
@@ -386,7 +386,7 @@
               <input
                 v-model.number="scaleForm.max"
                 type="number"
-                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               />
             </div>
           </div>
@@ -395,7 +395,7 @@
             <textarea
               v-model="scaleForm.description"
               rows="3"
-              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-y"
+              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-y"
               placeholder="Deskripsi (opsional)"
             ></textarea>
           </div>
@@ -411,7 +411,7 @@
           <button
             @click="saveScale"
             :disabled="!scaleForm.score.trim() || scaleSaving"
-            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
+            class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
           >
             {{ scaleSaving ? 'Menyimpan...' : 'Simpan' }}
           </button>

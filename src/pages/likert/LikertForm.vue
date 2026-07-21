@@ -18,31 +18,31 @@
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Nama <span class="text-danger">*</span></label>
             <input v-model="responden.nama" type="text" placeholder="Nama lengkap" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Kelas <span class="text-danger">*</span></label>
             <input v-model="responden.kelas" type="text" placeholder="Contoh: XII RPL 1" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="sm:col-span-2 flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Sekolah <span class="text-danger">*</span></label>
             <input v-model="responden.sekolah" type="text" placeholder="Nama sekolah" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="sm:col-span-2 flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Jurusan / Kompetensi Keahlian <span class="text-danger">*</span></label>
             <input v-model="responden.jurusan" type="text" placeholder="Contoh: Rekayasa Perangkat Lunak" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label class="text-sm font-semibold text-text-primary">Usia <span class="text-danger">*</span></label>
             <input v-model="responden.usia" type="number" min="10" max="30" placeholder="Usia (tahun)" required
-              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-instrument focus:bg-surface transition" />
+              class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition" />
           </div>
 
           <div class="flex flex-col gap-1">
@@ -71,7 +71,7 @@
         </div>
 
         <button type="submit"
-          class="w-full mt-2 py-3 bg-instrument text-text-on-primary text-sm font-semibold rounded-xl hover:bg-instrument-hover transition active:scale-[0.98]">
+          class="w-full mt-2 py-3 bg-primary text-text-on-primary text-sm font-semibold rounded-xl hover:bg-primary-hover transition active:scale-[0.98]">
           Lanjut ke Kuesioner →
         </button>
       </form>

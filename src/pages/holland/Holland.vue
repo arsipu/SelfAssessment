@@ -5,7 +5,7 @@
     <div class="max-w-3xl mx-auto px-6 py-10">
       <!-- Header -->
       <div class="mb-8">
-        <span class="inline-block text-xs font-medium text-instrument bg-instrument-soft px-2.5 py-1 rounded-full mb-3">
+        <span class="inline-block text-xs font-medium text-primary bg-primary-soft px-2.5 py-1 rounded-full mb-3">
           Instrumen
         </span>
         <h1 class="text-2xl font-medium text-text-primary mb-2">Holland RIASEC</h1>
@@ -71,7 +71,7 @@
             v-for="h in activedHollands"
             :key="h.id"
             :to="{ name: 'holland-form', params: { slug: h.slug } }"
-            class="px-5 py-2.5 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover transition-colors"
+            class="px-5 py-2.5 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors"
           >
             {{ h.name || 'Mulai asesmen' }}
           </router-link>

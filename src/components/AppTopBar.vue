@@ -46,11 +46,11 @@
                 class="flex items-start gap-3 px-4 py-2.5 hover:bg-primary-soft transition-colors"
               >
                 <div
-                  class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-instrument-soft"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-primary-soft"
                 >
                   <font-awesome-icon
                     :icon="item.type === 'holland' ? 'fa-solid fa-chart-bar' : 'fa-solid fa-file-lines'"
-                    class="w-4 h-4 text-instrument"
+                    class="w-4 h-4 text-primary"
                   />
                 </div>
                 <div>
@@ -122,11 +122,11 @@
               class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary-soft transition-colors"
             >
               <span
-                class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-instrument-soft"
+                class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-primary-soft"
               >
                 <font-awesome-icon
                   :icon="item.type === 'holland' ? 'fa-solid fa-chart-bar' : 'fa-solid fa-file-lines'"
-                  class="w-3.5 h-3.5 text-instrument"
+                  class="w-3.5 h-3.5 text-primary"
                 />
               </span>
               <span class="text-sm font-medium text-text-primary">{{ item.name }}</span>

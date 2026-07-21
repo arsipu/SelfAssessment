@@ -46,11 +46,11 @@
                 v-for="q in col.questions"
                 :key="q.id"
                 class="flex items-start gap-2.5 bg-surface border rounded-lg p-2.5 cursor-pointer transition-colors"
-                :class="isChecked(q.id) ? 'border-instrument bg-instrument-soft' : 'border-border hover:border-instrument'"
+                :class="isChecked(q.id) ? 'border-primary bg-primary-soft' : 'border-border hover:border-primary'"
               >
                 <input
                   type="checkbox"
-                  class="mt-0.5 w-4 h-4 shrink-0 accent-instrument"
+                  class="mt-0.5 w-4 h-4 shrink-0 accent-primary"
                   :checked="isChecked(q.id)"
                   @change="toggleAnswer(q)"
                 />
@@ -69,7 +69,7 @@
         <button
           @click="showConfirmModal = true"
           :disabled="answeredCount === 0"
-          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-instrument text-text-on-primary text-sm font-medium rounded-lg hover:bg-instrument-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          class="w-full sm:w-auto px-6 py-2.5 h-10 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Kirim jawaban
         </button>
@@ -92,14 +92,14 @@
           <div class="flex gap-3">
             <button
               @click="showConfirmModal = false"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-instrument-soft transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors"
             >
               Batal
             </button>
             <button
               @click="confirmSubmit"
               :disabled="submitting"
-              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-instrument hover:bg-instrument-hover disabled:opacity-50 transition-colors"
+              class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors"
             >
               {{ submitting ? 'Mengirim...' : 'Ya, kirim' }}
             </button>

@@ -5,7 +5,7 @@
     <div class="max-w-3xl mx-auto px-6 py-10">
       <!-- Header -->
       <div class="mb-8">
-        <span class="inline-block text-xs font-medium text-instrument bg-instrument-soft px-2.5 py-1 rounded-full mb-3">
+        <span class="inline-block text-xs font-medium text-primary bg-primary-soft px-2.5 py-1 rounded-full mb-3">
           Instrumen
         </span>
         <h1 class="text-2xl font-medium text-text-primary mb-2">Likert Scale</h1>
@@ -32,7 +32,7 @@
           v-for="likert in activedLikerts"
           :key="likert.id"
           @click="selectLikert(likert)"
-          class="w-full text-left bg-surface border border-border rounded-xl p-5 hover:border-instrument transition-colors flex items-center justify-between gap-4"
+          class="w-full text-left bg-surface border border-border rounded-xl p-5 hover:border-primary transition-colors flex items-center justify-between gap-4"
         >
           <div>
             <p class="text-sm font-medium text-text-primary mb-1">{{ likert.name }}</p>

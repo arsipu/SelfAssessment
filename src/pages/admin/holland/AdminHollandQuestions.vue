@@ -23,7 +23,7 @@
       </div>
         <button
           @click="router.push({ name: 'admin-holland-submissions', params: { slug: hollandSlug }})"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="w-4 h-4 shrink-0" />
 
@@ -116,7 +116,7 @@
                 <div class="flex items-center gap-1 shrink-0">
                   <button
                     @click="openEditModal(q, cat.id, col.id)"
-                    class="p-1.5 rounded-md text-instrument hover:bg-instrument-soft transition-colors cursor-pointer"
+                    class="p-1.5 rounded-md text-primary hover:bg-primary-soft transition-colors cursor-pointer"
                   >
                     <font-awesome-icon icon="fa-solid fa-pen" class="w-3.5 h-3.5" />
                   </button>
@@ -143,7 +143,7 @@
                 <input
                   v-model="inlineForm.question"
                   type="text"
-                  class="w-full sm:flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+                  class="w-full sm:flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                   placeholder="Masukkan teks pernyataan..."
                   autofocus
                   @keyup.enter="saveInline(cat.id, col.id)"
@@ -152,7 +152,7 @@
                   <button
                     @click="saveInline(cat.id, col.id)"
                     :disabled="!inlineForm.question.trim() || saving"
-                    class="flex-1 sm:flex-none px-3 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                    class="flex-1 sm:flex-none px-3 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                   >
                     {{ saving ? 'Menyimpan...' : 'Simpan' }}
                   </button>
@@ -182,7 +182,7 @@
           <p class="text-xs text-text-muted mb-3">Kategori ini belum punya kolom pernyataan.</p>
           <button
             @click="openAddColumnModal(cat.id)"
-            class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors cursor-pointer"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors cursor-pointer"
           >
             <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
             Tambah Kolom Pertama
@@ -215,7 +215,7 @@
             <label class="block text-sm font-medium text-text-primary mb-1">Kolom</label>
             <select
               v-model="editForm.columnId"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             >
               <option v-for="col in columnsFor(editRiasecId)" :key="col.id" :value="col.id">{{ col.name }}</option>
             </select>
@@ -227,7 +227,7 @@
             <textarea
               v-model="editForm.question"
               rows="2"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             ></textarea>
           </div>
         </div>
@@ -242,7 +242,7 @@
           <button
             @click="saveEdit"
             :disabled="!editForm.question.trim() || saving"
-            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -288,7 +288,7 @@
             <textarea
               v-model="riasecEditForm.description"
               rows="3"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
               placeholder="Deskripsi karakteristik kategori ini..."
             ></textarea>
           </div>
@@ -300,7 +300,7 @@
             <textarea
               v-model="riasecEditForm.skillsText"
               rows="4"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-mono resize-none"
               placeholder="Menggunakan dan mengoperasikan alat&#10;Merancang, membangun, memperbaiki"
             ></textarea>
           </div>
@@ -312,7 +312,7 @@
             <textarea
               v-model="riasecEditForm.careersText"
               rows="4"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-mono resize-none"
               placeholder="Pilot&#10;Petani&#10;Insinyur"
             ></textarea>
           </div>
@@ -324,7 +324,7 @@
             <textarea
               v-model="riasecEditForm.subjectsText"
               rows="3"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm font-mono resize-none"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-mono resize-none"
               placeholder="Matematika&#10;Sains&#10;Teknologi"
             ></textarea>
           </div>
@@ -340,7 +340,7 @@
           <button
             @click="saveRiasecEdit"
             :disabled="savingRiasec"
-            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ savingRiasec ? 'Menyimpan...' : 'Simpan' }}
           </button>
@@ -366,7 +366,7 @@
             <input
               v-model="columnForm.name"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Misal: Saya adalah"
               autofocus
               @keyup.enter="saveColumn"
@@ -377,7 +377,7 @@
             <input
               v-model.number="columnForm.order"
               type="number"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-instrument focus:border-transparent text-sm"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             />
             <p class="text-xs text-text-muted mt-1">Angka lebih kecil tampil lebih atas.</p>
           </div>
@@ -393,7 +393,7 @@
           <button
             @click="saveColumn"
             :disabled="!columnForm.name.trim() || savingColumn"
-            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-instrument rounded-lg hover:bg-instrument-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
           >
             {{ savingColumn ? 'Menyimpan...' : 'Simpan' }}
           </button>

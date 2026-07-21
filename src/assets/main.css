@@ -7,7 +7,7 @@
 
 @theme {
   /* ── Neutral ── */
-  --color-bg: #feffed;
+  --color-bg: #fff9e5;  
   --color-surface: #ffffff;
   --color-border: #e8e6d9;
   --color-surface-muted: #f7f6ee;
@@ -18,22 +18,9 @@
   --color-text-muted: #9a988a;
 
   /* ── Brand / primary ── */
-  --color-primary: #2d6a4f;
-  --color-primary-hover: #1f4d3a;
-  --color-primary-soft: #e3ede7;
-
-  /* ── Kategori instrumen ── */
-  --color-instrument: #a8623f;
-  --color-instrument-hover: #8a4f32;
-  --color-instrument-soft: #f3e7df;
-
-  --color-likert: #a8623f;
-  --color-likert-hover: #8a4f32;
-  --color-likert-soft: #f3e7df;
-
-  --color-holland: #2f7a6f;
-  --color-holland-hover: #24605a;
-  --color-holland-soft: #e2eeec;
+  --color-primary: #a8623f; 
+  --color-primary-hover: #8a4f32;
+  --color-primary-soft: #f3e7df;
 
   /* ── Categorical / data-viz (dot indicator, chart, legend) ── */
   --color-viz-1: #e74c3c;
@@ -70,6 +57,7 @@
   --color-warning-80: #b8863acc;      /* Sama dengan warning/80 */
   --color-surface-muted-40: #f7f6ee66; /* Sama dengan surface-muted/40 */
 
+  /* ── Table ── */
   --color-table-header: #754c35;
   --color-table-value: #eef29d;
 
@@ -144,10 +132,6 @@ tr.bg-table-value {
     --table-header-text: var(--color-table-header-text);
     --table-value-bg: var(--color-table-value);
     --table-value-text: var(--color-table-value-text);
-
-    width: 100%;
-    text-align: left;
-    border-collapse: collapse;
   }
 
   .app-table thead {
@@ -155,12 +139,7 @@ tr.bg-table-value {
   }
 
   .app-table thead th {
-    @apply px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider;
     color: var(--table-header-text);
-  }
-
-  .app-table tbody {
-    @apply divide-y divide-border;
   }
 
   .app-table tbody tr {
@@ -168,7 +147,6 @@ tr.bg-table-value {
   }
 
   .app-table tbody td {
-    @apply px-4 md:px-5 py-3 text-sm;
     color: var(--table-value-text);
   }
 }
