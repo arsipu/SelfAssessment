@@ -34,8 +34,8 @@
         :key="item.name"
         :to="{ name: item.name }"
         @click="$emit('close')"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-muted"
-        active-class="bg-primary text-white"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm"
+        :class="[isActive(item.name) ? 'bg-primary text-white' : 'text-text-secondary hover:bg-surface-muted']"
       >
         {{ item.label }}
       </RouterLink>
@@ -75,11 +75,16 @@ defineProps({ isOpen: Boolean })
 defineEmits(['close'])
 
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
+
+function isActive(name) {
+  return route.name?.toString().startsWith(name)
+}
 
 const navItems = [
   {

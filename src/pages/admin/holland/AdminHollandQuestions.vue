@@ -82,8 +82,8 @@
             class="border border-border rounded-lg overflow-hidden flex flex-col w-full"
           >
             <!-- Column Header -->
-            <div class="px-4 py-2.5 bg-surface-muted/50 flex items-center justify-between gap-3 border-b border-border">
-              <span class="min-w-0 text-xs font-medium text-text-secondary uppercase tracking-wider whitespace-normal break-words">
+            <div class="px-4 py-2.5 bg-table-header flex items-center justify-between gap-3 border-b border-border">
+              <span class="min-w-0 text-xs font-medium text-table-header-text uppercase tracking-wider whitespace-normal break-words">
                 {{ col.name }}
               </span>
               <div class="flex items-center gap-1 shrink-0">
@@ -105,24 +105,24 @@
             </div>
 
             <!-- Questions list -->
-            <div class="flex-1">
+            <div class="flex-1 bg-table-value">
               <div
                 v-for="(q, index) in questionsByRiasecAndColumn(cat.id, col.id)"
                 :key="q.id"
-                class="px-4 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-muted transition-colors flex items-start gap-2"
+                class="px-4 py-2.5 border-b border-border last:border-b-0  transition-colors flex items-start gap-2"
               >
-                <span class="text-xs text-text-muted mt-0.5 shrink-0 w-5">{{ index + 1 }}.</span>
-                <span class="text-sm text-text-primary flex-1">{{ q.question }}</span>
+                <span class="text-xs text-table-value-text mt-0.5 shrink-0 w-5">{{ index + 1 }}.</span>
+                <span class="text-sm text-table-value-text flex-1">{{ q.question }}</span>
                 <div class="flex items-center gap-1 shrink-0">
                   <button
                     @click="openEditModal(q, cat.id, col.id)"
-                    class="p-1.5 rounded-md text-primary hover:bg-primary-soft transition-colors cursor-pointer"
+                    class="p-1.5 rounded-md text-primary transition-colors cursor-pointer"
                   >
                     <font-awesome-icon icon="fa-solid fa-pen" class="w-3.5 h-3.5" />
                   </button>
                   <button
                     @click="openDeleteModal(q.id, cat.id, col.id)"
-                    class="p-1.5 rounded-md text-danger hover:bg-danger-soft transition-colors cursor-pointer"
+                    class="p-1.5 rounded-md text-danger transition-colors cursor-pointer"
                   >
                     <font-awesome-icon icon="fa-solid fa-trash" class="w-3.5 h-3.5" />
                   </button>
@@ -169,7 +169,7 @@
             <button
               v-else
               @click="openInlineAdd(cat.id, col.id)"
-              class="w-full px-4 py-2.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors flex items-center gap-2 border-t border-border cursor-pointer"
+              class="w-full px-4 py-2.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors flex items-center gap-2 border-t border-border cursor-pointer "
             >
               <font-awesome-icon icon="fa-solid fa-plus" class="h-3.5 w-3.5" />
               Tambah Pernyataan

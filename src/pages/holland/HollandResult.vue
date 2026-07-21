@@ -216,12 +216,22 @@ const detailSections = computed(() => {
 })
 
 onMounted(async () => {
-  if (!result.value) {
-    router.replace({ name: 'holland-form', params: { slug: hollandSlug } })
-    return
-  }
   loading.value = true
   try {
+    if (!hollandStore.currentHolland || hollandStore.currentHolland.slug !== hollandSlug) {
+      await hollandStore.getHollandBySlug(hollandSlug)
+    }
+
+    if (!hollandStore.currentHolland) {
+      router.replace({ name: 'not-available', query: { title: 'Instrumen Tidak Ditemukan', message: 'Instrumen yang kamu cari mungkin sudah dihapus atau link tidak valid.' } })
+      return
+    }
+
+    if (!result.value) {
+      router.replace({ name: 'holland-form', params: { slug: hollandSlug } })
+      return
+    }
+
     await riasecStore.fetchRiasecList(hollandId.value)
     const riasecIds = riasecStore.riasecList.map((c) => c.id)
     await columnsStore.fetchAllColumns(hollandId.value, riasecIds)

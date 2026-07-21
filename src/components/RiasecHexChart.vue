@@ -46,28 +46,42 @@ const props = defineProps({
   }
 })
 
+// Fungsi untuk mengambil nilai CSS variable dari root
+const getCssVariable = (name) =>
+  getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+
+// Fungsi untuk mengubah hex color menjadi rgba
+const hexToRgba = (hex, alpha = 1) => {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 // Urutan sudut heksagon
 const order = ['R', 'I', 'A', 'S', 'E', 'C']
 
 // Setup Data Chart
 const chartData = computed(() => {
+  const primaryColor = getCssVariable('--color-primary')
+
   return {
     labels: order,
     datasets: [
       {
         label: 'Skor',
         data: order.map(code => props.scores[code] || 0),
-        
-        // CATATAN WARNA: 
-        // Chart.js menggunakan canvas, jadi tidak bisa baca class Tailwind seperti 'fill-primary'.
-        // Kamu harus menggunakan hex code atau rgb/rgba di sini. 
-        // Ganti warna di bawah ini agar match dengan warna tema 'instrument' kamu.
-        backgroundColor: 'rgba(59, 130, 246, 0.15)', // Area dalam (contoh: biru transparan)
-        borderColor: '#3B82F6', // Garis pinggir polygon
-        pointBackgroundColor: '#3B82F6', // Warna titik di setiap sudut
-        
+
+        // otomatis mengikuti --color-primary di main.css
+        backgroundColor: hexToRgba(primaryColor, 0.15),
+        borderColor: primaryColor,
+        pointBackgroundColor: primaryColor,
+
         borderWidth: 2,
-        pointRadius: 4, // Ukuran titik (menggantikan <circle r="3.5">)
+        pointRadius: 4,
         pointHoverRadius: 6
       }
     ]
