@@ -37,18 +37,19 @@
         <table class="w-full text-left border-collapse table-fixed text-sm">
           <thead>
             <tr class="border-b border-border">
-              <th class="w-[8%] py-2 text-[11px] font-normal text-text-muted">No</th>
-              <th class="w-[54%] py-2 text-[11px] font-normal text-text-muted">Pertanyaan</th>
-              <th class="w-[26%] py-2 text-[11px] font-normal text-text-muted">Jawaban</th>
-              <th class="w-[12%] py-2 text-[11px] font-normal text-text-muted">Poin</th>
+              <th class="w-[8%] px-3 py-2 text-[11px] font-normal text-text-muted">No</th>
+              <th class="w-[50%] px-3 py-2 text-[11px] font-normal text-text-muted">Pertanyaan</th>
+              <th class="w-[30%] px-3 py-2 text-[11px] font-normal text-text-muted">Jawaban</th>
+              <th class="w-[12%] px-3 py-2 text-[11px] font-normal text-text-muted">Poin</th>
             </tr>
           </thead>
+
           <tbody class="divide-y divide-border">
             <tr v-for="(item, itemIndex) in section.items" :key="item.questionId">
-              <td class="py-2 text-text-secondary">{{ itemIndex + 1 }}</td>
-              <td class="py-2 text-text-primary">{{ item.questionText }}</td>
-              <td class="py-2 text-text-secondary whitespace-nowrap">{{ item.answerLabel }}</td>
-              <td class="py-2 text-text-secondary">{{ item.point }}</td>
+              <td class="px-3 py-2 text-text-secondary">{{ itemIndex + 1 }}</td>
+              <td class="px-3 py-2 text-text-primary">{{ item.questionText }}</td>
+              <td class="px-3 py-2 text-text-secondary">{{ item.answerLabel }}</td>
+              <td class="px-3 py-2 text-text-secondary">{{ item.point }}</td>
             </tr>
           </tbody>
         </table>

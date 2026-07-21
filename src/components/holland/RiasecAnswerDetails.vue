@@ -14,8 +14,8 @@
       </div>
 
       <div 
-        class="grid grid-cols-1 gap-6 [>*]:w-full"
-        :style="{ gridTemplateColumns: `repeat(${section.columns.length}, minmax(0, 1fr))` }"
+        class="flex flex-col lg:grid gap-6"
+        :class="section.columns.length === 2 ? 'lg:grid-cols-2' : section.columns.length === 3 ? 'lg:grid-cols-3' : section.columns.length >= 4 ? 'lg:grid-cols-4' : ''"
       >
         <div
           v-for="col in section.columns"

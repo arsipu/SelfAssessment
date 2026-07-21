@@ -27,7 +27,7 @@
         <!-- Alert untuk submission yang belum selesai -->
         <div
           v-if="!isCompleted"
-          class="pdf-alert-warning bg-warning-soft border border-warning/30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
+          class="pdf-alert-warning bg-warning-soft border border-warning-30 rounded-xl p-4 md:p-5 mb-4 md:mb-6"
         >
           <div class="flex items-start gap-3">
             <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -35,7 +35,7 @@
             </svg>
             <div>
               <p class="text-sm font-medium text-warning">Responden belum menyelesaikan tes</p>
-              <p class="text-xs text-warning/80 mt-1">
+                <p class="text-xs text-warning-80 mt-1">
                 Data skor dan rincian jawaban belum tersedia karena responden masih dalam tahap mengerjakan kuesioner.
               </p>
             </div>

@@ -38,24 +38,23 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse table-fixed">
+        <table class="app-table w-full text-left border-collapse table-fixed">
           <thead>
-            <tr class="bg-surface border-b border-border">
-              <th class="w-[18%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Rentang</th>
-              <th class="w-[27%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Label</th>
-              <th class="w-[35%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Deskripsi</th>
-              <th class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Aksi</th>
+            <tr>
+              <th class="w-[18%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Rentang</th>
+              <th class="w-[27%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Label</th>
+              <th class="w-[35%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Deskripsi</th>
+              <th class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border">
             <tr
               v-for="s in scales"
               :key="s.id"
-              class="hover:bg-surface-muted transition-colors"
             >
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.min }} – {{ s.max }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-primary">{{ s.label }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ s.description }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-table-value-text">{{ s.min }} – {{ s.max }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-table-value-text">{{ s.label }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm text-table-value-text">{{ s.description }}</td>
               <td class="px-4 md:px-5 py-3">
                 <div class="flex items-center gap-2">
                   <button
@@ -166,23 +165,22 @@
 
         <!-- Tabel -->
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse table-fixed">
+          <table class="app-table w-full text-left border-collapse table-fixed">
             <thead>
-              <tr class="bg-surface border-b border-border">
-                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">No</th>
-                <th class="w-[48%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Pertanyaan</th>
-                <th class="w-[24%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Jenis</th>
-                <th class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Aksi</th>
+              <tr>
+                <th class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">No</th>
+                <th class="w-[48%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Pertanyaan</th>
+                <th class="w-[24%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Jenis</th>
+                <th class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               <tr
                 v-for="(q, index) in questionsByCategory(cat.id)"
                 :key="q.id"
-                class="hover:bg-surface-muted transition-colors"
               >
-                <td class="px-4 md:px-5 py-3 text-sm text-text-secondary">{{ index + 1 }}</td>
-                <td class="px-4 md:px-5 py-3 text-sm text-text-primary">{{ q.question }}</td>
+                <td class="px-4 md:px-5 py-3 text-sm text-table-value-text">{{ index + 1 }}</td>
+                <td class="px-4 md:px-5 py-3 text-sm text-table-value-text">{{ q.question }}</td>
                 <td class="px-4 md:px-5 py-3">
                   <span
                     class="text-xs px-2 py-1 rounded-full font-medium"

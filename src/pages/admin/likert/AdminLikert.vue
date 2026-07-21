@@ -61,7 +61,7 @@
                   <button
                     @click="toggleStatusMenu(likert.id)"
                     :class="statusBadgeClass(likert.status)"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 md:py-1 rounded-full text-xs font-medium transition-colors h-8 md:h-auto cursor-pointer"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 md:py-1 rounded-full text-xs font-medium transition-colors h-10 md:h-auto cursor-pointer"
                   >
                     <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="statusDotClass(likert.status)"></span>
                     {{ statusLabel(likert.status) }}

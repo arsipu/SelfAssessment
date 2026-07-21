@@ -70,11 +70,11 @@
           </div>
         </div>
 
-        <!-- Grid layout: columns side by side -->
+        <!-- Grid layout: stacked di mobile, side by side di lg+ -->
         <div
           v-if="columnsFor(cat.id).length > 0"
-          class="grid grid-cols-1 gap-4 p-4 [>*]:w-full"
-          :style="{ gridTemplateColumns: `repeat(${columnsFor(cat.id).length}, minmax(0, 1fr))` }"
+          class="flex flex-col lg:grid gap-4 p-4"
+          :class="columnsFor(cat.id).length === 2 ? 'lg:grid-cols-2' : columnsFor(cat.id).length === 3 ? 'lg:grid-cols-3' : columnsFor(cat.id).length >= 4 ? 'lg:grid-cols-4' : ''"
         >
           <div
             v-for="col in columnsFor(cat.id)"
