@@ -8,12 +8,10 @@ import NotAvailableView from '@/components/NotAvailable.vue';
 
 import TestPrintView from '@/TestPrint.vue';
 
-import Holland from '@/pages/holland/Holland.vue';
 import HollandForm from '@/pages/holland/HollandForm.vue';
 import HollandQuestions from '@/pages/holland/HollandQuestions.vue';
 import HollandResult from '@/pages/holland/HollandResult.vue';
 
-import Likert from '@/pages/likert/Likert.vue';
 import LikertForm from '@/pages/likert/LikertForm.vue';
 import LikertQuestions from '@/pages/likert/LikertQuestions.vue';
 import LikertResult from '@/pages/likert/LikertResult.vue';
@@ -43,13 +41,11 @@ const routes = [
     { path: "/print", name: "print", component: TestPrintView },
 
 	// Holland — parameterized by :slug
-	{ path: "/holland", name: "holland", component: Holland },
     { path: "/holland/:slug", name: "holland-form", component: HollandForm },
     { path: "/holland/:slug/questions", name: "holland-questions", component: HollandQuestions },
     { path: "/holland/:slug/result", name: "holland-result", component: HollandResult },
 
 	// Likert — parameterized by :slug
-    { path: "/likert", name: "likert", component: Likert },
     { path: "/likert/:slug", name: "likert-form", component: LikertForm },
     { path: "/likert/:slug/questions", name: "likert-questions", component: LikertQuestions },
     { path: "/likert/:slug/result", name: "likert-result", component: LikertResult },
