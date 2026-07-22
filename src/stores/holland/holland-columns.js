@@ -52,9 +52,11 @@ export const useHollandColumnsStore = defineStore('hollandColumns', () => {
   }
 
   // ── Add column ─────────────────────────────────────────────
+  // Field `questions` diinisialisasi sebagai array kosong — ini
+  // menggantikan subcollection questions/{questionId} yang lama.
 
   const addColumn = async (hollandId, riasecId, { name, order }) => {
-    const payload = { name: name.trim(), order, createdAt: serverTimestamp() }
+    const payload = { name: name.trim(), order, questions: [], createdAt: serverTimestamp() }
     try {
       const ref = await addDoc(columnsPath(hollandId, riasecId), payload)
       columnsByRiasec.value[riasecId] = [
@@ -87,9 +89,10 @@ export const useHollandColumnsStore = defineStore('hollandColumns', () => {
   }
 
   // ── Delete column ──────────────────────────────────────────
-  // NOTE: ini cuma hapus doc column-nya. Subcollection `questions`
-  // di dalamnya HARUS dihapus manual dulu (lihat holland-questions.js
-  // -> deleteAllQuestionsInColumn), karena Firestore gak cascade-delete.
+  // NOTE: sebelum hapus column, question store deleteAllQuestionsInColumn
+  // akan dijalankan dulu oleh komponen. Dengan struktur baru (array field),
+  // cukup set questions jadi [] lalu hapus doc — tidak perlu iterasi
+  // subcollection.
 
   const deleteColumn = async (hollandId, riasecId, columnId) => {
     try {

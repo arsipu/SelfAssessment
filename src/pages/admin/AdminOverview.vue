@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="overflow-x-hidden max-w-full">
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
       <div class="flex flex-col items-center gap-3">
@@ -12,41 +12,41 @@
     </div>
 
     <!-- Dashboard Content -->
-    <div v-else class="space-y-8">
+    <div v-else class="space-y-8 max-w-full">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-text-primary">Dashboard</h1>
           <p class="text-sm text-text-secondary mt-1">Ringkasan aktivitas asesmen dan responden</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
           <router-link
             :to="{ name: 'admin-likert' }"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-text-on-primary bg-primary hover:bg-primary-hover transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-text-on-primary bg-primary hover:bg-primary-hover transition-colors whitespace-nowrap"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            Kelola Survei
+            <span class="min-w-0">Kelola Survei</span>
           </router-link>
           <router-link
             :to="{ name: 'admin-holland' }"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-text-on-primary bg-primary hover:bg-primary-hover transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-text-on-primary bg-primary hover:bg-primary-hover transition-colors whitespace-nowrap"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            Kelola Holland
+            <span class="min-w-0">Kelola Holland</span>
           </router-link>
         </div>
       </div>
 
       <!-- Global Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
         <div
           v-for="(card, idx) in globalStats"
           :key="idx"
-          class="relative overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+          class="relative overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 hover:shadow-md min-w-0"
         >
           <div class="flex items-center justify-between mb-3">
             <div
@@ -62,28 +62,28 @@
       </div>
 
       <!-- Likert & Holland Sections -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         <!-- Likert Card -->
-        <div class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+        <div class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md min-w-0">
           <div class="p-5 border-b border-border">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <div>
-                  <h2 class="text-base font-semibold text-text-primary">Survei</h2>
-                  <p class="text-xs text-text-muted">Instrumen penilaian sikap & persepsi</p>
+                <div class="min-w-0">
+                  <h2 class="text-base font-semibold text-text-primary truncate">Survei</h2>
+                  <p class="text-xs text-text-muted truncate">Instrumen penilaian sikap & persepsi</p>
                 </div>
               </div>
               <router-link
                 :to="{ name: 'admin-likert' }"
-                class="text-sm font-medium text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-1"
+                class="text-sm font-medium text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-1 shrink-0"
               >
                 Detail
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </router-link>
@@ -92,17 +92,17 @@
 
           <div class="p-5 space-y-4">
             <!-- Likert Mini Stats -->
-            <div class="grid grid-cols-3 gap-3">
-              <div class="text-center p-3 rounded-xl bg-surface-muted">
-                <p class="text-lg font-bold text-text-primary">{{ likertStats[0]?.value ?? 0 }}</p>
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-surface-muted min-w-0">
+                <p class="text-base sm:text-lg font-bold text-text-primary truncate">{{ likertStats[0]?.value ?? 0 }}</p>
                 <p class="text-xs text-text-secondary mt-0.5">Total</p>
               </div>
-              <div class="text-center p-3 rounded-xl bg-success-soft">
-                <p class="text-lg font-bold text-success">{{ likertStats[1]?.value ?? 0 }}</p>
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-success-soft min-w-0">
+                <p class="text-base sm:text-lg font-bold text-success truncate">{{ likertStats[1]?.value ?? 0 }}</p>
                 <p class="text-xs text-success mt-0.5">Selesai</p>
               </div>
-              <div class="text-center p-3 rounded-xl bg-warning-soft">
-                <p class="text-lg font-bold text-warning">{{ likertStats[2]?.value ?? 0 }}</p>
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-warning-soft min-w-0">
+                <p class="text-base sm:text-lg font-bold text-warning truncate">{{ likertStats[2]?.value ?? 0 }}</p>
                 <p class="text-xs text-warning mt-0.5">Berjalan</p>
               </div>
             </div>
@@ -128,7 +128,7 @@
                     <p class="text-xs text-text-muted truncate">{{ r.instrumentName }}</p>
                   </div>
                   <span
-                    class="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium"
+                    class="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium whitespace-nowrap"
                     :class="r.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
                   >
                     {{ r.status === 'completed' ? 'Selesai' : 'Proses' }}
@@ -159,27 +159,27 @@
         </div>
 
         <!-- Holland Card -->
-        <div class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+        <div class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md min-w-0">
           <div class="p-5 border-b border-border">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                   </svg>
                 </div>
-                <div>
-                  <h2 class="text-base font-semibold text-text-primary">Holland RIASEC</h2>
-                  <p class="text-xs text-text-muted">Instrumen minat karier & kepribadian</p>
+                <div class="min-w-0">
+                  <h2 class="text-base font-semibold text-text-primary truncate">Holland RIASEC</h2>
+                  <p class="text-xs text-text-muted truncate">Instrumen minat karier & kepribadian</p>
                 </div>
               </div>
               <router-link
                 :to="{ name: 'admin-holland' }"
-                class="text-sm font-medium text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-1"
+                class="text-sm font-medium text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-1 shrink-0"
               >
                 Detail
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </router-link>
@@ -188,17 +188,17 @@
 
           <div class="p-5 space-y-4">
             <!-- Holland Mini Stats -->
-            <div class="grid grid-cols-3 gap-3">
-              <div class="text-center p-3 rounded-xl bg-surface-muted">
-                <p class="text-lg font-bold text-text-primary">{{ hollandStats[0]?.value ?? 0 }}</p>
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-surface-muted min-w-0">
+                <p class="text-base sm:text-lg font-bold text-text-primary truncate">{{ hollandStats[0]?.value ?? 0 }}</p>
                 <p class="text-xs text-text-secondary mt-0.5">Total</p>
               </div>
-              <div class="text-center p-3 rounded-xl bg-success-soft">
-                <p class="text-lg font-bold text-success">{{ hollandStats[1]?.value ?? 0 }}</p>
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-success-soft min-w-0">
+                <p class="text-base sm:text-lg font-bold text-success truncate">{{ hollandStats[1]?.value ?? 0 }}</p>
                 <p class="text-xs text-success mt-0.5">Selesai</p>
               </div>
-              <div class="text-center p-3 rounded-xl bg-warning-soft">
-                <p class="text-lg font-bold text-warning">{{ hollandStats[2]?.value ?? 0 }}</p>
+              <div class="text-center p-2 sm:p-3 rounded-xl bg-warning-soft min-w-0">
+                <p class="text-base sm:text-lg font-bold text-warning truncate">{{ hollandStats[2]?.value ?? 0 }}</p>
                 <p class="text-xs text-warning mt-0.5">Berjalan</p>
               </div>
             </div>
@@ -224,7 +224,7 @@
                     <p class="text-xs text-text-muted truncate">{{ r.instrumentName }}</p>
                   </div>
                   <span
-                    class="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium"
+                    class="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium whitespace-nowrap"
                     :class="r.status === 'completed' ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'"
                   >
                     {{ r.status === 'completed' ? 'Selesai' : 'Proses' }}

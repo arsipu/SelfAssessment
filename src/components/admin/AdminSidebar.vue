@@ -1,7 +1,7 @@
 <template>
   <aside
     :class="[
-      'fixed top-0 left-0 h-full w-56 bg-surface border-r border-border flex flex-col z-40',
+      'fixed top-0 left-0 h-full w-56 bg-table-header border-r border-border flex flex-col z-40',
       'transform transition-transform duration-300',
       isOpen ? 'translate-x-0' : '-translate-x-full',
       'md:translate-x-0'
@@ -10,7 +10,7 @@
     <!-- Header -->
     <div class="px-5 py-4 border-b border-border flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-text-primary">
+        <p class="text-sm font-medium text-table-header-text">
           Self Assessment
         </p>
         <p class="text-xs text-text-muted">
@@ -35,7 +35,7 @@
         :to="{ name: item.name }"
         @click="$emit('close')"
         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm"
-        :class="[isActive(item.name) ? 'bg-primary text-white' : 'text-text-secondary hover:bg-surface-muted']"
+        :class="[isActive(item.name) ? 'bg-primary text-white' : 'text-[#CFCFCF] hover:bg-primary-hover']"
       >
         {{ item.label }}
       </RouterLink>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="min-w-0">
-          <p class="text-sm font-medium truncate">
+          <p class="text-sm font-medium truncate text-table-header-text">
             {{ userName }}
           </p>
           <p class="text-xs text-text-muted">
@@ -62,7 +62,7 @@
 
       <button
         @click="handleLogout"
-        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-danger-soft hover:text-danger transition-colors"
+        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-table-header-text hover:bg-danger-soft hover:text-danger transition-colors"
       >
         Keluar
       </button>

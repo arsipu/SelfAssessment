@@ -179,11 +179,15 @@ export const useHollandStore = defineStore('holland', () => {
 
   // ── Hapus instrumen ───────────────────────────────────────
   // CATATAN: ini cuma hapus doc holland utama. Subcollection
-  // `riasec` (dan nested `questions` di dalamnya) serta `submissions`
+  // `riasec` (termasuk `columns` di dalamnya) serta `submissions`
   // TIDAK ikut terhapus otomatis — Firestore tidak punya cascade delete
   // dari client SDK. Untuk pembersihan penuh, perlu Cloud Function
   // terpisah atau dihapus manual. Untuk sekarang biarkan begini dulu,
   // tapi ini technical debt yang perlu diketahui.
+  //
+  // Catatan: dengan struktur baru, `questions` sudah menjadi array field
+  // di dalam `columns/{columnId}`, jadi ikut terhapus saat column dihapus.
+  // Tapi subcollection `columns` tetap perlu dihapus manual.
 
   const deleteHolland = async (hollandId) => {
     try {

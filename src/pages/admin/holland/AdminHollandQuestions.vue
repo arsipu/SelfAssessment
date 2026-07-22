@@ -401,6 +401,31 @@
       </div>
     </div>
 
+    <!-- Alert Maksimal 4 Kolom -->
+    <div v-if="showMaxColumnsAlert" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
+        <div class="p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="w-5 h-5 text-yellow-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-text-primary">Batasan Kolom</h3>
+          </div>
+          <p class="text-sm text-text-secondary">
+            Kategori <strong>{{ maxColumnsAlertRiasecLabel }}</strong> sudah memiliki 4 kolom. Maksimal kolom per kategori adalah 4.
+          </p>
+        </div>
+        <div class="px-6 py-4 border-t border-border flex justify-end">
+          <button
+            @click="showMaxColumnsAlert = false"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            Mengerti
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Hapus Soal -->
     <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
@@ -496,6 +521,10 @@ const riasecEditForm = ref({
   careersText: '',
   subjectsText: '',
 })
+
+// Alert batasan maksimal 4 kolom
+const showMaxColumnsAlert = ref(false)
+const maxColumnsAlertRiasecLabel = ref('')
 
 // Modal tambah / edit kolom
 const showColumnModal = ref(false)
@@ -690,8 +719,14 @@ const confirmDelete = async () => {
 // ── Tambah / Edit Kolom ──────────────────────────────────────
 
 const openAddColumnModal = (riasecId) => {
-  columnModalRiasecId.value = riasecId
   const existing = columnsFor(riasecId)
+  if (existing.length >= 4) {
+    const cat = riasecList.value.find((c) => c.id === riasecId)
+    maxColumnsAlertRiasecLabel.value = cat?.label || riasecId
+    showMaxColumnsAlert.value = true
+    return
+  }
+  columnModalRiasecId.value = riasecId
   const nextOrder = existing.length
     ? Math.max(...existing.map((c) => c.order ?? 0)) + 1
     : 0
@@ -751,7 +786,7 @@ const closeDeleteColumnModal = () => {
 const confirmDeleteColumn = async () => {
   savingColumn.value = true
   try {
-    // Hapus semua soal di kolom ini dulu (Firestore gak cascade-delete subcollection)
+    // Hapus semua soal di kolom ini dulu (sekarang tinggal set array questions jadi [])
     await questionsStore.deleteAllQuestionsInColumn(
       hollandId.value,
       deleteColumnRiasecId.value,
