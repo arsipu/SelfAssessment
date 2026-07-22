@@ -86,7 +86,7 @@
               </div>
               <div>
                 <p class="text-text-muted text-xs mb-0.5">Usia / Gender</p>
-                <p class="text-text-primary font-medium">{{ formattedBirthDateAge }}, {{ submission.gender }}</p>
+                <p class="text-text-primary font-medium">{{ submission.age }} Tahun, {{ submission.gender }}</p>
               </div>
               <div>
                 <p class="text-text-muted text-xs mb-0.5">Kode Tracking</p>

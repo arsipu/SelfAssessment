@@ -531,7 +531,7 @@ const saveInline = async (categoryId) => {
   if (!inlineForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertQuestionsStore.addQuestion(likertId, {
+    await likertQuestionsStore.addQuestion(likertId.value, {
       question: inlineForm.value.question.trim(),
       favorable: inlineForm.value.favorable,
       categoryId,
@@ -562,7 +562,7 @@ const saveEdit = async () => {
   if (!editForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertQuestionsStore.updateQuestion(likertId, editingId.value, {
+    await likertQuestionsStore.updateQuestion(likertId.value, editingId.value, {
       question: editForm.value.question.trim(),
       favorable: editForm.value.favorable,
       categoryId: editForm.value.categoryId,
@@ -585,7 +585,7 @@ const openDeleteModal = (id) => {
 const confirmDelete = async () => {
   saving.value = true
   try {
-    await likertQuestionsStore.deleteQuestion(likertId, deletingId.value)
+    await likertQuestionsStore.deleteQuestion(likertId.value, deletingId.value)
     showDeleteModal.value = false
     deletingId.value = null
   } catch (e) {
@@ -628,14 +628,14 @@ const saveScale = async () => {
   try {
     const range = `${scaleForm.value.min} – ${scaleForm.value.max}`
     if (editingScaleId.value) {
-      await likertStore.updateScale(likertId, editingScaleId.value, {
+      await likertStore.updateScale(likertId.value, editingScaleId.value, {
         score: scaleForm.value.score.trim(),
         range,
         description: scaleForm.value.description.trim(),
       })
       showEditScaleModal.value = false
     } else {
-      await likertStore.addScale(likertId, {
+      await likertStore.addScale(likertId.value, {
         score: scaleForm.value.score.trim(),
         range,
         description: scaleForm.value.description.trim(),
@@ -675,7 +675,7 @@ const deleteScaleItem = (scaleId) => {
 const confirmDeleteScale = async () => {
   scaleSaving.value = true
   try {
-    await likertStore.deleteScale(likertId, deletingScaleId.value)
+    await likertStore.deleteScale(likertId.value, deletingScaleId.value)
     showDeleteScaleModal.value = false
     deletingScaleId.value = null
     await fetchScales()

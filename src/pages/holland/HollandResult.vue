@@ -21,7 +21,7 @@
               </div>
               <div>
                 <p class="text-text-muted text-xs mb-0.5">Usia / Gender</p>
-                <p class="text-text-primary font-medium">{{ formattedBirthDateAge }}, {{ result?.respondent?.gender }}</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.age }} Tahun, {{ result?.respondent?.gender }}</p>
               </div>
               <div>
                 <p class="text-text-muted text-xs mb-0.5">Sekolah / Universitas</p>
