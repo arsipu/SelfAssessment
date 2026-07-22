@@ -122,7 +122,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
-import { useLikertCategoryStore } from '@/stores/likert/likert-category'
+import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { LikertAnswer, LIKERT_SCALE_OPTIONS, LIKERT_SCORE_MAP, LIKERT_SCORE_MAP_REVERSE } from '@/apps/likert'
 
@@ -136,7 +136,7 @@ const likertQuestionsStore = useLikertQuestionsStore()
 const likertSessionStore = useLikertSessionStore()
 const { questions } = storeToRefs(likertQuestionsStore)
 
-const categoryStore = useLikertCategoryStore()
+const categoryStore = useLikertCategoriesStore()
 const { categories } = storeToRefs(categoryStore)
 
 const answers = ref({})
@@ -160,8 +160,9 @@ onMounted(async () => {
 
   answers.value = { ...session.answers }
 
-  await likertQuestionsStore.fetchQuestions(likertId.value)
-  await categoryStore.fetchCategories()
+  // Fetch categories (subcollection) — questions ada di array field tiap kategori
+  await categoryStore.fetchCategories(likertId.value)
+  await likertQuestionsStore.fetchAllQuestions(categories.value)
 })
 
 

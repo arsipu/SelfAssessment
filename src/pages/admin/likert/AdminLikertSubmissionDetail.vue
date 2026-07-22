@@ -155,7 +155,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
-import { useLikertCategoryStore } from '@/stores/likert/likert-category'
+import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
@@ -167,7 +167,7 @@ const likertId = ref(null)
 const submissionSlug = route.params.submissionSlug
 
 const likertStore = useLikertStore()
-const categoryStore = useLikertCategoryStore()
+const categoryStore = useLikertCategoriesStore()
 const submissionsStore = useLikertSubmissionsStore()
 const questionsStore = useLikertQuestionsStore()
 
@@ -237,12 +237,14 @@ onMounted(async () => {
 
   likertId.value = likert.id
 
-  await Promise.all([
-    submissionsStore.fetchSubmissionBySlug(likertId.value, submissionSlug),
-    questionsStore.fetchQuestions(likertId.value),
-    categoryStore.fetchCategories(),
-    likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId.value),
-  ])
+    await Promise.all([
+      submissionsStore.fetchSubmissionBySlug(likertId.value, submissionSlug),
+      categoryStore.fetchCategories(likertId.value),
+      likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertById(likertId.value),
+    ])
+
+    // Questions sekarang sebagai array field di categories — extract dari situ
+    await questionsStore.fetchAllQuestions(categoryStore.categories)
 
   scales.value = await likertStore.fetchLikertScales(likertId.value)
 })

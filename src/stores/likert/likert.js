@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   serverTimestamp,
   collectionGroup,
   query,
@@ -18,6 +19,14 @@ import {
 
 import { ACTIVE, INACTIVE } from '@/apps/status'
 import { slugify } from '@/utils/slug'
+
+// ── 4 kategori default untuk likert baru ────────────────────
+const DEFAULT_CATEGORIES = [
+  'Personal Characteristics',
+  'Organisational Acumen',
+  'Work Competence',
+  'Social Intelligence',
+]
 
 export const useLikertStore = defineStore('likert', () => {
   const likerts = ref([])
@@ -81,6 +90,26 @@ export const useLikertStore = defineStore('likert', () => {
     return currentLikert.value
   }
 
+  // ── Seed 4 kategori default untuk likert baru ────────────────
+  // Dipanggil sekali pas instrumen baru dibuat, dalam satu writeBatch.
+  // Tiap kategori default dibuat dengan `questions: []` — admin bebas
+  // nambah/edit/hapus kategori kemudian.
+
+  const seedLikertCategories = async (likertId) => {
+    const batch = writeBatch(db)
+
+    DEFAULT_CATEGORIES.forEach((name) => {
+      const ref = doc(collection(db, 'likert', likertId, 'categories'))
+      batch.set(ref, {
+        name,
+        questions: [],
+        createdAt: serverTimestamp(),
+      })
+    })
+
+    await batch.commit()
+  }
+
   const addLikert = async ({ name, description }) => {
     console.log('Adding likert:', name)
     try {
@@ -92,6 +121,17 @@ export const useLikertStore = defineStore('likert', () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
+
+      // Seed 4 kategori default langsung setelah doc likert berhasil dibuat.
+      try {
+        await seedLikertCategories(ref.id)
+      } catch (seedError) {
+        console.error('Gagal seed kategori default untuk likert baru:', ref.id, seedError)
+        throw new Error(
+          'Instrumen dibuat, tapi gagal menyiapkan 4 kategori default. Silakan cek atau hapus dan coba lagi.'
+        )
+      }
+
       console.log('Likert added with ID:', ref.id)
       await fetchLikerts()
       return ref.id

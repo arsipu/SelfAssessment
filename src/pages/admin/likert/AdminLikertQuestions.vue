@@ -18,6 +18,9 @@
         <div>
           <h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">{{ currentLikert?.name ?? 'Memuat...' }}</h1>
           <p class="text-sm text-text-secondary max-w-3xl">{{ currentLikert?.description }}</p>
+          <p class="text-xs text-text-muted mt-1">
+            Kelola kategori & pertanyaan. Kategori bisa ditambah, diedit namanya, atau dihapus. Pertanyaan ditambahkan per kategori.
+          </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <button
@@ -144,11 +147,11 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
-      <p class="text-sm text-text-muted">Memuat pertanyaan...</p>
+    <div v-if="catLoading" class="bg-surface border border-border rounded-xl p-8 md:p-12 text-center">
+      <p class="text-sm text-text-muted">Memuat data kategori...</p>
     </div>
 
-    <!-- Blocks per Category -->
+    <!-- Blocks per Category (dari subcollection categories) -->
     <div v-else class="space-y-4 md:space-y-6">
       <div
         v-for="cat in categories"
@@ -158,9 +161,25 @@
         <!-- Category Header -->
         <div class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <h2 class="text-sm font-medium text-text-primary">{{ cat.name }}</h2>
-          <span class="text-xs font-medium text-text-secondary bg-surface px-2.5 py-1 rounded-md border border-border">
-            {{ questionsByCategory(cat.id).length }} Soal
-          </span>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs font-medium text-text-secondary bg-surface px-2.5 py-1 rounded-md border border-border">
+              {{ questionsByCategory(cat.id).length }} Soal
+            </span>
+            <button
+              @click="openEditCategoryModal(cat)"
+              class="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface transition-colors cursor-pointer"
+              title="Ubah nama kategori"
+            >
+              <font-awesome-icon icon="fa-solid fa-pen" class="w-4 h-4" />
+            </button>
+            <button
+              @click="openDeleteCategoryModal(cat)"
+              class="p-2 rounded-lg text-danger hover:bg-danger-soft transition-colors cursor-pointer"
+              title="Hapus kategori"
+            >
+              <font-awesome-icon icon="fa-solid fa-trash" class="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <!-- Tabel -->
@@ -199,7 +218,7 @@
                       <font-awesome-icon icon="fa-solid fa-pen" class="w-5 h-5 shrink-0" />
                     </button>
                     <button
-                      @click="openDeleteModal(q.id)"
+                      @click="openDeleteModal(q.id, cat.id)"
                       class="p-2.5 md:p-2 rounded-lg text-danger hover:bg-danger-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
                       title="Hapus"
                     >
@@ -272,6 +291,15 @@
           </button>
         </div>
       </div>
+
+      <!-- Tombol Tambah Kategori Baru -->
+      <button
+        @click="openAddCategoryModal"
+        class="w-full py-3 text-sm text-text-secondary hover:text-text-primary bg-surface border border-border rounded-xl hover:bg-surface-muted transition-colors flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
+        Tambah Kategori Baru
+      </button>
     </div>
 
     <!-- Modal Edit Soal -->
@@ -287,11 +315,13 @@
         <div class="p-4 md:p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-medium text-text-primary mb-1">Kategori</label>
-            <input
-              :value="categories.find(c => c.id === editForm.categoryId)?.name ?? '-'"
-              disabled
-              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg text-sm bg-surface-muted text-text-muted cursor-not-allowed"
-            />
+            <select
+              v-model="editForm.categoryId"
+              class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            >
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+            <p class="text-xs text-text-muted mt-1">Pindahin soal ini ke kategori lain kalau perlu.</p>
           </div>
 
           <div>
@@ -345,6 +375,68 @@
           <button @click="showDeleteModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
           <button @click="confirmDelete" :disabled="saving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
             {{ saving ? 'Menghapus...' : 'Hapus' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Tambah / Edit Kategori -->
+    <div v-if="showCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-sm mx-auto">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <h3 class="text-base font-semibold text-text-primary">
+            {{ categoryForm.id ? 'Ubah Nama Kategori' : 'Tambah Kategori' }}
+          </h3>
+          <button @click="closeCategoryModal" class="text-text-muted hover:text-text-secondary transition-colors cursor-pointer">
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-1">Nama Kategori</label>
+            <input
+              v-model="categoryForm.name"
+              type="text"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              placeholder="Misal: Kemampuan Analitis"
+              autofocus
+              @keyup.enter="saveCategory"
+            />
+          </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3">
+          <button
+            @click="closeCategoryModal"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="saveCategory"
+            :disabled="!categoryForm.name.trim() || savingCategory"
+            class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+          >
+            {{ savingCategory ? 'Menyimpan...' : 'Simpan' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Hapus Kategori -->
+    <div v-if="showDeleteCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
+        <div class="p-4 md:p-6 overflow-y-auto">
+          <h3 class="text-lg font-semibold text-text-primary">Hapus Kategori "{{ deletingCategory?.name }}"</h3>
+          <p class="mt-2 text-sm text-text-secondary">
+            Semua pertanyaan di dalam kategori ini ({{ questionsByCategory(deletingCategory?.id).length }} soal) akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </div>
+        <div class="px-4 md:px-6 py-4 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
+          <button @click="closeDeleteCategoryModal" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
+          <button @click="confirmDeleteCategory" :disabled="savingCategory" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
+            {{ savingCategory ? 'Menghapus...' : 'Hapus Kategori & Isinya' }}
           </button>
         </div>
       </div>
@@ -439,8 +531,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
+import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
-import { useLikertCategoryStore } from '@/stores/likert/likert-category'
 import { storeToRefs } from 'pinia'
 
 const route = useRoute()
@@ -449,12 +541,12 @@ const likertSlug = route.params.slug
 const likertId = ref(null)
 
 const likertStore = useLikertStore()
+const categoryStore = useLikertCategoriesStore()
 const likertQuestionsStore = useLikertQuestionsStore()
-const categoryStore = useLikertCategoryStore()
 
 const { currentLikert } = storeToRefs(likertStore)
-const { questions, loading } = storeToRefs(likertQuestionsStore)
-const { categories } = storeToRefs(categoryStore)
+const { categories, loading: catLoading } = storeToRefs(categoryStore)
+const { questions, loading: questionsLoading } = storeToRefs(likertQuestionsStore)
 
 // ── State ──────────────────────────────────────────────────
 
@@ -467,11 +559,22 @@ const inlineForm = ref({ question: '', favorable: 'favorable' })
 // Edit modal
 const showEditModal = ref(false)
 const editingId = ref(null)
+const editOriginalCategoryId = ref(null)
 const editForm = ref({ question: '', favorable: 'favorable', categoryId: '' })
 
 // Delete modal
 const showDeleteModal = ref(false)
 const deletingId = ref(null)
+const deleteCategoryId = ref(null)
+
+// Category modal (tambah/edit nama)
+const showCategoryModal = ref(false)
+const savingCategory = ref(false)
+const categoryForm = ref({ id: null, name: '' })
+
+// Delete category modal
+const showDeleteCategoryModal = ref(false)
+const deletingCategory = ref(null)
 
 // ── Scale State ────────────────────────────────────────────
 
@@ -493,7 +596,6 @@ const deletingScaleId = ref(null)
 // ── Lifecycle ──────────────────────────────────────────────
 
 onMounted(async () => {
-
   const likert = await likertStore.getLikertBySlug(likertSlug)
   if (!likert) {
     router.push({ name: 'admin-likert' })
@@ -502,12 +604,10 @@ onMounted(async () => {
 
   likertId.value = likert.id
 
-  await Promise.all([
-    likertStore.getLikertById(likertId.value),
-    likertQuestionsStore.fetchQuestions(likertId.value),
-    categoryStore.fetchCategories(),
-    fetchScales(),
-  ])
+  // Fetch categories (subcollection) — questions otomatis termuat di field questions tiap kategori
+  await categoryStore.fetchCategories(likertId.value)
+  await likertQuestionsStore.fetchAllQuestions(categories.value)
+  await fetchScales()
 })
 
 // ── Helpers ────────────────────────────────────────────────
@@ -531,10 +631,9 @@ const saveInline = async (categoryId) => {
   if (!inlineForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertQuestionsStore.addQuestion(likertId.value, {
+    await likertQuestionsStore.addQuestion(likertId.value, categoryId, {
       question: inlineForm.value.question.trim(),
       favorable: inlineForm.value.favorable,
-      categoryId,
     })
     cancelInline()
   } catch (e) {
@@ -544,10 +643,77 @@ const saveInline = async (categoryId) => {
   }
 }
 
+// ── Category CRUD ──────────────────────────────────────────
+
+const openAddCategoryModal = () => {
+  categoryForm.value = { id: null, name: '' }
+  showCategoryModal.value = true
+}
+
+const openEditCategoryModal = (cat) => {
+  categoryForm.value = { id: cat.id, name: cat.name }
+  showCategoryModal.value = true
+}
+
+const closeCategoryModal = () => {
+  showCategoryModal.value = false
+  categoryForm.value = { id: null, name: '' }
+}
+
+const saveCategory = async () => {
+  if (!categoryForm.value.name.trim()) return
+  savingCategory.value = true
+  try {
+    if (categoryForm.value.id) {
+      await categoryStore.updateCategory(likertId.value, categoryForm.value.id, {
+        name: categoryForm.value.name.trim(),
+      })
+    } else {
+      await categoryStore.addCategory(likertId.value, {
+        name: categoryForm.value.name.trim(),
+      })
+    }
+    closeCategoryModal()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    savingCategory.value = false
+  }
+}
+
+const openDeleteCategoryModal = (cat) => {
+  deletingCategory.value = cat
+  showDeleteCategoryModal.value = true
+}
+
+const closeDeleteCategoryModal = () => {
+  showDeleteCategoryModal.value = false
+  deletingCategory.value = null
+}
+
+const confirmDeleteCategory = async () => {
+  savingCategory.value = true
+  try {
+    // Hapus semua soal dari questions store dulu
+    const toRemove = questions.value.filter((q) => q.categoryId === deletingCategory.value.id)
+    toRemove.forEach((q) => {
+      const idx = questions.value.findIndex((x) => x.id === q.id)
+      if (idx !== -1) questions.value.splice(idx, 1)
+    })
+    await categoryStore.deleteCategory(likertId.value, deletingCategory.value.id)
+    closeDeleteCategoryModal()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    savingCategory.value = false
+  }
+}
+
 // ── Edit Modal ─────────────────────────────────────────────
 
 const openEditModal = (q) => {
   editingId.value = q.id
+  editOriginalCategoryId.value = q.categoryId
   editForm.value = { question: q.question, favorable: q.favorable, categoryId: q.categoryId }
   showEditModal.value = true
 }
@@ -555,6 +721,7 @@ const openEditModal = (q) => {
 const closeEditModal = () => {
   showEditModal.value = false
   editingId.value = null
+  editOriginalCategoryId.value = null
   editForm.value = { question: '', favorable: 'favorable', categoryId: '' }
 }
 
@@ -562,11 +729,16 @@ const saveEdit = async () => {
   if (!editForm.value.question.trim()) return
   saving.value = true
   try {
-    await likertQuestionsStore.updateQuestion(likertId.value, editingId.value, {
-      question: editForm.value.question.trim(),
-      favorable: editForm.value.favorable,
-      categoryId: editForm.value.categoryId,
-    })
+    await likertQuestionsStore.updateQuestion(
+      likertId.value,
+      editOriginalCategoryId.value,
+      editingId.value,
+      {
+        question: editForm.value.question.trim(),
+        favorable: editForm.value.favorable,
+        newCategoryId: editForm.value.categoryId !== editOriginalCategoryId.value ? editForm.value.categoryId : null,
+      }
+    )
     closeEditModal()
   } catch (e) {
     console.error(e)
@@ -577,17 +749,19 @@ const saveEdit = async () => {
 
 // ── Delete Modal ───────────────────────────────────────────
 
-const openDeleteModal = (id) => {
+const openDeleteModal = (id, categoryId) => {
   deletingId.value = id
+  deleteCategoryId.value = categoryId
   showDeleteModal.value = true
 }
 
 const confirmDelete = async () => {
   saving.value = true
   try {
-    await likertQuestionsStore.deleteQuestion(likertId.value, deletingId.value)
+    await likertQuestionsStore.deleteQuestion(likertId.value, deleteCategoryId.value, deletingId.value)
     showDeleteModal.value = false
     deletingId.value = null
+    deleteCategoryId.value = null
   } catch (e) {
     console.error(e)
   } finally {

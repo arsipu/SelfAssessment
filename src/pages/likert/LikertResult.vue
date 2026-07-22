@@ -12,14 +12,39 @@
         <div class="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
 
           <!-- Kop -->
-          <div class="p-5 md:p-6 border-b border-border text-center">
-            <p class="text-[11px] text-text-muted uppercase tracking-wide mb-1">
-              Hasil {{ likertStore.currentLikert?.name || 'Kuesioner' }}
-            </p>
-            <h1 class="text-base md:text-lg font-semibold text-text-primary">{{ respondentName }}</h1>
-            <p class="text-xs text-text-muted mt-1 font-mono">
-              Kode: <span class="font-semibold text-text-secondary">{{ result.code }}</span>
-            </p>
+          <div class="p-5 md:p-6 border-b border-border">
+            <p class="text-[11px] text-text-muted uppercase tracking-wide mb-1">Laporan hasil survei</p>
+            <h1 class="text-lg font-semibold text-text-primary mb-4">{{ likertStore.currentLikert?.name || 'Kuesioner' }}</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-sm">
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Nama</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.nama }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Kelas</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.kelas }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Sekolah</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.sekolah }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Jurusan / Kompetensi Keahlian</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.jurusan }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Usia / Gender</p>
+                <p class="text-text-primary font-medium">{{ result?.respondent?.usia }} Tahun, {{ genderLabel }}</p>
+              </div>
+              <div>
+                <p class="text-text-muted text-xs mb-0.5">Kode Tracking</p>
+                <p class="text-text-primary font-medium font-mono">{{ result?.code }}</p>
+              </div>
+              <div v-if="result?.respondent?.pkl">
+                <p class="text-text-muted text-xs mb-0.5">Pernah PKL</p>
+                <p class="text-text-primary font-medium">{{ result.respondent.pkl }}</p>
+              </div>
+            </div>
           </div>
 
           <!-- Ringkasan: total skor + badge + deskripsi -->
@@ -50,7 +75,7 @@
 
             <Transition name="expand">
               <div v-if="showDetails" class="mt-4">
-                <LikertAnswerSections :sections="sections" variant="list" />
+                <LikertAnswerSections :sections="sections" variant="table" />
               </div>
             </Transition>
           </div>
@@ -132,7 +157,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
-import { useLikertCategoryStore } from '@/stores/likert/likert-category'
+import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
 import { exportResultToPDF } from '@/utils/likert-pdf-export'
 
@@ -144,7 +169,7 @@ const likertId = computed(() => likertStore?.currentLikert?.id || null)
 const likertStore = useLikertStore()
 const likertSessionStore = useLikertSessionStore()
 const likertQuestionsStore = useLikertQuestionsStore()
-const categoryStore = useLikertCategoryStore()
+const categoryStore = useLikertCategoriesStore()
 
 const categories = ref([])
 const loading = ref(true)
@@ -175,6 +200,11 @@ const answerLabelMap = Object.fromEntries(
   LIKERT_SCALE_OPTIONS.map((opt) => [opt.value, opt.label])
 )
 
+const genderLabel = computed(() => {
+  const g = result.value?.respondent?.jenisKelamin
+  return g === 'L' ? 'Laki-laki' : g === 'P' ? 'Perempuan' : g || '-'
+})
+
 const result = computed(() => likertSessionStore.getResult(likertId.value))
 const respondentName = computed(() => result.value?.respondentName || '-')
 const maxScore = computed(() => categories.value[0]?.max ?? categories.value[0]?.min ?? '-')
@@ -204,6 +234,7 @@ const sections = computed(() => {
       questionId: a.questionId,
       questionText: question?.question || '(soal tidak ditemukan)',
       answerLabel: answerLabelMap[a.answer] || a.answer || '-',
+      point: a.point ?? '-',
     })
   }
 
@@ -218,19 +249,28 @@ const sections = computed(() => {
 })
 
 onMounted(async () => {
-  if (!result.value) {
-    router.replace({ name: 'likert-form', params: { slug: likertSlug } })
-    return
-  }
-
   loading.value = true
   try {
-    await Promise.all([
-      likertStore.currentLikert ? Promise.resolve() : likertStore.getLikertBySlug(likertSlug),
-      likertQuestionsStore.fetchQuestions(likertId.value),
-      categoryStore.fetchCategories(),
-    ])
+    // 1. Pastikan currentLikert terisi DULU sebelum fetchCategories,
+    //    supaya likertId sudah benar (tidak null).
+    if (!likertStore.currentLikert) {
+      await likertStore.getLikertBySlug(likertSlug)
+    }
 
+    // 2. Baru fetch categories — likertId sudah valid sekarang
+    await categoryStore.fetchCategories(likertId.value)
+
+    // 3. Cek result SETELAH data utama selesai di-fetch, supaya likertId
+    //    sudah terisi dengan benar (mencegah redirect palsu saat reload halaman).
+    if (!result.value) {
+      router.replace({ name: 'likert-form', params: { slug: likertSlug } })
+      return
+    }
+
+    // 4. Questions sekarang sebagai array field di categories — extract dari situ
+    await likertQuestionsStore.fetchAllQuestions(categoryStore.categories)
+
+    // 5. Fetch scales
     const scales = await likertStore.fetchLikertScales(likertId.value)
     categories.value = scales.map((s) => ({
       ...s,

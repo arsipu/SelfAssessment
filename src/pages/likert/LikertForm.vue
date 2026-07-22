@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 py-6 pb-20 sm:py-10">
     <!-- tombol kembali -->
-      <button @click="$router.back()" class="flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer">
+      <button @click="$router.push('/')" class="flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer">
         <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
         Kembali
       </button>
