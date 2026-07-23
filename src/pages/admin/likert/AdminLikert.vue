@@ -28,8 +28,8 @@
     </div>
 
     <!-- Tabel Data Formulir -->
-    <div v-else class="bg-surface border border-border rounded-xl" :class="{ 'overflow-hidden': !isAnyMenuOpen }">
-      <div class="overflow-x-auto" :class="{ 'overflow-y-visible': isAnyMenuOpen }">
+    <div v-else class="bg-surface border border-border rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
         <table class="app-table w-full text-left border-collapse">
           <thead>
             <tr>
@@ -59,7 +59,8 @@
               <td class="px-4 md:px-5 py-3 text-sm">
                 <div class="relative inline-block">
                   <button
-                    @click="toggleStatusMenu(likert.id)"
+                    :ref="(el) => setStatusButtonRef(likert.id, el)"
+                    @click="toggleStatusMenu(likert.id, $event)"
                     :class="statusBadgeClass(likert.status)"
                     class="inline-flex items-center gap-1.5 px-2.5 py-1.5 md:py-1 rounded-full text-xs font-medium transition-colors h-10 md:h-auto cursor-pointer"
                   >
@@ -68,23 +69,26 @@
                     <font-awesome-icon icon="fa-solid fa-chevron-down" class="w-3.5 h-3.5 shrink-0" />
                   </button>
 
-                  <!-- Dropdown -->
-                  <div
-                    v-if="openStatusMenuId === likert.id"
-                    v-click-outside="closeStatusMenu"
-                    class="absolute z-10 mt-1 w-36 bg-surface border border-border rounded-lg shadow-lg overflow-hidden"
-                  >
-                    <button
-                      v-for="s in statusOptions"
-                      :key="s.value"
-                      @click="changeStatus(likert.id, s.value)"
-                      class="w-full text-left px-3 py-2.5 md:py-2 text-sm hover:bg-surface-muted flex items-center gap-2 cursor-pointer"
-                      :class="{ 'bg-surface-muted font-medium': likert.status === s.value }"
+                  <!-- Dropdown, di-teleport ke body supaya tidak terjebak di overflow wrapper tabel -->
+                  <Teleport to="body">
+                    <div
+                      v-if="openStatusMenuId === likert.id"
+                      v-click-outside="closeStatusMenu"
+                      class="fixed z-50 w-36 bg-surface border border-border rounded-lg shadow-lg overflow-hidden"
+                      :style="dropdownPosition"
                     >
-                      <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="s.dot"></span>
-                      {{ s.label }}
-                    </button>
-                  </div>
+                      <button
+                        v-for="s in statusOptions"
+                        :key="s.value"
+                        @click="changeStatus(likert.id, s.value)"
+                        class="w-full text-left px-3 py-2.5 md:py-2 text-sm hover:bg-surface-muted flex items-center gap-2 cursor-pointer"
+                        :class="{ 'bg-surface-muted font-medium': likert.status === s.value }"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="s.dot"></span>
+                        {{ s.label }}
+                      </button>
+                    </div>
+                  </Teleport>
                 </div>
               </td>
               <td class="px-4 md:px-5 py-3 text-sm">
@@ -187,7 +191,8 @@
         <div class="p-6">
           <h3 class="text-lg font-semibold text-text-primary">Hapus Formulir</h3>
           <p class="mt-2 text-sm text-text-secondary">
-            Apakah Anda yakin ingin menghapus formulir ini? Semua data terkait — termasuk pertanyaan di dalamnya — <strong class="text-text-primary">tidak akan terhapus otomatis</strong> dan perlu dibersihkan secara terpisah.
+            Apakah Anda yakin ingin menghapus formulir ini? Semua data terkait — termasuk pertanyaan di dalamnya —
+            <strong class="text-text-primary">tidak akan terhapus otomatis</strong> dan perlu dibersihkan secara terpisah.
           </p>
           <p class="mt-2 text-xs text-text-muted">
             Tindakan ini tidak dapat dibatalkan.
@@ -214,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
 import { storeToRefs } from 'pinia'
@@ -235,20 +240,59 @@ const form = ref({ name: '', description: '' })
 
 const isFormValid = computed(() => form.value.name.trim() !== '')
 
+// ==== Status dropdown (teleported) ====
 const openStatusMenuId = ref(null)
-
-// PENAMBAHAN: Digunakan untuk mengatur dynamic class "overflow-hidden" pada pembungkus tabel
-const isAnyMenuOpen = computed(() => openStatusMenuId.value !== null)
+const dropdownPosition = ref({ top: '0px', left: '0px' })
+const statusButtonRefs = ref({})
 
 const statusOptions = [
   { value: ACTIVE, label: statusText(ACTIVE), dot: 'bg-success' },
   { value: INACTIVE, label: statusText(INACTIVE), dot: 'bg-text-muted' },
 ]
 
+const setStatusButtonRef = (id, el) => {
+  if (el) statusButtonRefs.value[id] = el
+}
+
+const computeDropdownPosition = (btnEl) => {
+  const rect = btnEl.getBoundingClientRect()
+  const menuWidth = 144 // w-36 = 9rem = 144px
+  // supaya tidak overflow ke kanan layar
+  const left = Math.min(rect.left, window.innerWidth - menuWidth - 8)
+  dropdownPosition.value = {
+    top: `${rect.bottom + 4}px`,
+    left: `${Math.max(left, 8)}px`,
+  }
+}
+
+const toggleStatusMenu = (id, event) => {
+  if (openStatusMenuId.value === id) {
+    closeStatusMenu()
+    return
+  }
+  computeDropdownPosition(event.currentTarget)
+  openStatusMenuId.value = id
+}
+
+const closeStatusMenu = () => {
+  openStatusMenuId.value = null
+}
+
+// Tutup dropdown otomatis saat halaman/table di-scroll atau window di-resize,
+// supaya posisinya tidak "nyangkut" di tempat lama
+const handleScrollOrResize = () => {
+  if (openStatusMenuId.value !== null) closeStatusMenu()
+}
+
 onMounted(async () => {
-  console.log('Mounted')
+  window.addEventListener('scroll', handleScrollOrResize, true)
+  window.addEventListener('resize', handleScrollOrResize)
   await likertStore.fetchLikerts()
-  console.log('Likerts:', likerts.value)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScrollOrResize, true)
+  window.removeEventListener('resize', handleScrollOrResize)
 })
 
 const statusLabel = (status) => {
@@ -266,14 +310,6 @@ const statusBadgeClass = (status) => {
     default:
       return 'bg-surface-muted text-text-secondary hover:bg-border'
   }
-}
-
-const toggleStatusMenu = (id) => {
-  openStatusMenuId.value = openStatusMenuId.value === id ? null : id
-}
-
-const closeStatusMenu = () => {
-  openStatusMenuId.value = null
 }
 
 const changeStatus = async (id, status) => {

@@ -30,13 +30,11 @@ import AdminHollandQuestions from '@/pages/admin/holland/AdminHollandQuestions.v
 import AdminHollandSubmissions from '@/pages/admin/holland/AdminHollandSubmissions.vue';
 import AdminHollandSubmissionDetail from '@/pages/admin/holland/AdminHollandSubmissionDetail.vue';
 
-import TentangKamiView from '@/pages/dashboard/TentangKamiView.vue';
 import LoginView from '@/pages/login/LoginPage.vue';
 
 const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
-	{ path: "/tentang-kami", name: "tentang-kami", component: TentangKamiView },
 
     { path: "/print", name: "print", component: TestPrintView },
 

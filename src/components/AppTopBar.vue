@@ -62,13 +62,6 @@
           </transition>
         </div>
 
-        <router-link
-          to="/tentang-kami"
-          class="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
-          active-class="text-text-primary bg-primary-soft"
-        >
-          Tentang kami
-        </router-link>
       </div>
 
       <router-link
@@ -132,15 +125,6 @@
               <span class="text-sm font-medium text-text-primary">{{ item.name }}</span>
             </router-link>
           </div>
-
-          <router-link
-            to="/tentang-kami"
-            @click="mobileMenuOpen = false"
-            class="block px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-primary-soft rounded-lg transition-colors"
-            active-class="text-text-primary bg-primary-soft"
-          >
-            Tentang kami
-          </router-link>
 
           <router-link
             to="/login"
