@@ -181,7 +181,7 @@
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3 shrink-0">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0">
           <button
             @click="closeModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"

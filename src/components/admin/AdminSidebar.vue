@@ -13,7 +13,7 @@
         <p class="text-sm font-medium text-table-header-text">
           Self Assessment
         </p>
-        <p class="text-xs text-text-muted">
+        <p class="text-xs text-[#E7E7E7]">
           Panel Admin
         </p>
       </div>

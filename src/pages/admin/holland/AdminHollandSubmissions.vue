@@ -79,8 +79,8 @@
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="px-4 md:px-5 py-3 text-sm font-semibold tracking-wide">{{ s.topCode ?? '-' }}</td>
-              <td class="px-4 md:px-5 py-3 text-sm text-text-muted whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm font-semibold tracking-wide">{{ getTopCode(s) }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
               <td class="px-4 md:px-5 py-3 text-sm text-right">
                 <font-awesome-icon
                   icon="fa-solid fa-chevron-right"
@@ -134,12 +134,22 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
-import { exportSubmissionsToExcel } from '@/utils/holland-excel-export'
+import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
+import { computeScoreBreakdownFromAnswers, computeTopCode } from '@/utils/holland-scoring'
+
+const riasecStore = useHollandRiasecStore()
+const riasecIds = computed(() => riasecStore.riasecList.map((c) => c.id))
+
+function getTopCode(submission) {
+  if (submission.status !== 'completed' || !submission.answers) return '-'
+  const breakdown = computeScoreBreakdownFromAnswers(submission.answers, riasecIds.value)
+  return computeTopCode(breakdown) || '-'
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -181,5 +191,6 @@ onMounted(async () => {
   }
   hollandId.value = holland.id
   await submissionsStore.fetchSubmissions(hollandId.value)
+  await riasecStore.fetchRiasecList(hollandId.value)
 })
 </script>

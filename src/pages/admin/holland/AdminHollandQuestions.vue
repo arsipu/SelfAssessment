@@ -406,8 +406,8 @@
       <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
         <div class="p-6">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="w-5 h-5 text-yellow-600" />
+            <div class="w-10 h-10 rounded-full bg-warning-soft flex items-center justify-center shrink-0">
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="w-5 h-5 text-warning" />
             </div>
             <h3 class="text-lg font-semibold text-text-primary">Batasan Kolom</h3>
           </div>

@@ -133,23 +133,9 @@
       </div>
     </div>
   </Transition>
-
-  <!-- Template tersembunyi khusus buat di-screenshot -->
-  <div style="position: fixed; left: -9999px; top: 0;">
-    <ScoreCardTemplate
-      ref="scoreCardRef"
-      :likert-name="likertStore.currentLikert?.name"
-      :code="result?.code"
-      :respondent="result?.respondent || {}"
-      :total-score="result?.totalScore"
-      :scales-label="category?.label"
-      :scales-description="category?.description"
-    />
-  </div>
 </template>
 
 <script setup>
-import ScoreCardTemplate from '@/components/LikertScoreCardTemplate.vue'
 import LikertScoreSummary from '@/components/likert/LikertScoreSummary.vue'
 import LikertAnswerSections from '@/components/likert/LikertAnswerSections.vue'
 import { ref, computed, onMounted } from 'vue'
