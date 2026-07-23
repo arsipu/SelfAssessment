@@ -205,8 +205,8 @@
         <div class="p-6">
           <h3 class="text-lg font-semibold text-text-primary">Hapus Instrumen</h3>
           <p class="mt-2 text-sm text-text-secondary">
-            Apakah Anda yakin ingin menghapus instrumen ini? Semua data terkait — termasuk kategori RIASEC, pertanyaan, dan submission —
-            <strong class="text-text-primary">tidak akan terhapus otomatis</strong> dan perlu dibersihkan secara terpisah.
+            Apakah Anda yakin ingin menghapus instrumen ini? Semua data terkait — termasuk kategori RIASEC, pertanyaan, kolom, dan submission —
+            <strong class="text-text-primary">akan terhapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.
           </p>
           <p class="mt-2 text-xs text-text-muted">
             Tindakan ini tidak dapat dibatalkan.
@@ -317,7 +317,7 @@ const statusDotClass = (status) => {
 const statusBadgeClass = (status) => {
   switch (status) {
     case ACTIVE:
-      return 'bg-success-soft text-success hover:bg-success'
+      return 'bg-success-soft text-success hover:bg-success-soft'
     default:
       return 'bg-surface-muted text-text-secondary hover:bg-border'
   }

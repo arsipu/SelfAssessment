@@ -8,7 +8,6 @@ import {
   getDoc,
   addDoc,
   updateDoc,
-  deleteDoc,
   writeBatch,
   serverTimestamp,
   query,
@@ -177,21 +176,55 @@ export const useHollandStore = defineStore('holland', () => {
     }
   }
 
-  // ── Hapus instrumen ───────────────────────────────────────
-  // CATATAN: ini cuma hapus doc holland utama. Subcollection
-  // `riasec` (termasuk `columns` di dalamnya) serta `submissions`
-  // TIDAK ikut terhapus otomatis — Firestore tidak punya cascade delete
-  // dari client SDK. Untuk pembersihan penuh, perlu Cloud Function
-  // terpisah atau dihapus manual. Untuk sekarang biarkan begini dulu,
-  // tapi ini technical debt yang perlu diketahui.
+  // ── Hapus instrumen (cascading penuh) ──────────────────────
+  // Menghapus seluruh data terkait:
+  //   - Semua submission di holland/{id}/submissions
+  //   - Semua riasec categories + columns + questions di dalamnya
+  //   - Document utama holland/{id}
   //
-  // Catatan: dengan struktur baru, `questions` sudah menjadi array field
-  // di dalam `columns/{columnId}`, jadi ikut terhapus saat column dihapus.
-  // Tapi subcollection `columns` tetap perlu dihapus manual.
+  // Karena Firestore client SDK tidak punya cascade delete, kita
+  // lakukan secara manual dengan batch writes (maks 500 operasi per batch).
 
   const deleteHolland = async (hollandId) => {
     try {
-      await deleteDoc(doc(db, 'holland', hollandId))
+      // 1. Hapus semua submissions
+      const submissionsSnap = await getDocs(collection(db, 'holland', hollandId, 'submissions'))
+      const submissions = submissionsSnap.docs
+
+      // 2. Hapus semua riasec categories + columns di dalamnya
+      const riasecSnap = await getDocs(collection(db, 'holland', hollandId, 'riasec'))
+      const riasecDocs = riasecSnap.docs
+
+      // Kumpulkan semua operasi delete dalam batch
+      const batch = writeBatch(db)
+      let operationCount = 0
+
+      // Hapus submissions
+      submissions.forEach((subDoc) => {
+        batch.delete(subDoc.ref)
+        operationCount++
+      })
+
+      // Untuk setiap riasec, hapus columns dulu baru riasec doc-nya
+      for (const riasecDoc of riasecDocs) {
+        const columnsSnap = await getDocs(collection(db, 'holland', hollandId, 'riasec', riasecDoc.id, 'columns'))
+        columnsSnap.docs.forEach((colDoc) => {
+          batch.delete(colDoc.ref)
+          operationCount++
+        })
+        batch.delete(riasecDoc.ref)
+        operationCount++
+      }
+
+      // Hapus document utama
+      batch.delete(doc(db, 'holland', hollandId))
+      operationCount++
+
+      // Commit batch (maks 500 operasi — aman untuk kasus ini)
+      if (operationCount > 0) {
+        await batch.commit()
+      }
+
       await fetchHollands()
     } catch (error) {
       console.error('Error deleting holland:', error)
