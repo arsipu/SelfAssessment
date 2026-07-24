@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandStore } from '@/stores/holland/holland'
@@ -227,19 +227,60 @@ onMounted(async () => {
       return
     }
 
-    if (!result.value) {
+    await riasecStore.fetchRiasecList(hollandId.value)
+    const riasecIds = riasecStore.riasecList.map((c) => c.id)
+
+    const code = route.query.code
+
+    if (code) {
+      // Ada code di URL -> selalu fetch dari Firestore berdasarkan code ini,
+      // JANGAN pakai result.value lama walau ada di state (biar bisa ganti-ganti
+      // code manual dan hasilnya sesuai).
+      const fetched = await sessionStore.loadResultByCode(hollandId.value, code, riasecIds)
+      if (!fetched) {
+        router.replace({ name: 'not-available', query: { title: 'Hasil Tidak Ditemukan', message: 'Kode tidak valid atau hasil tidak ditemukan.' } })
+        return
+      }
+    } else if (!result.value) {
+      // Nggak ada code & nggak ada result lokal -> balik ke form
       router.replace({ name: 'holland-form', params: { slug: hollandSlug } })
       return
     }
+    // else: nggak ada code, tapi result.value ada (baru submit) -> pakai itu
 
-    await riasecStore.fetchRiasecList(hollandId.value)
-    const riasecIds = riasecStore.riasecList.map((c) => c.id)
     await columnsStore.fetchAllColumns(hollandId.value, riasecIds)
     await questionsStore.fetchAllQuestions(hollandId.value, columnsByRiasec.value)
   } finally {
     loading.value = false
   }
 })
+
+// Watch for manual changes to ?code= query parameter.
+// Ketika user mengganti code di URL secara manual, Vue Router TIDAK
+// me-re-mount komponen (karena path-nya sama), jadi onMounted tidak
+// dijalankan lagi. Watcher ini memastikan data result di-refetch
+// setiap kali code berubah.
+watch(
+  () => route.query.code,
+  async (newCode) => {
+    // Skip kalau code dihapus atau belum ada hollandId / riasecList
+    if (!newCode) return
+    if (!hollandId.value) return
+
+    const riasecIds = riasecStore.riasecList.map((c) => c.id)
+    if (riasecIds.length === 0) return
+
+    loading.value = true
+    try {
+      const fetched = await sessionStore.loadResultByCode(hollandId.value, newCode, riasecIds)
+      if (!fetched) {
+        router.replace({ name: 'not-available', query: { title: 'Hasil Tidak Ditemukan', message: 'Kode tidak valid atau hasil tidak ditemukan.' } })
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+)
 
 function handleExportPDF() {
   // TODO: Implement PDF export functionality

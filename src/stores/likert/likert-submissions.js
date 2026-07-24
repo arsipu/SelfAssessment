@@ -134,8 +134,8 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
     }
   }
 
-  const findSubmissionByCode = async (code) => {
-    const q = query(collectionGroup(db, 'submissions'), where('code', '==', code))
+  const findSubmissionByCode = async (code, likertId) => {
+    const q = query(collection(db, 'likert', likertId, 'submissions'), where('code', '==', code))
     const snap = await getDocs(q)
     if (snap.empty) return null
     const docSnap = snap.docs[0]
@@ -169,5 +169,6 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
     createSubmission,
     completeSubmission,
     updateSubmissionAnswers,
+    findSubmissionByCode,
   }
 })

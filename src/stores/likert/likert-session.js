@@ -68,6 +68,34 @@ export const useLikertSessionStore = defineStore(
       delete sessions.value[likertId]
     }
 
+    const loadResultByCode = async (likertId, code) => {
+      const likertSubmissionsStore = useLikertSubmissionsStore()
+      const submission = await likertSubmissionsStore.findSubmissionByCode(code, likertId)
+
+      if (!submission || submission.likertId !== likertId) {
+        return null
+      }
+
+      results.value[likertId] = {
+        totalScore: submission.totalScore,
+        submissionId: submission.id,
+        code: submission.code,
+        respondentName: submission.name || '-',
+        respondent: {
+          nama: submission.name,
+          kelas: submission.class,
+          sekolah: submission.school,
+          jurusan: submission.major,
+          usia: submission.age,
+          jenisKelamin: submission.gender,
+          pkl: submission.internship,
+        },
+        answers: submission.submission || [],
+      }
+
+      return results.value[likertId]
+    }
+
     const clearSession = (likertId) => {
       delete sessions.value[likertId]
     }
@@ -86,6 +114,7 @@ export const useLikertSessionStore = defineStore(
       getSession,
       updateAnswers,
       finishSession,
+      loadResultByCode,
       clearSession,
       getResult,
       clearResult,

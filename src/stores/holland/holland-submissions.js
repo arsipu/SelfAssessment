@@ -160,9 +160,9 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
 
   // Mencari submission berdasarkan kode tracking — pakai collectionGroup
   // agar bisa cari tanpa tahu hollandId-nya terlebih dahulu.
-  const findSubmissionByCode = async (code) => {
+  const findSubmissionByCode = async (code, hollandId) => {
     try {
-      const q = query(collectionGroup(db, 'submissions'), where('code', '==', code))
+      const q = query(collection(db, 'holland', hollandId, 'submissions'), where('code', '==', code))
       const snap = await getDocs(q)
       if (snap.empty) return null
       const docSnap = snap.docs[0]

@@ -8,7 +8,7 @@
     >
       {{ scaleLabel }}
     </span>
-    <div v-if="scaleDescription" class="bg-surface-muted border border-border rounded-xl p-5 mt-5 text-left">
+    <div v-if="scaleDescription" class="border border-border rounded-xl p-5 mt-5 text-left">
       <p class="text-sm text-text-secondary leading-relaxed">{{ scaleDescription }}</p>
     </div>
   </div>

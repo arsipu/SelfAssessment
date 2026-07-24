@@ -269,7 +269,8 @@ const handleSubmit = async () => {
     // scores & topCode dihitung di dalam finishSession (holland-scoring.js),
     // TIDAK dikirim dari sini dan TIDAK disimpan ke Firestore.
     await sessionStore.finishSession(hollandId.value, answers, riasecIds)
-    router.push({ name: 'holland-result', params: { slug: hollandSlug } })
+    // router.push({ name: 'holland-result', params: { slug: hollandSlug } })
+    router.push({ name: 'holland-result', params: { slug: hollandSlug }, query: { code: session.code } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
     console.error(error)

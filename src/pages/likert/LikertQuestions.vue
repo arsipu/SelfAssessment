@@ -237,8 +237,9 @@ const handleSubmit = async () => {
   const totalScore = submissionResult.reduce((sum, r) => sum + (r.point ?? 0), 0)
 
   try {
+    const session = likertSessionStore.getSession(likertId.value) // ambil dulu sebelum finishSession hapus dia
     await likertSessionStore.finishSession(likertId.value, submissionResult, totalScore)
-    router.push({ name: 'likert-result', params: { slug: likertSlug } })
+    router.push({ name: 'likert-result', params: { slug: likertSlug }, query: { code: session.code } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')
   }

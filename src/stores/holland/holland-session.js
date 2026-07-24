@@ -92,6 +92,44 @@ export const useHollandSessionStore = defineStore(
       delete sessions.value[hollandId]
     }
 
+    // Ambil result dari Firestore pakai tracking code — dipakai sebagai
+    // fallback kalau results.value[hollandId] kosong (mis. akses langsung,
+    // device beda, atau state persist kehapus).
+    const loadResultByCode = async (hollandId, code, riasecIds) => {
+      const submissionsStore = useHollandSubmissionsStore()
+      const submission = await submissionsStore.findSubmissionByCode(code, hollandId)
+
+      if (!submission || submission.hollandId !== hollandId) {
+        return null
+      }
+
+      const answers = submission.answers || []
+      const scores = computeScoreBreakdownFromAnswers(answers, riasecIds)
+      const topCode = computeTopCode(scores)
+
+      results.value[hollandId] = {
+        scores,
+        topCode,
+        submissionId: submission.id,
+        code: submission.code,
+        respondentName: submission.name || '-',
+        respondent: {
+          name: submission.name,
+          major: submission.major,
+          school: submission.school,
+          gender: submission.gender,
+          birthDate: submission.birthDate,
+          age: submission.age,
+          occupation: submission.occupation,
+          testDate: submission.testDate,
+          testPurpose: submission.testPurpose,
+        },
+        answers,
+      }
+
+      return results.value[hollandId]
+    }
+
     const clearSession = (hollandId) => {
       delete sessions.value[hollandId]
     }
@@ -110,6 +148,7 @@ export const useHollandSessionStore = defineStore(
       getSession,
       updateAnswers,
       finishSession,
+      loadResultByCode,
       clearSession,
       getResult,
       clearResult,

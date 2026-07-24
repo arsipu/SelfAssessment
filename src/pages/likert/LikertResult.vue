@@ -237,26 +237,32 @@ const sections = computed(() => {
 onMounted(async () => {
   loading.value = true
   try {
-    // 1. Pastikan currentLikert terisi DULU sebelum fetchCategories,
-    //    supaya likertId sudah benar (tidak null).
     if (!likertStore.currentLikert) {
       await likertStore.getLikertBySlug(likertSlug)
     }
 
-    // 2. Baru fetch categories — likertId sudah valid sekarang
+    if (!likertStore.currentLikert) {
+      router.replace({ name: 'not-available', query: { title: 'Instrumen Tidak Ditemukan', message: 'Instrumen yang kamu cari mungkin sudah dihapus atau link tidak valid.' } })
+      return
+    }
+
     await categoryStore.fetchCategories(likertId.value)
 
-    // 3. Cek result SETELAH data utama selesai di-fetch, supaya likertId
-    //    sudah terisi dengan benar (mencegah redirect palsu saat reload halaman).
-    if (!result.value) {
+    const code = route.query.code
+
+    if (code) {
+      const fetched = await likertSessionStore.loadResultByCode(likertId.value, code)
+      if (!fetched) {
+        router.replace({ name: 'not-available', query: { title: 'Hasil Tidak Ditemukan', message: 'Kode tidak valid atau hasil tidak ditemukan.' } })
+        return
+      }
+    } else if (!result.value) {
       router.replace({ name: 'likert-form', params: { slug: likertSlug } })
       return
     }
 
-    // 4. Questions sekarang sebagai array field di categories — extract dari situ
     await likertQuestionsStore.fetchAllQuestions(categoryStore.categories)
 
-    // 5. Fetch scales
     const scales = await likertStore.fetchLikertScales(likertId.value)
     categories.value = scales.map((s) => ({
       ...s,
