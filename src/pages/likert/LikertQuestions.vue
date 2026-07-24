@@ -234,11 +234,10 @@ const scoreMapRev = LIKERT_SCORE_MAP_REVERSE
 
 const handleSubmit = async () => {
   const submissionResult = buildSubmissionResult()
-  const totalScore = submissionResult.reduce((sum, r) => sum + (r.point ?? 0), 0)
 
   try {
     const session = likertSessionStore.getSession(likertId.value) // ambil dulu sebelum finishSession hapus dia
-    await likertSessionStore.finishSession(likertId.value, submissionResult, totalScore)
+    await likertSessionStore.finishSession(likertId.value, submissionResult)
     router.push({ name: 'likert-result', params: { slug: likertSlug }, query: { code: session.code } })
   } catch (error) {
     alert('Gagal menyimpan jawaban, coba lagi.')

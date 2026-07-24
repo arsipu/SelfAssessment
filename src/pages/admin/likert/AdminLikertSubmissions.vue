@@ -80,7 +80,7 @@
                   {{ s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan' }}
                 </span>
               </td>
-              <td class="px-4 md:px-5 py-3 text-sm">{{ s.totalScore ?? '-' }}</td>
+              <td class="px-4 md:px-5 py-3 text-sm">{{ computeTotalScore(s.submission) || '-' }}</td>
               <td class="px-4 md:px-5 py-3 text-sm whitespace-nowrap">{{ formatDate(s.createdAt) }}</td>
               <td class="px-4 md:px-5 py-3 text-sm text-right">
                 <font-awesome-icon
@@ -134,11 +134,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
+import { computeTotalScore } from '@/utils/likert-scoring'
 import { exportSubmissionsToExcel } from '@/utils/likert-excel-export'
 
 const route = useRoute()

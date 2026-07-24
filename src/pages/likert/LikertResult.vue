@@ -50,7 +50,7 @@
           <!-- Ringkasan: total skor + badge + deskripsi -->
           <div class="p-5 md:p-8 border-b border-border">
             <LikertScoreSummary
-              :total-score="result.totalScore"
+              :total-score="computedScore"
               :scale-label="category?.label"
               :scale-description="category?.description"
               :badge-bg="category?.bg"
@@ -145,6 +145,7 @@ import { useLikertSessionStore } from '@/stores/likert/likert-session'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
+import { computeTotalScore } from '@/utils/likert-scoring'
 import { exportResultToPDF } from '@/utils/likert-pdf-export'
 
 const route = useRoute()
@@ -195,8 +196,11 @@ const result = computed(() => likertSessionStore.getResult(likertId.value))
 const respondentName = computed(() => result.value?.respondentName || '-')
 const maxScore = computed(() => categories.value[0]?.max ?? categories.value[0]?.min ?? '-')
 
+// totalScore dihitung ulang dari answers setiap kali — tidak baca dari Firestore
+const computedScore = computed(() => computeTotalScore(result.value?.answers))
+
 const category = computed(() => {
-  const score = result.value?.totalScore ?? 0
+  const score = computedScore.value
   const found = (
     categories.value.find((c) => score >= c.min && score <= c.max) ||
     categories.value[categories.value.length - 1] ||

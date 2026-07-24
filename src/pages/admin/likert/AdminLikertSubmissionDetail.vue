@@ -89,12 +89,13 @@
           </div>
 
           <!-- "Ringkasan: total skor + label nilai" -->
+          <!-- totalScore dihitung ulang dari submission.submission — tidak baca dari Firestore -->
           <div
-            v-if="isCompleted && submission.totalScore != null"
+            v-if="isCompleted"
             class="p-4 md:p-6 border-b border-border"
           >
             <LikertScoreSummary
-              :total-score="submission.totalScore"
+              :total-score="computedScore"
               :scale-label="scalesLabel !== '-' ? scalesLabel : ''"
               :scale-description="scalesDescription"
               variant="inline"
@@ -159,6 +160,7 @@ import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { useLikertSubmissionsStore } from '@/stores/likert/likert-submissions'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { LIKERT_SCALE_OPTIONS } from '@/apps/likert'
+import { computeTotalScore } from '@/utils/likert-scoring'
 
 const route = useRoute()
 const router = useRouter()
@@ -183,14 +185,17 @@ const pdfContent = ref(null)
 
 const isCompleted = computed(() => submission.value?.status === 'completed')
 
+// totalScore dihitung ulang dari submission.submission — tidak baca dari Firestore
+const computedScore = computed(() => computeTotalScore(submission.value?.submission))
+
 const scalesLabel = computed(() => {
-  const score = submission.value?.totalScore ?? 0
+  const score = computedScore.value
   const found = scales.value.find((s) => score >= s.min && score <= s.max)
   return found?.label || '-'
 })
 
 const scalesDescription = computed(() => {
-  const score = submission.value?.totalScore ?? 0
+  const score = computedScore.value
   const found = scales.value.find((s) => score >= s.min && score <= s.max)
   return found?.description || ''
 })

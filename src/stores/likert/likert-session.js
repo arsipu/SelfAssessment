@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useLikertSubmissionsStore } from './likert-submissions'
+import { computeTotalScore } from '@/utils/likert-scoring'
 // import { useLikertStore } from './likert'
 
 export const useLikertSessionStore = defineStore(
@@ -8,7 +9,7 @@ export const useLikertSessionStore = defineStore(
   () => {
     // sessions[likertId] = { submissionId, respondent, answers }
     const sessions = ref({})
-    // results[likertId] = { totalScore, submissionId }
+    // results[likertId] = { totalScore (computed), submissionId }
     const results = ref({})
 
     // Mulai sesi baru: bikin submission di Firestore, simpan sessionId (= submissionId) lokal
@@ -49,12 +50,15 @@ export const useLikertSessionStore = defineStore(
     }
 
     // dipanggil pas submit kuesioner: tulis final ke Firestore, simpan hasil, bersihkan sesi
-    const finishSession = async (likertId, submissionResult, totalScore) => {
+    // totalScore TIDAK dikirim ke Firestore — dihitung ulang dari `submissionResult` via likert-scoring.js
+    const finishSession = async (likertId, submissionResult) => {
       const session = sessions.value[likertId]
       if (!session) throw new Error('Sesi tidak ditemukan')
 
       const likertSubmissionsStore = useLikertSubmissionsStore()
-      await likertSubmissionsStore.completeSubmission(likertId, session.submissionId, submissionResult, totalScore)
+      await likertSubmissionsStore.completeSubmission(likertId, session.submissionId, submissionResult)
+
+      const totalScore = computeTotalScore(submissionResult)
 
       results.value[likertId] = {
         totalScore,
@@ -76,8 +80,9 @@ export const useLikertSessionStore = defineStore(
         return null
       }
 
+      const answers = submission.submission || []
       results.value[likertId] = {
-        totalScore: submission.totalScore,
+        totalScore: computeTotalScore(answers),
         submissionId: submission.id,
         code: submission.code,
         respondentName: submission.name || '-',
@@ -90,7 +95,7 @@ export const useLikertSessionStore = defineStore(
           jenisKelamin: submission.gender,
           pkl: submission.internship,
         },
-        answers: submission.submission || [],
+        answers,
       }
 
       return results.value[likertId]

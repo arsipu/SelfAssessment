@@ -18,7 +18,6 @@ import {
 
 import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
 import { slugify } from '@/utils/slug'
-
 export const useLikertSubmissionsStore = defineStore('likert-submissions', () => {
   const submissions = ref([])
   const currentSubmission = ref(null)
@@ -101,7 +100,6 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
         gender: respondentData.jenisKelamin,
         internship: respondentData.pkl,
         submission: [],
-        totalScore: null,
         code: code,
         status: SUBMISSION_IN_PROGRESS,
         createdAt: serverTimestamp(),
@@ -118,12 +116,12 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
   }
 
   // Dipanggil pas user submit jawaban kuesioner
-  const completeSubmission = async (likertId, submissionId, submissionResult, totalScore) => {
+  // totalScore TIDAK disimpan ke Firestore — dihitung ulang dari `submission` via likert-scoring.js
+  const completeSubmission = async (likertId, submissionId, submissionResult) => {
     console.log('Completing submission:', submissionId)
     try {
       await updateDoc(doc(db, 'likert', likertId, 'submissions', submissionId), {
         submission: submissionResult,
-        totalScore,
         status: SUBMISSION_COMPLETED,
         updatedAt: serverTimestamp(),
       })
