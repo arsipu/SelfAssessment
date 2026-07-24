@@ -1,24 +1,26 @@
 import { createAndDownloadExcel } from './excel-helper'
 import { RIASEC_CATEGORY_ORDER, RIASEC_GUIDE } from '@/apps/holland'
+import { computeScoreBreakdownFromAnswers, computeTopCode } from '@/utils/holland-scoring'
 
 /**
  * Export Holland RIASEC submissions ke file .xlsx.
  *
- * Kolom yang dihasilkan:
- *   No, Nama, Sekolah, Jurusan, Usia, Gender, Pekerjaan, Tujuan Tes,
- *   Tanggal Tes, Kode, Status, Kode RIASEC (topCode),
- *   persentase tiap kategori R / I / A / S / E / C, Tanggal
- *
  * @param {Array} submissions - daftar submission dari Firestore
+ * @param {Array<string>} riasecIds - daftar id kategori RIASEC (buat hitung skor dari answers)
  * @param {string} hollandName - nama instrumen (default: 'Holland RIASEC')
  */
-export function exportSubmissionsToExcel(submissions, hollandName = 'Holland RIASEC') {
+export function exportSubmissionsToExcel(submissions, riasecIds, hollandName = 'Holland RIASEC') {
   const rows = submissions.map((s, i) => {
-    const scores = s.scores || {}
+    const isCompleted = s.status === 'completed'
+    const breakdown = isCompleted && s.answers
+      ? computeScoreBreakdownFromAnswers(s.answers, riasecIds)
+      : null
+    const topCode = breakdown ? computeTopCode(breakdown) : null
+
     const scoreRow = {}
     for (const code of RIASEC_CATEGORY_ORDER) {
       const label = RIASEC_GUIDE[code]?.label || code
-      scoreRow[`${label} (%)`] = scores[code]?.percentage ?? '-'
+      scoreRow[`${label} (%)`] = breakdown?.[code]?.percentage ?? '-'
     }
 
     return {
@@ -32,8 +34,8 @@ export function exportSubmissionsToExcel(submissions, hollandName = 'Holland RIA
       'Tujuan Tes': s.testPurpose ?? '-',
       'Tanggal Tes': s.testDate ?? '-',
       Kode: s.code,
-      Status: s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan',
-      'Kode RIASEC': s.topCode ?? '-',
+      Status: isCompleted ? 'Selesai' : 'Sedang Mengerjakan',
+      'Kode RIASEC': topCode ?? '-',
       ...scoreRow,
     }
   })

@@ -43,7 +43,7 @@
             <div>
               <p class="text-sm font-medium text-warning">Responden belum menyelesaikan tes</p>
               <p class="text-xs text-warning-80 mt-1">
-                Data skor, kode RIASEC, dan rincian jawaban belum tersedia karena responden masih dalam tahap mengerjakan kuesioner.
+                Skor dan kode RIASEC belum tersedia karena responden masih dalam tahap mengerjakan kuesioner. Jawaban yang sudah masuk tetap ditampilkan di bawah.
               </p>
             </div>
           </div>
@@ -128,7 +128,7 @@
           </div>
 
           <!-- Rincian jawaban per kategori (always expanded di admin) -->
-          <div v-if="isCompleted && detailSections.length" class="p-4 md:p-6">
+          <div v-if="detailSections.length" class="p-4 md:p-6">
             <p class="text-xs font-medium text-text-muted mb-4">Rincian jawaban per kategori</p>
             <RiasecAnswerDetails
               :detail-sections="detailSections"
@@ -245,8 +245,6 @@ const topCodeInfo = computed(() => {
   if (!topCode.value) return null
   return riasecMap.value[topCode.value] || null
 })
-
-const formattedBirthDateAge = computed(() => formatBirthDateAge(submission.value))
 
 const scoreBreakdown = computed(() => buildScoreBreakdown(scoreBreakdownRaw.value, topCode.value))
 

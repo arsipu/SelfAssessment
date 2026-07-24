@@ -141,6 +141,7 @@ import { useHollandStore } from '@/stores/holland/holland'
 import { useHollandSubmissionsStore } from '@/stores/holland/holland-submissions'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { computeScoreBreakdownFromAnswers, computeTopCode } from '@/utils/holland-scoring'
+import { exportSubmissionsToExcel } from '@/utils/holland-excel-export'
 
 const riasecStore = useHollandRiasecStore()
 const riasecIds = computed(() => riasecStore.riasecList.map((c) => c.id))
@@ -176,7 +177,7 @@ async function confirmExportExcel() {
   if (exporting.value) return
   exporting.value = true
   try {
-    exportSubmissionsToExcel(submissions.value, 'Holland RIASEC')
+    exportSubmissionsToExcel(submissions.value, riasecIds.value, 'Holland RIASEC')
     showExportModal.value = false
   } finally {
     exporting.value = false

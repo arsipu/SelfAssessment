@@ -14,7 +14,7 @@ export function exportSubmissionsToExcel(submissions, likertName = 'Likert', sca
     Kelas: s.class,
     Jurusan: s.major,
     Usia: s.age,
-    Gender: s.gender,
+    Gender: s.gender == 'L' ? 'Laki-laki' : s.gender == 'P' ? 'Perempuan' : '-',
     'Pernah PKL': s.internship,
     Kode: s.code,
     Status: s.status === 'completed' ? 'Selesai' : 'Sedang Mengerjakan',
