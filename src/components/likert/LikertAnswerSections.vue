@@ -44,7 +44,7 @@
             </tr>
           </thead>
 
-          <tbody class="divide-y divide-border">
+          <tbody class="divide-y divide-border bg-table-value">
             <tr v-for="(item, itemIndex) in section.items" :key="item.questionId">
               <td class="px-3 py-2 text-text-secondary">{{ itemIndex + 1 }}</td>
               <td class="px-3 py-2 text-text-primary">{{ item.questionText }}</td>

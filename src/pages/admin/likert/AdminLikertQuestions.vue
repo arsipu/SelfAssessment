@@ -90,7 +90,7 @@
 
       <!-- Inline Add Form -->
       <div class="border-t border-border">
-        <div v-if="showAddScaleForm" class="px-4 md:px-5 py-4 bg-surface-muted">
+        <div v-if="showAddScaleForm" class="px-4 md:px-5 py-4 bg-table-value">
           <div class="flex flex-col sm:flex-row items-start gap-3">
             <input
               v-model="scaleForm.min"
@@ -241,7 +241,7 @@
         <!-- Inline Add Form -->
         <div class="border-t border-border">
           <!-- Form aktif -->
-          <div v-if="activeAddCategoryId === cat.id" class="px-4 md:px-5 py-4 bg-surface-muted">
+          <div v-if="activeAddCategoryId === cat.id" class="px-4 md:px-5 py-4 bg-table-value">
             <div class="flex flex-col sm:flex-row items-start gap-3">
               <textarea
                 v-model="inlineForm.question"
@@ -321,7 +321,6 @@
             >
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
-            <p class="text-xs text-text-muted mt-1">Pindahin soal ini ke kategori lain kalau perlu.</p>
           </div>
 
           <div>
@@ -346,7 +345,7 @@
           </div>
         </div>
 
-        <div class="px-4 md:px-6 py-4 border-t border-border bg-surface-muted flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
+        <div class="px-4 md:px-6 py-4 border-t border-border bg-surface flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
           <button
             @click="closeEditModal"
             class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
@@ -365,20 +364,15 @@
     </div>
 
     <!-- Modal Hapus Soal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
-        <div class="p-4 md:p-6 overflow-y-auto">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Soal</h3>
-          <p class="mt-2 text-sm text-text-secondary">Apakah Anda yakin ingin menghapus soal ini? Tindakan ini tidak dapat dibatalkan.</p>
-        </div>
-        <div class="px-4 md:px-6 py-4 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
-          <button @click="showDeleteModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
-          <button @click="confirmDelete" :disabled="saving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
-            {{ saving ? 'Menghapus...' : 'Hapus' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      title="Hapus Soal"
+      :loading="saving"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    >
+      Apakah Anda yakin ingin menghapus soal ini? Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
 
     <!-- Modal Tambah / Edit Kategori -->
     <div v-if="showCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
@@ -404,9 +398,20 @@
               @keyup.enter="saveCategory"
             />
           </div>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-1">Posisi</label>
+            <select
+              v-model.number="categoryForm.order"
+              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            >
+              <option v-for="pos in orderOptions" :key="pos" :value="pos">
+                Posisi {{ pos + 1 }}
+              </option>
+            </select>
+          </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3">
           <button
             @click="closeCategoryModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
@@ -425,22 +430,16 @@
     </div>
 
     <!-- Modal Hapus Kategori -->
-    <div v-if="showDeleteCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
-        <div class="p-4 md:p-6 overflow-y-auto">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Kategori "{{ deletingCategory?.name }}"</h3>
-          <p class="mt-2 text-sm text-text-secondary">
-            Semua pertanyaan di dalam kategori ini ({{ questionsByCategory(deletingCategory?.id).length }} soal) akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.
-          </p>
-        </div>
-        <div class="px-4 md:px-6 py-4 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
-          <button @click="closeDeleteCategoryModal" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
-          <button @click="confirmDeleteCategory" :disabled="savingCategory" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
-            {{ savingCategory ? 'Menghapus...' : 'Hapus Kategori & Isinya' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteCategoryModal"
+      :title="deleteCategoryTitle"
+      :loading="savingCategory"
+      confirmText="Hapus Kategori & Isinya"
+      @confirm="confirmDeleteCategory"
+      @cancel="closeDeleteCategoryModal"
+    >
+      Semua pertanyaan di dalam kategori ini (<strong>{{ questionsByCategory(deletingCategory?.id).length }} soal</strong>) akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
 
     <!-- Modal Edit Skala -->
     <div v-if="showEditScaleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
@@ -510,30 +509,26 @@
     </div>
 
     <!-- Modal Konfirmasi Hapus Skala -->
-    <div v-if="showDeleteScaleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]">
-        <div class="p-4 md:p-6 overflow-y-auto">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Skala</h3>
-          <p class="mt-2 text-sm text-text-secondary">Apakah Anda yakin ingin menghapus skala ini? Tindakan ini tidak dapat dibatalkan.</p>
-        </div>
-        <div class="px-4 md:px-6 py-4 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
-          <button @click="showDeleteScaleModal = false" class="w-full sm:w-auto px-4 py-2.5 md:py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm h-10 cursor-pointer">Batal</button>
-          <button @click="confirmDeleteScale" :disabled="scaleSaving" class="w-full sm:w-auto px-4 py-2.5 md:py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 h-10 cursor-pointer">
-            {{ scaleSaving ? 'Menghapus...' : 'Hapus' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteScaleModal"
+      title="Hapus Skala"
+      :loading="scaleSaving"
+      @confirm="confirmDeleteScale"
+      @cancel="showDeleteScaleModal = false"
+    >
+      Apakah Anda yakin ingin menghapus skala ini? Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
 import { useLikertCategoriesStore } from '@/stores/likert/likert-categories'
 import { useLikertQuestionsStore } from '@/stores/likert/likert-questions'
 import { storeToRefs } from 'pinia'
+import ConfirmDeleteModal from '@/components/common/ConfirmDeleteModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -570,11 +565,14 @@ const deleteCategoryId = ref(null)
 // Category modal (tambah/edit nama)
 const showCategoryModal = ref(false)
 const savingCategory = ref(false)
-const categoryForm = ref({ id: null, name: '' })
+const categoryForm = ref({ id: null, name: '', order: 0 })
 
 // Delete category modal
 const showDeleteCategoryModal = ref(false)
 const deletingCategory = ref(null)
+const deleteCategoryTitle = computed(() =>
+  deletingCategory.value ? `Hapus Kategori "${deletingCategory.value.name}"` : 'Hapus Kategori'
+)
 
 // ── Scale State ────────────────────────────────────────────
 
@@ -645,19 +643,28 @@ const saveInline = async (categoryId) => {
 
 // ── Category CRUD ──────────────────────────────────────────
 
+// jumlah opsi beda buat tambah vs edit:
+// - tambah: 0..N (N = jumlah kategori existing, boleh nyisip di paling akhir)
+// - edit: 0..N-1 (N = jumlah kategori existing termasuk dirinya sendiri)
+const orderOptions = computed(() => {
+  const count = categories.value.length
+  const max = categoryForm.value.id ? count - 1 : count
+  return Array.from({ length: max + 1 }, (_, i) => i)
+})
+
 const openAddCategoryModal = () => {
-  categoryForm.value = { id: null, name: '' }
+  categoryForm.value = { id: null, name: '', order: categories.value.length }
   showCategoryModal.value = true
 }
 
 const openEditCategoryModal = (cat) => {
-  categoryForm.value = { id: cat.id, name: cat.name }
+  categoryForm.value = { id: cat.id, name: cat.name, order: cat.order ?? 0 }
   showCategoryModal.value = true
 }
 
 const closeCategoryModal = () => {
   showCategoryModal.value = false
-  categoryForm.value = { id: null, name: '' }
+  categoryForm.value = { id: null, name: '', order: 0 }
 }
 
 const saveCategory = async () => {
@@ -667,10 +674,12 @@ const saveCategory = async () => {
     if (categoryForm.value.id) {
       await categoryStore.updateCategory(likertId.value, categoryForm.value.id, {
         name: categoryForm.value.name.trim(),
+        order: categoryForm.value.order,
       })
     } else {
       await categoryStore.addCategory(likertId.value, {
         name: categoryForm.value.name.trim(),
+        order: categoryForm.value.order,
       })
     }
     closeCategoryModal()

@@ -8,6 +8,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   serverTimestamp,
   query,
   orderBy,
@@ -52,19 +53,42 @@ export const useHollandColumnsStore = defineStore('hollandColumns', () => {
   }
 
   // ── Add column ─────────────────────────────────────────────
-  // Field `questions` diinisialisasi sebagai array kosong — ini
-  // menggantikan subcollection questions/{questionId} yang lama.
+  // `order` di sini artinya "mau disisipkan di posisi ke berapa".
+  // Semua column existing yang order-nya >= posisi itu digeser +1 dulu,
+  // baru column baru ditulis di posisi tsb. Kalau posisi == jumlah
+  // column existing (nyisip di paling akhir), gak ada yang perlu digeser.
 
   const addColumn = async (hollandId, riasecId, { name, order }) => {
+    const existing = columnsByRiasec.value[riasecId] || []
+    const toShift = existing.filter((c) => (c.order ?? 0) >= order)
+
     const payload = { name: name.trim(), order, questions: [], createdAt: serverTimestamp() }
+
     try {
-      const ref = await addDoc(columnsPath(hollandId, riasecId), payload)
+      const batch = writeBatch(db)
+      const newRef = doc(columnsPath(hollandId, riasecId))
+      batch.set(newRef, payload)
+
+      toShift.forEach((c) => {
+        batch.update(doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', c.id), {
+          order: (c.order ?? 0) + 1,
+        })
+      })
+
+      await batch.commit()
+
+      const shiftedIds = new Set(toShift.map((c) => c.id))
+      const updatedExisting = existing.map((c) =>
+        shiftedIds.has(c.id) ? { ...c, order: (c.order ?? 0) + 1 } : c
+      )
+
       columnsByRiasec.value[riasecId] = [
-        ...(columnsByRiasec.value[riasecId] || []),
-        { id: ref.id, ...payload },
+        ...updatedExisting,
+        { id: newRef.id, ...payload },
       ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      console.log('Column added with ID:', ref.id)
-      return ref.id
+
+      console.log('Column added with ID:', newRef.id)
+      return newRef.id
     } catch (error) {
       console.error('Error adding column:', error)
       throw error
@@ -72,14 +96,52 @@ export const useHollandColumnsStore = defineStore('hollandColumns', () => {
   }
 
   // ── Update column ──────────────────────────────────────────
+  // `order` di sini artinya "pindah ke posisi ke berapa" (dari dropdown,
+  // jadi udah pasti dalam rentang valid 0..N-1). Item-item di ANTARA
+  // posisi lama & posisi baru ikut digeser 1 langkah, konsisten sama
+  // semantic "sisip" yang dipakai di addColumn.
 
-  const updateColumn = async (hollandId, riasecId, columnId, payload) => {
+  const updateColumn = async (hollandId, riasecId, columnId, { name, order }) => {
     try {
-      const ref = doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', columnId)
-      await updateDoc(ref, payload)
       const list = columnsByRiasec.value[riasecId] || []
-      const idx = list.findIndex((c) => c.id === columnId)
-      if (idx !== -1) list[idx] = { ...list[idx], ...payload }
+      const current = list.find((c) => c.id === columnId)
+      const oldOrder = current?.order ?? 0
+
+      const ref = doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', columnId)
+      const payload = { name: name.trim(), order }
+
+      if (order === undefined || order === oldOrder) {
+        // posisi gak berubah, cuma update field lain (nama, dst)
+        await updateDoc(ref, payload)
+        const idx = list.findIndex((c) => c.id === columnId)
+        if (idx !== -1) list[idx] = { ...list[idx], ...payload }
+      } else {
+        // tentuin siapa aja yang kena geser
+        const toShift =
+          order > oldOrder
+            ? list.filter((c) => c.id !== columnId && (c.order ?? 0) > oldOrder && (c.order ?? 0) <= order)
+            : list.filter((c) => c.id !== columnId && (c.order ?? 0) >= order && (c.order ?? 0) < oldOrder)
+        const direction = order > oldOrder ? -1 : 1
+
+        const batch = writeBatch(db)
+        batch.update(ref, payload)
+        toShift.forEach((c) => {
+          batch.update(doc(db, 'holland', hollandId, 'riasec', riasecId, 'columns', c.id), {
+            order: (c.order ?? 0) + direction,
+          })
+        })
+        await batch.commit()
+
+        const shiftedIds = new Set(toShift.map((c) => c.id))
+        for (let i = 0; i < list.length; i++) {
+          if (list[i].id === columnId) {
+            list[i] = { ...list[i], ...payload }
+          } else if (shiftedIds.has(list[i].id)) {
+            list[i] = { ...list[i], order: (list[i].order ?? 0) + direction }
+          }
+        }
+      }
+
       columnsByRiasec.value[riasecId] = [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       console.log('Column updated:', columnId)
     } catch (error) {

@@ -89,7 +89,7 @@
               <div class="flex items-center gap-1 shrink-0">
                 <button
                   @click="openEditColumnModal(cat.id, col)"
-                  class="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors cursor-pointer"
+                  class="p-1.5 rounded-md text-table-header-text hover:bg-primary transition-colors cursor-pointer"
                   title="Ubah nama / urutan kolom"
                 >
                   <font-awesome-icon icon="fa-solid fa-pen" class="w-3 h-3" />
@@ -138,7 +138,7 @@
             </div>
 
             <!-- Inline Add Form -->
-            <div v-if="activeAddKey === keyOf(cat.id, col.id)" class="px-4 py-3 bg-surface-muted border-t border-border">
+            <div v-if="activeAddKey === keyOf(cat.id, col.id)" class="px-4 py-3 bg-surface border-t border-border">
               <div class="flex flex-col sm:flex-row items-stretch sm:items-start gap-2">
                 <input
                   v-model="inlineForm.question"
@@ -219,7 +219,6 @@
             >
               <option v-for="col in columnsFor(editRiasecId)" :key="col.id" :value="col.id">{{ col.name }}</option>
             </select>
-            <p class="text-xs text-text-muted mt-1">Pindahin pernyataan ini ke kolom lain kalau perlu.</p>
           </div>
 
           <div>
@@ -232,7 +231,7 @@
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3">
           <button
             @click="closeEditModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
@@ -330,7 +329,7 @@
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3 shrink-0">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0">
           <button
             @click="closeRiasecEditModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
@@ -373,17 +372,19 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-text-primary mb-1">Urutan</label>
-            <input
+            <label class="block text-sm font-medium text-text-primary mb-1">Posisi</label>
+            <select
               v-model.number="columnForm.order"
-              type="number"
-              class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-            />
-            <p class="text-xs text-text-muted mt-1">Angka lebih kecil tampil lebih atas.</p>
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm"
+            >
+              <option v-for="pos in orderOptions" :key="pos" :value="pos">
+                Posisi {{ pos + 1 }}
+              </option>
+            </select>
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3">
           <button
             @click="closeColumnModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
@@ -427,49 +428,39 @@
     </div>
 
     <!-- Modal Hapus Soal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Pernyataan</h3>
-          <p class="mt-2 text-sm text-text-secondary">Apakah Anda yakin ingin menghapus pernyataan ini? Tindakan ini tidak dapat dibatalkan.</p>
-        </div>
-        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
-          <button @click="showDeleteModal = false" class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer">Batal</button>
-          <button @click="confirmDelete" :disabled="saving" class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer">
-            {{ saving ? 'Menghapus...' : 'Hapus' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      title="Hapus Pernyataan"
+      :loading="saving"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    >
+      Apakah Anda yakin ingin menghapus pernyataan ini? Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
 
     <!-- Modal Hapus Kolom -->
-    <div v-if="showDeleteColumnModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Kolom "{{ deletingColumn?.name }}"</h3>
-          <p class="mt-2 text-sm text-text-secondary">
-            Semua pernyataan di dalam kolom ini ({{ questionsByRiasecAndColumn(deleteColumnRiasecId, deletingColumn?.id).length }} soal) akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.
-          </p>
-        </div>
-        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
-          <button @click="closeDeleteColumnModal" class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer">Batal</button>
-          <button @click="confirmDeleteColumn" :disabled="savingColumn" class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer">
-            {{ savingColumn ? 'Menghapus...' : 'Hapus Kolom & Isinya' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteColumnModal"
+      :title="deleteColumnTitle"
+      :loading="savingColumn"
+      confirmText="Hapus Kolom & Isinya"
+      @confirm="confirmDeleteColumn"
+      @cancel="closeDeleteColumnModal"
+    >
+      Semua pernyataan di dalam kolom ini (<strong>{{ questionsByRiasecAndColumn(deleteColumnRiasecId, deletingColumn?.id).length }} soal</strong>) akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHollandQuestionsStore } from '@/stores/holland/holland-questions'
 import { useHollandColumnsStore } from '@/stores/holland/holland-columns'
 import { useHollandRiasecStore } from '@/stores/holland/holland-riasec'
 import { useHollandStore } from '@/stores/holland/holland'
+import ConfirmDeleteModal from '@/components/common/ConfirmDeleteModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -536,6 +527,9 @@ const columnForm = ref({ id: null, name: '', order: 0 })
 const showDeleteColumnModal = ref(false)
 const deleteColumnRiasecId = ref(null)
 const deletingColumn = ref(null)
+const deleteColumnTitle = computed(() =>
+  deletingColumn.value ? `Hapus Kolom "${deletingColumn.value.name}"` : 'Hapus Kolom'
+)
 
 // ── Lifecycle ──────────────────────────────────────────────
 
@@ -565,7 +559,17 @@ const questionsByRiasec = (riasecId) =>
 const questionsByRiasecAndColumn = (riasecId, columnId) =>
   allQuestions.value.filter((q) => q.riasecId === riasecId && q.columnId === columnId)
 
-// array <-> textarea (1 baris = 1 item), buang baris kosong
+
+// jumlah opsi beda buat tambah vs edit:
+// - tambah: 0..N (N = jumlah existing, boleh nyisip di paling akhir juga)
+// - edit: 0..N-1 (N = jumlah existing termasuk dirinya sendiri)
+const orderOptions = computed(() => {
+  const count = columnsFor(columnModalRiasecId.value).length
+  const max = columnForm.value.id ? count - 1 : count
+  return Array.from({ length: max + 1 }, (_, i) => i)
+})
+
+// Konversi array <-> textarea (1 baris = 1 item), buang baris kosong saat parsing
 const arrayToText = (arr) => (arr || []).join('\n')
 const textToArray = (text) =>
   text
@@ -677,7 +681,7 @@ const saveRiasecEdit = async () => {
       careers: textToArray(riasecEditForm.value.careersText),
       subjects: textToArray(riasecEditForm.value.subjectsText),
     })
-    // refresh biar label/deskripsi di kartu kategori langsung ke-update
+    // refresh list riasec biar label/deskripsi di kartu kategori langsung ke-update
     await riasecStore.fetchRiasecList(hollandId.value)
     closeRiasecEditModal()
   } catch (e) {
@@ -689,6 +693,7 @@ const saveRiasecEdit = async () => {
 
 // ── Delete Modal Soal ──────────────────────────────────────
 
+// Buka modal hapus soal
 const openDeleteModal = (id, riasecId, columnId) => {
   deletingId.value = id
   deleteRiasecId.value = riasecId
@@ -696,6 +701,7 @@ const openDeleteModal = (id, riasecId, columnId) => {
   showDeleteModal.value = true
 }
 
+// Tutup modal hapus soal
 const confirmDelete = async () => {
   saving.value = true
   try {
@@ -718,8 +724,10 @@ const confirmDelete = async () => {
 
 // ── Tambah / Edit Kolom ──────────────────────────────────────
 
+// Tambah kolom baru, batasi maksimal 4 kolom per kategori
 const openAddColumnModal = (riasecId) => {
   const existing = columnsFor(riasecId)
+  // Batasi maksimal 4 kolom per kategori
   if (existing.length >= 4) {
     const cat = riasecList.value.find((c) => c.id === riasecId)
     maxColumnsAlertRiasecLabel.value = cat?.label || riasecId
@@ -734,18 +742,21 @@ const openAddColumnModal = (riasecId) => {
   showColumnModal.value = true
 }
 
+// Edit kolom yang sudah ada
 const openEditColumnModal = (riasecId, col) => {
   columnModalRiasecId.value = riasecId
   columnForm.value = { id: col.id, name: col.name, order: col.order ?? 0 }
   showColumnModal.value = true
 }
 
+// Tutup modal tambah / edit kolom
 const closeColumnModal = () => {
   showColumnModal.value = false
   columnModalRiasecId.value = null
   columnForm.value = { id: null, name: '', order: 0 }
 }
 
+// Simpan kolom baru / update kolom lama
 const saveColumn = async () => {
   if (!columnForm.value.name.trim()) return
   savingColumn.value = true

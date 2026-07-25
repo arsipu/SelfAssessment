@@ -176,12 +176,10 @@ const questionsStore = useLikertQuestionsStore()
 const { currentSubmission: submission, loading } = storeToRefs(submissionsStore)
 const { questions } = storeToRefs(questionsStore)
 const { categories } = storeToRefs(categoryStore)
-const { currentLikert } = storeToRefs(likertStore)
 
 const scales = ref([])
 
 const showExportPDFModal = ref(false)
-const pdfContent = ref(null)
 
 const isCompleted = computed(() => submission.value?.status === 'completed')
 

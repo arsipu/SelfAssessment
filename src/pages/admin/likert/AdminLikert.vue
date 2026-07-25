@@ -167,7 +167,7 @@
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-border bg-surface-muted flex justify-end gap-3 shrink-0">
+        <div class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0">
           <button
             @click="closeModal"
             class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
@@ -186,35 +186,16 @@
     </div>
 
     <!-- Modal Hapus -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Formulir</h3>
-          <p class="mt-2 text-sm text-text-secondary">
-            Apakah Anda yakin ingin menghapus formulir ini? Semua data terkait — termasuk kategori, pertanyaan, skala penilaian, dan submission —
-            <strong class="text-text-primary">akan terhapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.
-          </p>
-          <p class="mt-2 text-xs text-text-muted">
-            Tindakan ini tidak dapat dibatalkan.
-          </p>
-        </div>
-        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
-          <button
-            @click="showDeleteModal = false"
-            class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer"
-          >
-            Batal
-          </button>
-          <button
-            @click="confirmDelete"
-            :disabled="saving"
-            class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer"
-          >
-            {{ saving ? 'Menghapus...' : 'Hapus' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      title="Hapus Formulir"
+      :loading="saving"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    >
+      Apakah Anda yakin ingin menghapus formulir ini? Semua data terkait — termasuk kategori, pertanyaan, skala penilaian, dan submission —
+      <strong class="text-text-primary">akan terhapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
   </div>
 </template>
 
@@ -224,6 +205,7 @@ import { useRouter } from 'vue-router'
 import { useLikertStore } from '@/stores/likert/likert'
 import { storeToRefs } from 'pinia'
 import { ACTIVE, INACTIVE, statusText } from '@/apps/status'
+import ConfirmDeleteModal from '@/components/common/ConfirmDeleteModal.vue'
 
 const router = useRouter()
 const likertStore = useLikertStore()

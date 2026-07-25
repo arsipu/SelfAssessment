@@ -200,35 +200,16 @@
     </div>
 
     <!-- Modal Hapus Instrumen -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div class="bg-surface rounded-xl shadow-xl w-full max-w-md mx-auto">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-text-primary">Hapus Instrumen</h3>
-          <p class="mt-2 text-sm text-text-secondary">
-            Apakah Anda yakin ingin menghapus instrumen ini? Semua data terkait — termasuk kategori RIASEC, pertanyaan, kolom, dan submission —
-            <strong class="text-text-primary">akan terhapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.
-          </p>
-          <p class="mt-2 text-xs text-text-muted">
-            Tindakan ini tidak dapat dibatalkan.
-          </p>
-        </div>
-        <div class="px-6 py-4 border-t border-border flex justify-end gap-3">
-          <button
-            @click="showDeleteModal = false"
-            class="px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer"
-          >
-            Batal
-          </button>
-          <button
-            @click="confirmDelete"
-            :disabled="saving"
-            class="px-4 py-2 bg-danger text-text-on-primary rounded-lg hover:bg-danger-soft text-sm disabled:opacity-60 cursor-pointer"
-          >
-            {{ saving ? 'Menghapus...' : 'Hapus' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      title="Hapus Instrumen"
+      :loading="saving"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    >
+      Apakah Anda yakin ingin menghapus instrumen ini? Semua data terkait — termasuk kategori RIASEC, pertanyaan, kolom, dan submission —
+      <strong class="text-text-primary">akan terhapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.
+    </ConfirmDeleteModal>
   </div>
 </template>
 
@@ -238,11 +219,13 @@ import { useRouter } from 'vue-router'
 import { useHollandStore } from '@/stores/holland/holland'
 import { storeToRefs } from 'pinia'
 import { ACTIVE, INACTIVE, statusText } from '@/apps/status'
+import ConfirmDeleteModal from '@/components/common/ConfirmDeleteModal.vue'
 
 const router = useRouter()
 const hollandStore = useHollandStore()
 const { hollands, loading } = storeToRefs(hollandStore)
 
+// State modal tambah/edit instrumen
 const showAddModal = ref(false)
 const showDeleteModal = ref(false)
 const isEditing = ref(false)
@@ -254,7 +237,7 @@ const form = ref({ name: '', description: '', direction: '' })
 
 const isFormValid = computed(() => form.value.name.trim() !== '')
 
-// ==== Status dropdown (teleported) ====
+// ==== Status dropdown (teleported ke body biar gak kepotong overflow tabel) ====
 const openStatusMenuId = ref(null)
 const dropdownPosition = ref({ top: '0px', left: '0px' })
 const statusButtonRefs = ref({})
@@ -268,6 +251,7 @@ const setStatusButtonRef = (id, el) => {
   if (el) statusButtonRefs.value[id] = el
 }
 
+// Hitung posisi dropdown supaya nggak overflow keluar layar
 const computeDropdownPosition = (btnEl) => {
   const rect = btnEl.getBoundingClientRect()
   const menuWidth = 144 // w-36 = 9rem = 144px
@@ -291,6 +275,7 @@ const closeStatusMenu = () => {
   openStatusMenuId.value = null
 }
 
+// Tutup dropdown status kalau halaman di-scroll/resize (posisi jadi nggak valid)
 const handleScrollOrResize = () => {
   if (openStatusMenuId.value !== null) closeStatusMenu()
 }

@@ -98,10 +98,11 @@ export const useLikertStore = defineStore('likert', () => {
   const seedLikertCategories = async (likertId) => {
     const batch = writeBatch(db)
 
-    DEFAULT_CATEGORIES.forEach((name) => {
+    DEFAULT_CATEGORIES.forEach((name, index) => {
       const ref = doc(collection(db, 'likert', likertId, 'categories'))
       batch.set(ref, {
         name,
+        order: index,
         questions: [],
         createdAt: serverTimestamp(),
       })
