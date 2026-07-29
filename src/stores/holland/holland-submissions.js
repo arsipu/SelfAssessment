@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '@/firebase/firebase-config'
-import { generateSessionCode } from '@/utils/code'
+import { generateSessionCodeHolland } from '@/utils/code'
+import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
+import { slugify } from '@/utils/slug'
 import {
   collection,
   doc,
@@ -16,8 +18,6 @@ import {
   where,
 } from 'firebase/firestore'
 
-import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
-import { slugify } from '@/utils/slug'
 
 export const useHollandSubmissionsStore = defineStore('holland-submissions', () => {
   const submissions = ref([])
@@ -100,7 +100,7 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   // kalau soal/kolom berubah belakangan.
   const createSubmission = async (hollandId, respondentData, initialAnswers) => {
     try {
-      const code = generateSessionCode()
+      const code = generateSessionCodeHolland()
       const ref = await addDoc(collection(db, 'holland', hollandId, 'submissions'), {
         name: respondentData.name,
         major: respondentData.major,
@@ -162,7 +162,13 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
   // agar bisa cari tanpa tahu hollandId-nya terlebih dahulu.
   const findSubmissionByCode = async (code, hollandId) => {
     try {
-      const q = query(collection(db, 'holland', hollandId, 'submissions'), where('code', '==', code))
+      // const q = query(collection(db, 'holland', hollandId, 'submissions'), where('code', '==', code))
+      
+      const q = query(
+        collection(db, 'holland', hollandId, 'submissions'),
+        where('code', '==', code),
+        where('status', '==', SUBMISSION_COMPLETED)
+      )
       const snap = await getDocs(q)
       if (snap.empty) return null
       const docSnap = snap.docs[0]
@@ -173,6 +179,27 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
       }
     } catch (error) {
       console.error('Error finding submission by code:', error)
+      throw error
+    }
+  }
+
+  const findSubmissionByCodeGlobal = async (code) => {
+    try {
+      const q = query(
+        collectionGroup(db, 'submissions'),
+        where('code', '==', code),
+        where('status', '==', SUBMISSION_COMPLETED)
+      )
+      const snap = await getDocs(q)
+      if (snap.empty) return null
+      const docSnap = snap.docs[0]
+      return {
+        id: docSnap.id,
+        hollandId: docSnap.ref.parent.parent.id,
+        ...docSnap.data(),
+      }
+    } catch (error) {
+      console.error('Error finding submission (global):', error)
       throw error
     }
   }
@@ -188,5 +215,6 @@ export const useHollandSubmissionsStore = defineStore('holland-submissions', () 
     updateSubmissionAnswers,
     completeSubmission,
     findSubmissionByCode,
+    findSubmissionByCodeGlobal,
   }
 })

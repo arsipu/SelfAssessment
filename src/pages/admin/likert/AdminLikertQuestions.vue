@@ -34,6 +34,100 @@
       </div>
     </div>
 
+    <!-- Panduan Penilaian Skala Likert -->
+    <div class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6">
+      <button
+        @click="showGuide = !showGuide"
+        class="w-full px-4 md:px-5 py-3 md:py-4 flex items-center justify-between gap-3 hover:bg-surface-muted transition-colors cursor-pointer"
+      >
+        <div class="flex items-center gap-2">
+          <font-awesome-icon icon="fa-solid fa-circle-info" class="w-4 h-4 text-primary shrink-0" />
+          <span class="text-sm font-medium text-text-primary">Cara Penilaian Skala Likert</span>
+        </div>
+        <font-awesome-icon
+          icon="fa-solid fa-chevron-down"
+          class="w-4 h-4 text-text-muted shrink-0 transition-transform"
+          :class="{ 'rotate-180': showGuide }"
+        />
+      </button>
+
+      <div v-if="showGuide" class="px-4 md:px-5 pb-4 md:pb-5 border-t border-border pt-4 space-y-4">
+        <div>
+          <p class="text-sm text-text-secondary mb-2">
+            Setiap soal dijawab responden dengan salah satu dari 4 pilihan berikut:
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="bg-surface-muted rounded-lg px-3 py-2 text-center">
+              <p class="text-xs text-text-muted">Sangat Setuju</p>
+              <p class="text-sm font-semibold text-text-primary">SS</p>
+            </div>
+            <div class="bg-surface-muted rounded-lg px-3 py-2 text-center">
+              <p class="text-xs text-text-muted">Setuju</p>
+              <p class="text-sm font-semibold text-text-primary">S</p>
+            </div>
+            <div class="bg-surface-muted rounded-lg px-3 py-2 text-center">
+              <p class="text-xs text-text-muted">Tidak Setuju</p>
+              <p class="text-sm font-semibold text-text-primary">TS</p>
+            </div>
+            <div class="bg-surface-muted rounded-lg px-3 py-2 text-center">
+              <p class="text-xs text-text-muted">Sangat Tidak Setuju</p>
+              <p class="text-sm font-semibold text-text-primary">STS</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm text-text-secondary mb-2">
+            Nilai tiap pilihan tergantung jenis soal — <strong class="text-text-primary">Favorable</strong> atau <strong class="text-text-primary">Unfavorable</strong> (diatur per soal saat menambah/edit di tabel bawah):
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-border">
+                  <th class="py-2 pr-4 text-xs font-medium uppercase tracking-wider text-text-muted">Jenis Soal</th>
+                  <th class="py-2 px-2 text-xs font-medium uppercase tracking-wider text-text-muted text-center">SS</th>
+                  <th class="py-2 px-2 text-xs font-medium uppercase tracking-wider text-text-muted text-center">S</th>
+                  <th class="py-2 px-2 text-xs font-medium uppercase tracking-wider text-text-muted text-center">TS</th>
+                  <th class="py-2 pl-2 text-xs font-medium uppercase tracking-wider text-text-muted text-center">STS</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <tr>
+                  <td class="py-2 pr-4">
+                    <span class="text-xs px-2 py-1 rounded-full font-medium bg-success-soft text-success">Favorable</span>
+                  </td>
+                  <td class="py-2 px-2 text-center text-table-value-text">4</td>
+                  <td class="py-2 px-2 text-center text-table-value-text">3</td>
+                  <td class="py-2 px-2 text-center text-table-value-text">2</td>
+                  <td class="py-2 pl-2 text-center text-table-value-text">1</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-4">
+                    <span class="text-xs px-2 py-1 rounded-full font-medium bg-danger-soft text-danger">Unfavorable</span>
+                  </td>
+                  <td class="py-2 px-2 text-center text-table-value-text">1</td>
+                  <td class="py-2 px-2 text-center text-table-value-text">2</td>
+                  <td class="py-2 px-2 text-center text-table-value-text">3</td>
+                  <td class="py-2 pl-2 text-center text-table-value-text">4</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-text-muted mt-2">
+            Favorable dipakai untuk soal yang searah dengan hal yang diukur, Unfavorable untuk soal yang berlawanan arah — nilainya sengaja dibalik supaya skor akhir tetap konsisten.
+          </p>
+        </div>
+
+        <div class="bg-primary-soft/50 border border-primary/20 rounded-lg px-3 py-2.5">
+          <p class="text-xs text-text-secondary">
+            <font-awesome-icon icon="fa-solid fa-lightbulb" class="w-3.5 h-3.5 text-primary mr-1" />
+            Total skor dari semua jawaban responden dicocokkan ke rentang pada tabel
+            <strong class="text-text-primary">"Skala Penilaian"</strong> di bawah untuk menentukan interpretasi akhir (misal: Sangat Tinggi, Tinggi, dst).
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Card Kelola Skala (inline, bukan modal) -->
     <div class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6">
       <div class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted">
@@ -546,6 +640,7 @@ const { questions, loading: questionsLoading } = storeToRefs(likertQuestionsStor
 // ── State ──────────────────────────────────────────────────
 
 const saving = ref(false)
+const showGuide = ref(false)
 
 // Inline add
 const activeAddCategoryId = ref(null)

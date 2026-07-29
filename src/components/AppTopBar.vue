@@ -61,6 +61,14 @@
             </div>
           </transition>
         </div>
+        
+        <router-link
+          to="/cek-hasil"
+          class="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
+          active-class="text-text-primary bg-primary-soft"
+        >
+          Cek Hasil
+        </router-link>
 
       </div>
 

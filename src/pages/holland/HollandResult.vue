@@ -14,6 +14,37 @@
           <div class="p-5 md:p-6 border-b border-border">
             <p class="text-[11px] text-text-muted uppercase tracking-wide mb-1">Laporan hasil tes</p>
             <h1 class="text-lg font-semibold text-text-primary mb-4">Minat karier RIASEC</h1>
+            
+            <!-- Kode tracking -->
+            <div
+              v-if="result?.code"
+              class="print:hidden flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-5 p-3 rounded-xl bg-primary-soft border border-primary/20"
+            >
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <font-awesome-icon icon="fa-solid fa-key" class="w-3.5 h-3.5 text-primary shrink-0" />
+                <div class="min-w-0">
+                  <p class="text-[11px] text-text-secondary leading-snug">
+                    Simpan kode ini untuk melihat hasil kembali kapan saja
+                  </p>
+                  <p class="text-sm font-mono font-semibold text-text-primary tracking-wide">
+                    {{ result.code }}
+                  </p>
+                </div>
+              </div>
+              <button
+                @click="copyCode"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-text-on-primary hover:bg-primary-hover transition"
+              >
+                <font-awesome-icon :icon="codeCopied ? 'fa-solid fa-check' : 'fa-solid fa-copy'" class="w-3 h-3" />
+                {{ codeCopied ? 'Tersalin' : 'Salin' }}
+              </button>
+            </div>
+
+            <!-- Versi cetak: kode tetap tampil tanpa tombol -->
+            <p v-if="result?.code" class="hidden print:block text-xs text-text-secondary mb-4">
+              Kode hasil: <span class="font-mono font-semibold">{{ result.code }}</span>
+            </p>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-sm">
               <div>
                 <p class="text-text-muted text-xs mb-0.5">Nama</p>
@@ -174,6 +205,18 @@ const exportingPDF = ref(false)
 const hollandId = computed(() => hollandStore?.currentHolland?.id || null)
 const loading = ref(true)
 const showDetails = ref(false)
+const codeCopied = ref(false)
+
+async function copyCode() {
+  if (!result.value?.code) return
+  try {
+    await navigator.clipboard.writeText(result.value.code)
+    codeCopied.value = true
+    setTimeout(() => { codeCopied.value = false }, 2000)
+  } catch (e) {
+    console.error('Gagal menyalin kode:', e)
+  }
+}
 
 const result = computed(() => sessionStore.getResult(hollandId.value))
 

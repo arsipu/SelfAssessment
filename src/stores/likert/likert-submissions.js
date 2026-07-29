@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '@/firebase/firebase-config'
-import { generateSessionCode } from '@/utils/code'
+import { generateSessionCodeLikert } from '@/utils/code'
+import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
+import { slugify } from '@/utils/slug'
 import {
   collection,
   doc,
@@ -16,8 +18,7 @@ import {
   where,
 } from 'firebase/firestore'
 
-import { SUBMISSION_IN_PROGRESS, SUBMISSION_COMPLETED } from '@/apps/status'
-import { slugify } from '@/utils/slug'
+
 export const useLikertSubmissionsStore = defineStore('likert-submissions', () => {
   const submissions = ref([])
   const currentSubmission = ref(null)
@@ -90,7 +91,7 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
   const createSubmission = async (likertId, respondentData) => {
     console.log('Creating submission (in_progress) for likert:', likertId)
     try {
-      const code = generateSessionCode()
+      const code = generateSessionCodeLikert()
       const ref = await addDoc(collection(db, 'likert', likertId, 'submissions'), {
         name: respondentData.nama,
         class: respondentData.kelas,
@@ -133,7 +134,14 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
   }
 
   const findSubmissionByCode = async (code, likertId) => {
-    const q = query(collection(db, 'likert', likertId, 'submissions'), where('code', '==', code))
+    // const q = query(collection(db, 'likert', likertId, 'submissions'), where('code', '==', code))
+
+    const q = query(
+      collection(db, 'likert', likertId, 'submissions'),
+      where('code', '==', code),
+      where('status', '==', SUBMISSION_COMPLETED)
+    )
+    
     const snap = await getDocs(q)
     if (snap.empty) return null
     const docSnap = snap.docs[0]
@@ -141,6 +149,33 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
       id: docSnap.id,
       likertId: docSnap.ref.parent.parent.id, // ambil parent likert id
       ...docSnap.data(),
+    }
+  }
+
+  const findSubmissionByCodeGlobal = async (code) => {
+    try {
+      console.log("Searching code:", code)
+      console.log("Status:", SUBMISSION_COMPLETED)
+
+      const q = query(
+        collectionGroup(db, 'submissions'),
+        where('code', '==', code),
+        where('status', '==', SUBMISSION_COMPLETED)
+      )
+
+      const snap = await getDocs(q)
+      if (snap.empty) return null
+      const docSnap = snap.docs[0]
+      return {
+        id: docSnap.id,
+        likertId: docSnap.ref.parent.parent.id,
+        ...docSnap.data(),
+      }
+    } catch (error) {
+      console.log(error.code)
+      console.log(error.message)
+      console.error('Error finding submission (global):', error)
+      throw error
     }
   }
 
@@ -168,5 +203,6 @@ export const useLikertSubmissionsStore = defineStore('likert-submissions', () =>
     completeSubmission,
     updateSubmissionAnswers,
     findSubmissionByCode,
+    findSubmissionByCodeGlobal,
   }
 })

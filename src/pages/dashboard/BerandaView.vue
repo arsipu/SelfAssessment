@@ -85,7 +85,7 @@
             <span
               class="inline-block text-[11px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full bg-primary-soft text-primary"
             >
-              {{ item.type === 'holland' ? 'RIASEC' : 'Likert' }}
+              {{ item.type === 'holland' ? 'RIASEC' : 'Survei' }}
             </span>
           </div>
 
@@ -154,52 +154,29 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 pt-8">
-        
-        <!-- Kolom Kiri: Instrumen -->
-        <div>
-          <h3 class="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-microscope" class="w-5 h-5 text-primary" />
-            Instrumen yang digunakan
-          </h3>
-          <div class="space-y-6">
-            <div v-for="ins in instruments" :key="ins.name" class="flex items-start gap-4">
-              <div
-                class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
-                :style="{ backgroundColor: ins.bg, color: ins.text }"
-              >
-                <span class="text-xs font-bold">{{ ins.code }}</span>
-              </div>
-              <div>
-                <p class="text-base font-semibold text-text-primary mb-1">{{ ins.name }}</p>
-                <p class="text-sm text-text-secondary leading-relaxed">{{ ins.desc }}</p>
-              </div>
+      <div class="pt-8">
+        <h3 class="text-lg font-bold text-text-primary mb-8 flex items-center justify-center gap-2">
+          <font-awesome-icon icon="fa-solid fa-microscope" class="w-5 h-5 text-primary" />
+          Instrumen yang digunakan
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+          <div
+            v-for="ins in instruments"
+            :key="ins.name"
+            class="bg-surface border border-border rounded-2xl p-6 flex items-start gap-5 hover:border-primary hover:shadow-md transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+              :style="{ backgroundColor: ins.bg, color: ins.text }"
+            >
+              <span class="text-sm font-bold">{{ ins.code }}</span>
+            </div>
+            <div class="min-w-0">
+              <p class="text-base font-bold text-text-primary mb-1.5">{{ ins.name }}</p>
+              <p class="text-sm text-text-secondary leading-relaxed">{{ ins.desc }}</p>
             </div>
           </div>
         </div>
-
-        <!-- Kolom Kanan: Tim pengembang -->
-        <div>
-          <h3 class="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-primary" />
-            Tim pengembang
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div v-for="member in team" :key="member.name" class="flex items-center gap-4">
-              <div
-                class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm"
-                :style="{ backgroundColor: member.bg, color: member.text }"
-              >
-                {{ member.initials }}
-              </div>
-              <div>
-                <p class="text-sm font-bold text-text-primary">{{ member.name }}</p>
-                <p class="text-xs text-text-secondary mt-0.5">{{ member.role }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </section>
 
@@ -281,20 +258,12 @@ const instruments = [
     text: 'var(--color-primary)',
   },
   {
-    code: 'Likert',
-    name: 'Skala Likert',
+    code: 'Survei',
+    name: 'Skala Survei',
     desc: 'Instrumen terstandar untuk mengukur kesiapan dari aspek pengetahuan, keterampilan, dan adaptabilitas.',
     bg: 'var(--color-primary-soft)',
     text: 'var(--color-primary)',
   },
-]
-
-// Tim pengembang
-const team = [
-  { name: 'Anggota Tim', role: 'Lead Developer', initials: 'AT', bg: 'var(--color-primary)', text: 'var(--color-text-on-primary)' },
-  { name: 'Anggota Tim', role: 'UI/UX Designer', initials: 'AT', bg: 'white', text: 'var(--color-text-primary)' },
-  { name: 'Anggota Tim', role: 'Data Analyst', initials: 'AT', bg: 'white', text: 'var(--color-text-primary)' },
-  { name: 'Anggota Tim', role: 'Content Writer', initials: 'AT', bg: 'white', text: 'var(--color-text-primary)' },
 ]
 
 onMounted(async () => {

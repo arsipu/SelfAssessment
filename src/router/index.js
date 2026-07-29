@@ -3,6 +3,7 @@ import { useUserStore } from '@/stores/user';
 import { ROLE_ADMIN } from '@/apps/role.js';
 
 import BerandaView from '@/pages/dashboard/BerandaView.vue';
+import CekHasilView from '@/pages/CekHasilView.vue';
 
 import NotAvailableView from '@/components/NotAvailable.vue';
 
@@ -35,6 +36,7 @@ import LoginView from '@/pages/login/LoginPage.vue';
 const routes = [
 	// Public
 	{ path: "/", name: "beranda", component: BerandaView },
+    { path: "/cek-hasil", name: "check-result", component: CekHasilView },
 
     { path: "/print", name: "print", component: TestPrintView },
 
