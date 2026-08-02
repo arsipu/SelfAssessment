@@ -42,12 +42,12 @@
 							type="text"
 							placeholder="Contoh: XII RPL 1"
 							required
-							class="px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition"
+							class="px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition"
 						/>
 					</div>
 
 					<div class="sm:col-span-2 flex flex-col gap-1">
-						<label class="text-sm font-semibold text-text-primary"
+						<label class="text-sm font-semibold text-black"
 							>Sekolah <span class="text-danger">*</span></label
 						>
 						<input
@@ -55,12 +55,12 @@
 							type="text"
 							placeholder="Nama sekolah"
 							required
-							class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition"
+							class="px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition"
 						/>
 					</div>
 
 					<div class="sm:col-span-2 flex flex-col gap-1">
-						<label class="text-sm font-semibold text-text-primary"
+						<label class="text-sm font-semibold text-black"
 							>Jurusan / Kompetensi Keahlian
 							<span class="text-danger">*</span></label
 						>
@@ -69,12 +69,12 @@
 							type="text"
 							placeholder="Contoh: Rekayasa Perangkat Lunak"
 							required
-							class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition"
+							class="px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition"
 						/>
 					</div>
 
 					<div class="flex flex-col gap-1">
-						<label class="text-sm font-semibold text-text-primary"
+						<label class="text-sm font-semibold text-black"
 							>Usia <span class="text-danger">*</span></label
 						>
 						<input
@@ -84,12 +84,12 @@
 							max="30"
 							placeholder="Usia (tahun)"
 							required
-							class="px-3 py-2.5 border border-border rounded-lg text-sm bg-surface-muted focus:outline-none focus:border-primary focus:bg-surface transition"
+							class="px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition"
 						/>
 					</div>
 
 					<div class="flex flex-col gap-1">
-						<label class="text-sm font-semibold text-text-primary"
+						<label class="text-sm font-semibold text-black"
 							>Jenis Kelamin <span class="text-danger">*</span></label
 						>
 						<div
@@ -124,7 +124,7 @@
 					</div>
 
 					<div class="sm:col-span-2 flex flex-col gap-1">
-						<label class="text-sm font-semibold text-text-primary"
+						<label class="text-sm font-semibold text-black"
 							>Pernah PKL <span class="text-danger">*</span></label
 						>
 						<div
@@ -161,7 +161,7 @@
 
 				<button
 					type="submit"
-					class="w-full mt-2 py-3 btn-primary text-sm font-semibold rounded-xl transition active:scale-[0.98]"
+					class="w-full mt-2 py-3 btn-primary text-sm font-semibold rounded-xl transition active:scale-[0.98] cursor-pointer"
 				>
 					Lanjut ke Kuesioner →
 				</button>
