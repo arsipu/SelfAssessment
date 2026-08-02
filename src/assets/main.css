@@ -1,155 +1,188 @@
 @import "tailwindcss";
 /* @import "./base.css"; */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 @theme {
-  /* ── Neutral ── */
-  --color-bg: #F7F3D7;
-  --color-surface: #FFFDF0;
-  --color-border: #EDE8C4;
-  --color-surface-muted: #EDE8C4;
+	/* ── Neutral ── */
+	--color-bg: #fffcfa;
+	--color-surface: #fffdf0;
+	--color-border: #ede8c4;
+	--color-surface-muted: #ede8c4;
 
-  --color-text-primary: #1F1F1F;
-  --color-text-on-primary: #ffffff;
-  --color-text-secondary: #4A4A4A;
-  --color-text-muted: #8A8A8A;
+	--color-text-primary: #4f252e;
+	--color-text-on-primary: #4f252e;
+	--color-text-secondary: #4f252e;
+	--color-text-muted: #8a8a8a;
 
-  /* ── Brand / primary ── */
-  --color-primary: #8B5A2B;
-  --color-primary-hover: #6B4226;
-  --color-primary-soft: #EDE8C4;
+	/* ── Brand / primary ── */
+	--color-primary: #e86a09;
+	--color-primary-hover: #6b4226;
+	--color-primary-soft: #f7a565;
 
-  /* ── Categorical / data-viz (dot indicator, chart, legend) ── */
-  --color-viz-1: #E23A3A;
-  --color-viz-2: #3A7CA5;
-  --color-viz-3: #A9763E;
-  --color-viz-4: #4CAF50;
-  --color-viz-5: #F5A623;
-  --color-viz-6: #6B4226;
+	/* ── Categorical / data-viz (dot indicator, chart, legend) ── */
+	--color-viz-1: #e23a3a;
+	--color-viz-2: #3a7ca5;
+	--color-viz-3: #a9763e;
+	--color-viz-4: #4caf50;
+	--color-viz-5: #f5a623;
+	--color-viz-6: #6b4226;
 
-  /* ── Level scale (5 tingkat skor Likert) ── */
-  --color-level-1: #E23A3A;
-  --color-level-1-soft: #F8D9D9;
-  --color-level-2: #A9763E;
-  --color-level-2-soft: #F0E6D2;
-  --color-level-3: #F5A623;
-  --color-level-3-soft: #FCEBD0;
-  --color-level-4: #3A7CA5;
-  --color-level-4-soft: #D9E7EE;
-  --color-level-5: #4CAF50;
-  --color-level-5-soft: #DCF0DD;
+	/* ── Level scale (5 tingkat skor Likert) ── */
+	--color-level-1: #e23a3a;
+	--color-level-1-soft: #f8d9d9;
+	--color-level-2: #a9763e;
+	--color-level-2-soft: #f0e6d2;
+	--color-level-3: #f5a623;
+	--color-level-3-soft: #fcebd0;
+	--color-level-4: #3a7ca5;
+	--color-level-4-soft: #d9e7ee;
+	--color-level-5: #4caf50;
+	--color-level-5-soft: #dcf0dd;
 
-  /* ── Semantic / status ── */
-  --color-success: #4CAF50;
-  --color-success-soft: #E3F3E4;
+	/* ── Semantic / status ── */
+	--color-success: #4caf50;
+	--color-success-soft: #e3f3e4;
 
-  --color-warning: #F5A623;
-  --color-warning-soft: #FCEFD9;
+	--color-warning: #f5a623;
+	--color-warning-soft: #fcefd9;
 
-  --color-danger: #E23A3A;
-  --color-danger-soft: #FADBDA;
+	--color-danger: #e23a3a;
+	--color-danger-soft: #fadbda;
 
-  /* ── Tambahan Opacity Manual (HEX + Alpha) untuk PDF ── */
-  --color-warning-30: #F5A6234d;      
-  --color-warning-80: #F5A623cc;      
-  --color-surface-muted-40: #FFFDF0; 
-  /* --color-surface-muted-40: #EDE8C466; */
+	/* ── Tambahan Opacity Manual (HEX + Alpha) untuk PDF ── */
+	--color-warning-30: #f5a6234d;
+	--color-warning-80: #f5a623cc;
+	--color-surface-muted-40: #fffdf0;
+	/* --color-surface-muted-40: #EDE8C466; */
 
-  /* ── Table ── */
-  --color-table-header: #6B4226;
-  /* --color-table-value: #FFFDF0; */
-  --color-table-value: #EDE8C466;
-  /* --color-table-value: #EDE8C4; */
+	/* ── Table ── */
+	--color-table-header: #6b4226;
+	/* --color-table-value: #FFFDF0; */
+	--color-table-value: #ede8c466;
+	/* --color-table-value: #EDE8C4; */
 
-  --color-table-header-text: #ffffff;
-  --color-table-value-text: #1F1F1F;
+	--color-table-header-text: #ffffff;
+	--color-table-value-text: #1f1f1f;
 }
 
 html {
-	font-family: "Plus Jakarta Sans", "Poppins", "Inter", sans-serif;
+	font-family: "Poppins", sans-serif;
+}
+
+.header-title {
+	font-family: "Poppins", sans-serif;
+	font-weight: 300;
 }
 
 body {
 	background-color: var(--color-bg);
 }
 
+.bg-hero {
+	background-color: #fff0e0;
+}
+
+.card {
+	background-color: white;
+	border: 1px solid #262625;
+}
+
+.btn-primary {
+	background-color: var(--color-primary);
+	color: white;
+	border: 1.5px solid #262625;
+	border-radius: 20px;
+}
+
+.text-black {
+	color: #262625;
+}
+
+.text-black-secondary {
+	color: #636362;
+}
+
+.btn-primary:hover {
+	background-color: #d67b03;
+}
+
 tr.bg-table-header {
-  background-color: var(--color-table-header);
+	background-color: var(--color-table-header);
 }
 
 tr.bg-table-value {
-  background-color: var(--color-table-value);
+	background-color: var(--color-table-value);
 }
 
 /* ── PDF Export Styles ── */
 .pdf-export-wrapper.pdf-exporting .pdf-breadcrumb {
-  display: none !important;
+	display: none !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .pdf-actions {
-  display: none !important;
+	display: none !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .pdf-expand-toggle {
-  display: none !important;
+	display: none !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .pdf-expand-content {
-  display: block !important;
+	display: block !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .pdf-alert-warning {
-  display: none !important;
+	display: none !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .bg-surface {
-  background-color: #FFFDF0 !important;
-  border: 1px solid #EDE8C4 !important;
+	background-color: #f4ae52 !important;
+	border: 1px solid #ede8c4 !important;
 }
 
 .pdf-export-wrapper.pdf-exporting .bg-surface-muted {
-  background-color: #EDE8C4 !important;
+	background-color: #ede8c4 !important;
 }
 
 /* ── PDF Export Styles for Likert ── */
 .pdf-export-wrapper.pdf-exporting table {
-  border-collapse: collapse !important;
+	border-collapse: collapse !important;
 }
 
 .pdf-export-wrapper.pdf-exporting th,
 .pdf-export-wrapper.pdf-exporting td {
-  border: 1px solid #EDE8C4 !important;
+	border: 1px solid #ede8c4 !important;
 }
 
 .pdf-export-wrapper.pdf-exporting thead {
-  background-color: #EDE8C4 !important;
+	background-color: #ede8c4 !important;
 }
 
 @layer components {
-  .app-table {
-    /* nilai default, bisa dioverride per instance */
-    --table-header-bg: var(--color-table-header);
-    --table-header-text: var(--color-table-header-text);
-    --table-value-bg: var(--color-table-value);
-    --table-value-text: var(--color-table-value-text);
-  }
+	.app-table {
+		/* nilai default, bisa dioverride per instance */
+		--table-header-bg: var(--color-table-header);
+		--table-header-text: var(--color-table-header-text);
+		--table-value-bg: var(--color-table-value);
+		--table-value-text: var(--color-table-value-text);
+	}
 
-  .app-table thead {
-    background-color: var(--table-header-bg);
-  }
+	.app-table thead {
+		background-color: var(--table-header-bg);
+	}
 
-  .app-table thead th {
-    color: var(--table-header-text);
-  }
+	.app-table thead th {
+		color: var(--table-header-text);
+	}
 
-  .app-table tbody tr {
-    background-color: var(--table-value-bg);
-  }
+	.app-table tbody tr {
+		background-color: var(--table-value-bg);
+	}
 
-  .app-table tbody td {
-    color: var(--table-value-text);
-  }
+	.app-table tbody td {
+		color: var(--table-value-text);
+	}
 }
