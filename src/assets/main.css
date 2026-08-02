@@ -8,7 +8,7 @@
 @theme {
 	/* ── Neutral ── */
 	--color-bg: #fffcfa;
-	--color-surface: #fffdf0;
+	--color-surface: #fcfcfc;
 	--color-border: #ede8c4;
 	--color-surface-muted: #ede8c4;
 
@@ -66,6 +66,8 @@
 
 	--color-table-header-text: #ffffff;
 	--color-table-value-text: #1f1f1f;
+
+	--color-border-primary: #262625;
 }
 
 html {
@@ -88,6 +90,13 @@ body {
 .card {
 	background-color: white;
 	border: 1px solid #262625;
+}
+
+.card-title {
+	background-color: var(--color-primary);
+	color: white;
+	border: none; /* Reset semua border */
+	border-bottom: 1px solid #262625; /* Hanya aktifkan border bawah */
 }
 
 .btn-primary {
