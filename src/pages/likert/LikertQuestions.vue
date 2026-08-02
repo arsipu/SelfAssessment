@@ -2,7 +2,7 @@
 	<div class="min-h-screen">
 		<AppTopBar />
 
-		<div class="max-w-6xl mx-auto px-4 py-6 pb-20 sm:py-10">
+		<div class="max-w-4xl mx-auto px-4 py-6 pb-20 sm:py-10">
 			<!-- tombol kembali -->
 			<button
 				@click="$router.push('/')"
@@ -22,7 +22,7 @@
 					</p>
 				</div>
 
-				<div class="p-6">
+				<div class="p-3 md:p-6">
 					<!-- Progress bar -->
 					<div class="mb-8">
 						<div class="flex items-center justify-between mb-1.5">
@@ -42,59 +42,54 @@
 					<!-- Category sections -->
 					<div v-for="section in sections" :key="section.key" class="mb-6">
 						<div class="flex items-center gap-3 mb-3">
-							<div class="h-px flex-1 bg-border"></div>
 							<div class="flex items-center gap-2 shrink-0">
-								<span
-									class="w-2 h-2 rounded-full"
-									:style="{ backgroundColor: section.dot }"
-								></span>
-								<span class="text-xs font-medium text-text-secondary">{{
+								<span class="text-sm md:text-md font-medium text-black">{{
 									section.label
 								}}</span>
 							</div>
-							<div class="h-px flex-1 bg-border"></div>
 						</div>
 
 						<div class="space-y-3">
 							<div
 								v-for="(q, i) in section.questions"
 								:key="q.id"
-								class="bg-surface border border-border rounded-xl p-3 md:p-4 transition-colors"
+								class="rounded-xl p-1 md:p-4 transition-colors"
 							>
 								<div class="flex items-start gap-3 mb-3">
 									<span
-										class="text-xs font-medium text-text-muted mt-0.5 w-6 shrink-0"
+										class="text-xs md:text-sm font-medium text-black mt-0.5 w-2 md:w-6 shrink-0"
 										>{{ i + 1 }}.</span
 									>
-									<p class="text-sm text-text-primary leading-relaxed">
+									<p class="text-xs md:text-sm text-black">
 										{{ q.question }}
 									</p>
 								</div>
 
-								<div class="flex flex-wrap gap-1.5 md:gap-2 pl-9">
-									<button
+								<div
+									class="flex flex-col sm:flex-row gap-2 sm:gap-5 items-start sm:items-center"
+								>
+									<label
 										v-for="opt in scaleOptions"
 										:key="opt.value"
-										@click="answers[q.id] = opt.value"
-										class="flex-1 min-w-[3rem] px-1.5 py-2 rounded-lg text-[11px] md:text-xs font-medium transition-all border leading-tight text-center cursor-pointer"
-										:class="
-											answers[q.id] === opt.value
-												? 'bg-primary text-text-on-primary border-primary'
-												: 'bg-surface-muted text-text-secondary border-border hover:border-primary hover:text-text-primary'
-										"
+										class="flex items-center gap-2 text-xs md:text-sm text-black cursor-pointer"
 									>
+										<input
+											type="radio"
+											:name="'likert-' + q.id"
+											:value="opt.value"
+											v-model="answers[q.id]"
+											class="w-3 md:w-4 h-3 md:h-4"
+										/>
 										{{ opt.label }}
-									</button>
+									</label>
 								</div>
 							</div>
 						</div>
 					</div>
 
 					<!-- Submit -->
-					<div
-						class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
-					>
-						<p class="text-xs text-text-muted text-center sm:text-left">
+					<div class="mt-8 flex flex-col items-left justify-between gap-3">
+						<p class="text-xs text-black-secondary text-left">
 							{{
 								unansweredCount > 0
 									? `${unansweredCount} soal belum dijawab`
@@ -104,7 +99,7 @@
 						<button
 							@click="showConfirmModal = true"
 							:disabled="unansweredCount > 0"
-							class="w-full sm:w-auto px-6 py-2.5 h-10 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+							class="w-full px-6 py-2.5 h-10 btn-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
 						>
 							Kirim jawaban
 						</button>
