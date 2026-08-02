@@ -235,15 +235,6 @@ watch(
 
 onUnmounted(() => clearTimeout(debounceTimer));
 
-const dotColors = [
-	"var(--color-viz-1)",
-	"var(--color-viz-2)",
-	"var(--color-viz-3)",
-	"var(--color-viz-4)",
-	"var(--color-viz-5)",
-	"var(--color-viz-6)",
-];
-
 const sections = computed(() => {
 	const grouped = {};
 	for (const q of questions.value) {
@@ -255,7 +246,6 @@ const sections = computed(() => {
 		return {
 			key: categoryId,
 			label: cat?.name || "Tanpa kategori",
-			dot: dotColors[index % dotColors.length],
 			questions: grouped[categoryId],
 		};
 	});
