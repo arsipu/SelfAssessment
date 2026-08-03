@@ -3,7 +3,7 @@
 		<div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
 			<div
 				v-if="!result || loading"
-				class="text-center text-sm text-text-muted py-20"
+				class="text-center text-sm text-black-secondary py-20"
 			>
 				Memuat hasil...
 			</div>
@@ -18,7 +18,7 @@
 						<p class="text-[11px] text-black tracking-wide mb-1">
 							Hai, Berikut Hasil dari :
 						</p>
-						<h1 class="text-lg font-semibold text-text-primary mb-4">
+						<h1 class="text-lg font-semibold text-black mb-4">
 							{{ likertStore.currentLikert?.name || "Kuesioner" }}
 						</h1>
 
@@ -34,12 +34,12 @@
 								/>
 								<div class="min-w-0">
 									<p
-										class="text-xs md:text-[11px] text-text-secondary leading-snug"
+										class="text-xs md:text-[11px] text-black-secondary leading-snug"
 									>
 										Simpan kode ini untuk melihat hasil kembali kapan saja
 									</p>
 									<p
-										class="text-xs md:text-sm font-mono font-semibold text-text-primary tracking-wide"
+										class="text-xs md:text-sm font-mono font-semibold text-black tracking-wide"
 									>
 										{{ result.code }}
 									</p>
@@ -47,7 +47,7 @@
 							</div>
 							<button
 								@click="copyCode"
-								class="self-start inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer"
+								class="self-start inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-black hover:bg-primary-hover transition"
 							>
 								<font-awesome-icon
 									:icon="codeCopied ? 'fa-solid fa-check' : 'fa-solid fa-copy'"
@@ -60,7 +60,7 @@
 						<!-- Versi cetak: kode tetap tampil tanpa tombol -->
 						<p
 							v-if="result?.code"
-							class="hidden print:block text-xs text-text-secondary mb-4"
+							class="hidden print:block text-xs text-black-secondary mb-4"
 						>
 							Kode hasil:
 							<span class="font-mono font-semibold">{{ result.code }}</span>
@@ -70,40 +70,40 @@
 							class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-sm"
 						>
 							<div>
-								<p class="text-text-muted text-xs mb-0.5">Nama</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black-secondary text-xs mb-0.5">Nama</p>
+								<p class="text-black font-medium">
 									{{ result?.respondent?.nama }}
 								</p>
 							</div>
 							<div>
-								<p class="text-text-muted text-xs mb-0.5">Kelas</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black-secondary text-xs mb-0.5">Kelas</p>
+								<p class="text-black font-medium">
 									{{ result?.respondent?.kelas }}
 								</p>
 							</div>
 							<div>
-								<p class="text-text-muted text-xs mb-0.5">Sekolah</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black-secondary text-xs mb-0.5">Sekolah</p>
+								<p class="text-black font-medium">
 									{{ result?.respondent?.sekolah }}
 								</p>
 							</div>
 							<div>
-								<p class="text-text-muted text-xs mb-0.5">
+								<p class="text-black-secondary text-xs mb-0.5">
 									Jurusan / Kompetensi Keahlian
 								</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black font-medium">
 									{{ result?.respondent?.jurusan }}
 								</p>
 							</div>
 							<div>
-								<p class="text-text-muted text-xs mb-0.5">Usia / Gender</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black-secondary text-xs mb-0.5">Usia / Gender</p>
+								<p class="text-black font-medium">
 									{{ result?.respondent?.usia }} Tahun, {{ genderLabel }}
 								</p>
 							</div>
 							<div v-if="result?.respondent?.pkl">
-								<p class="text-text-muted text-xs mb-0.5">Pernah PKL</p>
-								<p class="text-text-primary font-medium">
+								<p class="text-black-secondary text-xs mb-0.5">Pernah PKL</p>
+								<p class="text-black font-medium">
 									{{ result.respondent.pkl }}
 								</p>
 							</div>
@@ -128,7 +128,9 @@
 							@click="showDetails = !showDetails"
 							class="w-full flex items-center justify-between gap-2"
 						>
-							<p class="text-xs font-medium text-text-muted">Rincian jawaban</p>
+							<p class="text-xs font-medium text-black-secondary">
+								Rincian jawaban
+							</p>
 							<font-awesome-icon
 								icon="fa-solid fa-chevron-down"
 								class="w-4 h-4 text-text-muted transition-transform duration-200"
@@ -148,7 +150,7 @@
 				<div class="flex flex-col md:flex-row gap-3">
 					<button
 						@click="showExportPDFModal = true"
-						class="w-full md:flex-1 py-3 h-10 border border-border text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition"
+						class="w-full md:flex-1 py-3 h-10 border border-black-secondary text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition cursor-pointer"
 					>
 						Unduh PDF
 					</button>
@@ -173,24 +175,24 @@
 			<div
 				class="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-lg max-h-[90vh] overflow-y-auto"
 			>
-				<h2 class="text-base font-semibold text-text-primary mb-2">
+				<h2 class="text-base font-semibold text-black mb-2">
 					Unduh hasil PDF?
 				</h2>
-				<p class="text-sm text-text-secondary leading-relaxed mb-6">
+				<p class="text-sm text-black-secondary leading-relaxed mb-6">
 					Rekap jawaban akan diunduh dalam format .pdf.
 				</p>
 
 				<div class="flex gap-3">
 					<button
 						@click="showExportPDFModal = false"
-						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors"
+						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-secondary bg-surface-muted hover:bg-primary-soft transition-colors cursor-pointer"
 					>
 						Batal
 					</button>
 					<button
 						@click="confirmExportPDF"
 						:disabled="exportingPDF"
-						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors"
+						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
 					>
 						{{ exportingPDF ? "Mengunduh..." : "Ya, unduh" }}
 					</button>
@@ -389,21 +391,23 @@ const scoreCardRef = ref(null);
 const exportingPDF = ref(false);
 
 async function handleExportPDF() {
-	if (exportingPDF.value) return;
-	exportingPDF.value = true;
-	try {
-		await exportResultToPDF({
-			scoreCardElement: scoreCardRef.value.cardRef,
-			sections: sections.value,
-			filename:
-				`hasil-${likertStore.currentLikert?.name}-${respondentName.value}.pdf`.replace(
-					/\s+/g,
-					"_",
-				),
-		});
-	} finally {
-		exportingPDF.value = false;
-	}
+	window.print();
+	showExportPDFModal.value = false;
+	// if (exportingPDF.value) return;
+	// exportingPDF.value = true;
+	// try {
+	// 	await exportResultToPDF({
+	// 		scoreCardElement: scoreCardRef.value.cardRef,
+	// 		sections: sections.value,
+	// 		filename:
+	// 			`hasil-${likertStore.currentLikert?.name}-${respondentName.value}.pdf`.replace(
+	// 				/\s+/g,
+	// 				"_",
+	// 			),
+	// 	});
+	// } finally {
+	// 	exportingPDF.value = false;
+	// }
 }
 </script>
 
