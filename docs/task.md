@@ -1,79 +1,102 @@
-# Task: Samakan Desain & Style HollandForm.vue dengan LikertForm.vue
+# Rencana: Samakan Desain HollandQuestions.vue dengan LikertQuestions.vue
 
 ## Tujuan
 
-Mengubah tampilan `src/pages/holland/HollandForm.vue` agar desain & style-nya **mirip** dengan `src/pages/likert/LikertForm.vue`, **tanpa mengubah fungsionalitas/logika** Holland (field berbeda, state `preparing`, `loadError`, `computedAge`, label tombol dinamis, alur redirect, dsb).
+Mengubah tampilan/desain halaman `src/pages/holland/HollandQuestions.vue` agar **mirip** dengan `src/pages/likert/LikertQuestions.vue`.
 
-## Referensi Style LikertForm.vue (Target)
+> Hanya perubahan desain/tampilan (template + class styling). **Tidak ada perubahan** pada logika `script setup`, alur sesi, penyimpanan jawaban, maupun struktur data.
 
-Class-class kunci yang dipakai LikertForm:
+---
 
-| Elemen                          | Class LikertForm                                                                                                                                                   |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Container card                  | `bg-surface card rounded-2xl overflow-hidden`                                                                                                                      |
-| Header card (judul + deskripsi) | `card-title p-6` (background primary, teks putih, border bawah)                                                                                                    |
-| Label form                      | `text-sm font-semibold text-black`                                                                                                                                 |
-| Input                           | `px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition`                       |
-| Radio label                     | `flex items-center gap-2 text-sm text-black cursor-pointer`                                                                                                        |
-| Tombol submit                   | `w-full mt-2 py-3 btn-primary text-sm font-semibold rounded-xl transition active:scale-[0.98] cursor-pointer` + `disabled:opacity-50 disabled:pointer-events-none` |
+## Analisis Perbedaan Desain Saat Ini
 
-## Perbedaan Saat Ini (HollandForm vs LikertForm)
+| Aspek             | LikertQuestions.vue (acuan)                                  | HollandQuestions.vue (sekarang)                                        |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- | --- |
+| Tombol kembali    | Ada ("Kembali" + icon panah)                                 | Tidak ada                                                              |
+| Container utama   | Card `bg-surface card rounded-2xl overflow-hidden`           | Tanpa card, konten langsung di halaman                                 |
+| Judul             | `card-title p-6 text-center` → nama + deskripsi instrumen    | Header teks biasa ("Holland RIASEC")                                   |     |
+| Bagian kategori   | Tanpa kotak border, hanya label section                      | Kotak border `border rounded-xl p-4 bg-surface` + dot warna            |
+| Item pertanyaan   | Nomor + teks pertanyaan, opsi polos di bawahnya              | Kotak label checkbox `border rounded-lg p-2.5`, highlight saat dipilih |
+| Gaya opsi/jawaban | Radio polos `flex items-center gap-2` + input kecil          | Checkbox dalam kotak ber-border                                        |
+| Area submit       | Teks sisa soal + tombol `btn-primary` lebar penuh (`w-full`) | Teks jumlah dipilih + tombol `sm:w-auto`                               |
+| Modal konfirmasi  | Ada                                                          | Ada (sudah hampir sama)                                                |
 
-| Aspek          | HollandForm (sekarang)                                                                | LikertForm (target)                                                                           |
-| -------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Container card | `border border-border rounded-2xl p-5 sm:p-8 shadow-sm`                               | `bg-surface card rounded-2xl overflow-hidden` (tanpa padding luar, tanpa shadow)              |
-| Header         | `<div class="mb-5 sm:mb-6">` terpisah, teks `text-text-primary`/`text-text-secondary` | `<div class="card-title p-6">` menyatu, background primary + teks putih                       |
-| Label          | `text-text-primary`                                                                   | `text-black` (`#262625`)                                                                      |
-| Input          | `bg-surface-muted` + `border-border`                                                  | `bg-surface` + `border-border-primary`                                                        |
-| Tombol submit  | `bg-primary text-text-on-primary ... hover:bg-primary-hover`                          | `btn-primary` (border 1.5px `#262625`, radius 20px dari CSS, tetapi di-override `rounded-xl`) |
+---
 
-## Rencana Perubahan (Hanya Template/Class, Logika Tetap)
+## Rencana Perubahan (Template HollandQuestions.vue)
 
-### 1. Container card
+### 1. Tombol Kembali (baru)
 
-- Hapus: `border border-border rounded-2xl p-5 sm:p-8 shadow-sm`
-- Ganti: `bg-surface card rounded-2xl overflow-hidden`
-- Tambahkan `p-6` / `sm:p-6` bila perlu di dalam form (karena padding card dihilangkan) — ikuti struktur LikertForm di mana form pakai `p-6`.
+- Tambahkan tombol "Kembali" di atas card, persis seperti Likert:
+  - `<button @click="$router.push('/')">` dengan icon `fa-solid fa-arrow-left` + teks "Kembali"
+  - Class: `flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer`
 
-### 2. Header judul + deskripsi
+### 2. Card Container (ubah)
 
-- Gabungkan `<h1>` dan `<p>` ke dalam satu div dengan class `card-title p-6` (bukan div terpisah).
-- Hapus class `text-text-primary` / `text-text-secondary` pada h1/p (karena `card-title` sudah memberi background primary + teks putih).
-- Pertahankan ukuran teks: `text-xl sm:text-2xl font-bold` (h1), `text-xs sm:text-sm mt-1` (p).
+- Bungkus seluruh konten kuis dalam:
+  - `<div class="bg-surface card rounded-2xl overflow-hidden">`
 
-### 3. Label form
+### 3. Header Card — `card-title` (ubah)
 
-- Ganti semua `text-text-primary` pada `<label>` menjadi `text-black`.
-- Struktur label tetap memakai `text-sm font-semibold` + `<span class="text-danger">*</span>` untuk field wajib.
+- Ganti blok header teks biasa dengan header ala Likert:
+  - Judul: `{{ hollandStore.currentHolland?.name }}` — class `text-xl sm:text-2xl font-semi-bold`
+  - Deskripsi: `{{ hollandStore.currentHolland?.description }}` — class `text-xs sm:text-sm mt-1`
+  - Wrapper: `card-title p-6 text-center`
+- `hollandStore.currentHolland` sudah tersedia & punya field `name` dan `description` (terverifikasi di `src/stores/holland/holland.js`).
 
-### 4. Input & radio
+### 4. Padding Konten (ubah)
 
-- Ganti `bg-surface-muted` → `bg-surface` pada semua input.
-- Ganti `border-border` → `border-border-primary` pada semua input.
-- Radio label: `text-text-primary` → `text-black`.
+- Konten di dalam card memakai `p-3 md:p-6` (sama seperti Likert).
 
-### 5. Tombol submit
+### 6. Bagian Kategori / Section (ubah styling)
 
-- Ganti class tombol menjadi seperti LikertForm:
-  ```
-  w-full mt-2 py-3 btn-primary text-sm font-semibold rounded-xl transition
-  active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none
-  ```
-- **Pertahankan**: `:disabled="submitting || preparing"` dan label dinamis `{{ submitButtonLabel }}` (Menyimpan... / Menyiapkan soal... / Lanjut ke Kuesioner →) — fungsionalitas tidak berubah.
+- **Hapus** kotak border luar (`border border-border rounded-xl p-4 md:p-5 bg-surface`).
+- Header section disamakan dengan Likert:
+  - `<div class="flex items-center gap-3 mb-3">`
+  - Label: `text-sm md:text-md font-medium text-black` → `{{ section.label }} <span class="text-xs text-text-muted">({{ section.code }})</span>`
+  - **Hapus dot warna** (penanda lingkaran `w-2.5 h-2.5`) agar konsisten dengan Likert. (Variabel `dotColors` di script boleh dibiarkan, tinggal tak dipakai, atau dirapikan saat implementasi.)
+- **Pertahankan** layout kolom dinamis (grid `repeat(columns.length, ...)`) karena ini kebutuhan fungsional Holland (kolom per kategori dari Firestore).
 
-### 6. Pesan error (`loadError`)
+### 7. Item Pertanyaan (ubah styling — bagian terbesar)
 
-- Tetap tampilkan `<p v-if="loadError" class="text-xs text-danger">{{ loadError }}</p>` — letakkan di atas tombol submit, sesuai posisi saat ini.
+- **Hapus** kotak label checkbox ber-border (`bg-surface border rounded-lg p-2.5 hover:border-primary`).
+- Ganti dengan gaya pertanyaan ala Likert:
+  - Wrapper per pertanyaan: `rounded-xl p-1 md:p-4` + header `flex items-start gap-3 mb-3`
+  - Nomor: `text-xs md:text-sm font-medium text-black w-2 md:w-6 shrink-0` (index dalam kolom: `colIndex`/indeks pertanyaan + 1)
+  - Teks pertanyaan: `text-xs md:text-sm text-black`
+- Opsi/jawaban di bawah pertanyaan (dalam baris/kolom sesuai layout kolom):
+  - Label checkbox: `flex items-center gap-2 text-xs md:text-sm text-black cursor-pointer`
+  - Input checkbox: `w-3 md:w-4 h-3 md:h-4 accent-primary` (tetap `type="checkbox"`, fungsi `isChecked`/`toggleAnswer` dipertahankan)
+  - Indikator terpilih dibuat minimal agar tetap terlihat: misalnya warna teks `text-primary` atau `font-medium` saat dicentang (bukan kotak border).
+
+### 8. Label Kolom (pertahankan, rapikan)
+
+- Label nama kolom (`col.label`) tetap tampil sebagai sub-header per kolom:
+  - `text-xs font-semibold text-text-secondary mb-2` (dipertahankan).
+
+### 9. Area Submit (ubah, samakan dengan Likert)
+
+- Ganti menjadi:
+  - Wrapper: `mt-8 flex flex-col items-left justify-between gap-3` (tanpa `sm:flex-row`)
+  - Tombol: `w-full px-6 py-2.5 h-10 btn-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer` (lebar penuh `w-full`)
+
+### 10. Modal Konfirmasi (pertahankan)
+
+- Struktur modal sudah mirip dengan Likert; cukup dipertahankan apa adanya (kecil kemungkinan ada penyesuaian minor, mis. konsistensi wording).
+
+---
 
 ## Yang TIDAK Diubah
 
-- Semua logika `<script setup>` Holland (store, `preparing`, `loadError`, `computedAge`, `formatBirthDateAge`, `prepareQuestions`, `onMounted`, `goToKuesioner`).
-- Field & urutan field Holland (Nama, Jurusan, Sekolah/Universitas, Jenis Kelamin, Tanggal Lahir, Pekerjaan, Tanggal Tes, Tujuan Tes) — tetap sesuai kebutuhan data Holland.
-- Nama store, route, session, dsb.
+- Seluruh `script setup` (state, computed, watch, fungsi `toggleAnswer`, `buildAnswers`, `handleSubmit`, dll.)
+- Alur sesi & restore jawaban (`checkedMap` dari `session.answers`)
+- Layout kolom dinamis per kategori (grid) — kebutuhan fungsional Holland
+- Tipe jawaban tetap **checkbox multi-pilih** (bukan radio)
+- `progressPct` / `answeredCount` / `sections` computed — hanya dipakai ulang di template
 
-## Verifikasi
+## Catatan Implementasi
 
-1. Buka halaman form Holland (via route `/tes-holland/:slug` atau sesuai router) — pastikan tampilan header card, input, dan tombol mirip LikertForm.
-2. Pastikan Tombol submit tetap disable saat `preparing` dan menampilkan label dinamis.
-3. Pastikan error `loadError` tetap muncul jika soal belum tersedia.
-4. Pastikan alur submit & redirect ke `holland-questions` tetap berjalan normal.
+- `progressPct` dan `answeredCount` sudah tersedia di script, tinggal dipakai di template.
+- `hollandStore.currentHolland` tersedia dan memiliki `name` & `description`.
+- Font-awesome sudah dipakai di Likert, jadi aman digunakan untuk icon panah.
+- Setelah edit, verifikasi: halaman tetap berfungsi (restore jawaban, centang/uncentang, submit, modal) — hanya tampilan yang berubah.
