@@ -11,7 +11,7 @@
 			<div v-else class="space-y-6">
 				<!-- CARD RAPOR -->
 				<div
-					class="card border border-border rounded-2xl shadow-sm overflow-hidden"
+					class="print-area card border border-border rounded-2xl shadow-sm overflow-hidden print:p-8"
 				>
 					<!-- Kop -->
 					<div class="p-5 md:p-6 border-b border-border">
@@ -47,7 +47,7 @@
 							</div>
 							<button
 								@click="copyCode"
-								class="self-start inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-black hover:bg-primary-hover transition"
+								class="self-start inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-black transition cursor-pointer"
 							>
 								<font-awesome-icon
 									:icon="codeCopied ? 'fa-solid fa-check' : 'fa-solid fa-copy'"
@@ -126,7 +126,7 @@
 					<div class="p-4 md:p-6">
 						<button
 							@click="showDetails = !showDetails"
-							class="w-full flex items-center justify-between gap-2"
+							class="print:hidden w-full flex items-center justify-between gap-2"
 						>
 							<p class="text-xs font-medium text-black-secondary">
 								Rincian jawaban
@@ -147,7 +147,7 @@
 				</div>
 
 				<!-- Tombol aksi -->
-				<div class="flex flex-col md:flex-row gap-3">
+				<div class="print:hidden flex flex-col md:flex-row gap-3">
 					<button
 						@click="showExportPDFModal = true"
 						class="w-full md:flex-1 py-3 h-10 border border-black-secondary text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition cursor-pointer"
@@ -191,10 +191,9 @@
 					</button>
 					<button
 						@click="confirmExportPDF"
-						:disabled="exportingPDF"
-						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
+						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover transition-colors cursor-pointer"
 					>
-						{{ exportingPDF ? "Mengunduh..." : "Ya, unduh" }}
+						Ya, unduh
 					</button>
 				</div>
 			</div>
@@ -205,7 +204,7 @@
 <script setup>
 import LikertScoreSummary from "@/components/likert/LikertScoreSummary.vue";
 import LikertAnswerSections from "@/components/likert/LikertAnswerSections.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useLikertStore } from "@/stores/likert/likert";
 import { useLikertSessionStore } from "@/stores/likert/likert-session";
@@ -213,7 +212,6 @@ import { useLikertQuestionsStore } from "@/stores/likert/likert-questions";
 import { useLikertCategoriesStore } from "@/stores/likert/likert-categories";
 import { LIKERT_SCALE_OPTIONS } from "@/apps/likert";
 import { computeTotalScore } from "@/utils/likert-scoring";
-import { exportResultToPDF } from "@/utils/likert-pdf-export";
 
 const route = useRoute();
 const router = useRouter();
@@ -246,14 +244,7 @@ async function copyCode() {
 }
 
 async function confirmExportPDF() {
-	if (exportingPDF.value) return;
-	exportingPDF.value = true;
-	try {
-		handleExportPDF();
-		showExportPDFModal.value = false;
-	} finally {
-		exportingPDF.value = false;
-	}
+	await handleExportPDF();
 }
 
 const badgeStyleMap = {
@@ -387,27 +378,53 @@ onMounted(async () => {
 	}
 });
 
-const scoreCardRef = ref(null);
-const exportingPDF = ref(false);
+const wasDetailsExpandedBeforePrint = ref(false);
+const exportingFromButton = ref(false);
+
+// Fallback untuk Ctrl+P / print manual: paksa rincian jawaban terbuka
+function handleBeforePrint() {
+	// Jangan timpa state saat proses export dari tombol — sudah ditangani handleExportPDF
+	if (exportingFromButton.value) return;
+	wasDetailsExpandedBeforePrint.value = showDetails.value;
+	showDetails.value = true;
+}
+
+// Fallback setelah print manual selesai: kembalikan state semula
+function handleAfterPrint() {
+	if (exportingFromButton.value) return;
+	if (!wasDetailsExpandedBeforePrint.value) {
+		showDetails.value = false;
+	}
+}
+
+onMounted(() => {
+	window.addEventListener("beforeprint", handleBeforePrint);
+	window.addEventListener("afterprint", handleAfterPrint);
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("beforeprint", handleBeforePrint);
+	window.removeEventListener("afterprint", handleAfterPrint);
+});
 
 async function handleExportPDF() {
+	exportingFromButton.value = true;
+
+	// Simpan state asli, lalu paksa rincian jawaban terbuka agar ikut tercetak
+	wasDetailsExpandedBeforePrint.value = showDetails.value;
+	showDetails.value = true;
+
+	// Tunggu Vue me-render konten yang di-expand sebelum dialog print dibuka
+	await nextTick();
+
 	window.print();
+
+	// Kembalikan state semula setelah dialog print ditutup (jika tadinya tertutup)
+	if (!wasDetailsExpandedBeforePrint.value) {
+		showDetails.value = false;
+	}
+	exportingFromButton.value = false;
 	showExportPDFModal.value = false;
-	// if (exportingPDF.value) return;
-	// exportingPDF.value = true;
-	// try {
-	// 	await exportResultToPDF({
-	// 		scoreCardElement: scoreCardRef.value.cardRef,
-	// 		sections: sections.value,
-	// 		filename:
-	// 			`hasil-${likertStore.currentLikert?.name}-${respondentName.value}.pdf`.replace(
-	// 				/\s+/g,
-	// 				"_",
-	// 			),
-	// 	});
-	// } finally {
-	// 	exportingPDF.value = false;
-	// }
 }
 </script>
 
@@ -416,15 +433,29 @@ async function handleExportPDF() {
 	break-inside: avoid;
 	page-break-inside: avoid;
 }
+</style>
 
+<style>
+/* Aturan print sengaja TIDAK scoped agar menembus komponen child
+   (LikertScoreSummary, LikertAnswerSections) sehingga border di dalam
+   tabel jawaban juga ikut dihilangkan saat print. */
 @media print {
+	/* Margin 18mm di SEMUA sisi dan berlaku di SETIAP halaman cetak.
+	   PENTING: .print-area TIDAK memakai position: absolute — elemen dibiarkan
+	   mengalir normal di dalam layout, sehingga margin @page diterapkan
+	   sungguh-sungguh oleh browser di setiap halaman (di Chrome, margin @page
+	   tidak berpengaruh pada elemen position: absolute). Ukuran kertas dibuat
+	   eksplisit A4 portrait supaya @page diproses konsisten di semua browser. */
 	@page {
-		size: auto;
-		margin: 0mm;
+		size: A4 portrait;
+		margin: 18mm;
 	}
 
+	html,
 	body {
-		margin: 1cm;
+		margin: 0;
+		padding: 0;
+		background: #fff !important;
 	}
 
 	body * {
@@ -436,11 +467,55 @@ async function handleExportPDF() {
 		-webkit-print-color-adjust: exact !important;
 		print-color-adjust: exact !important;
 	}
+
+	/* Buang padding/margin kontainer luar agar .print-area memenuhi lebar
+	   page area dan jarak dari tepi kertas murni berasal dari @page margin.
+	   Padding kecil 5mm dipertahankan sebagai fallback visual tambahan di
+	   halaman pertama bila @page margin tidak dihormati browser. */
+	.min-h-screen,
+	.max-w-2xl,
+	.space-y-6 {
+		margin: 0 !important;
+		padding-left: 5mm !important;
+		padding-right: 5mm !important;
+		padding-top: 0 !important;
+		padding-bottom: 0 !important;
+		max-width: none !important;
+	}
+
+	/* Tailwind v4 .space-y-6 memberi margin-bottom ke child pertama
+	   (.print-area) — dinonaktifkan agar tidak menambah jarak ekstra. */
+	.space-y-6 > :not(:last-child) {
+		margin-bottom: 0 !important;
+	}
+
+	/* Card .print-area memakai overflow: hidden — saat konten melebihi satu
+	   halaman, ini bisa memotong isi antar halaman cetak. */
 	.print-area {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
+		display: block !important;
+		width: auto !important;
+		margin: 0 !important;
+		overflow: visible !important;
+	}
+
+	/* Hilangkan semua border & shadow agar hasil print bersih tanpa garis */
+	.print-area,
+	.print-area * {
+		border: none !important;
+		box-shadow: none !important;
+	}
+
+	/* Beri jarak antar baris tabel agar tetap mudah dibaca tanpa border */
+	.print-area table tbody tr {
+		padding: 0.5rem 0;
+	}
+
+	.print-area table tbody tr:first-child td {
+		padding-top: 0.75rem;
+	}
+
+	.print-area table tbody tr:last-child td {
+		padding-bottom: 0.75rem;
 	}
 }
 </style>

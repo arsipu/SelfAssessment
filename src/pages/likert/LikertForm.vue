@@ -96,7 +96,7 @@
 							class="flex flex-col sm:flex-row gap-2 sm:gap-5 items-start sm:items-center py-1 sm:py-2"
 						>
 							<label
-								class="flex items-center gap-2 text-sm text-text-primary cursor-pointer"
+								class="flex items-center gap-2 text-sm text-black cursor-pointer"
 							>
 								<input
 									v-model="responden.jenisKelamin"
@@ -109,7 +109,7 @@
 								Laki-laki
 							</label>
 							<label
-								class="flex items-center gap-2 text-sm text-text-primary cursor-pointer"
+								class="flex items-center gap-2 text-sm text-black cursor-pointer"
 							>
 								<input
 									v-model="responden.jenisKelamin"
@@ -131,7 +131,7 @@
 							class="flex flex-col sm:flex-row gap-2 sm:gap-5 items-start sm:items-center py-1 sm:py-2"
 						>
 							<label
-								class="flex items-center gap-2 text-sm text-text-primary cursor-pointer"
+								class="flex items-center gap-2 text-sm text-black cursor-pointer"
 							>
 								<input
 									v-model="responden.pkl"
@@ -144,7 +144,7 @@
 								Ya
 							</label>
 							<label
-								class="flex items-center gap-2 text-sm text-text-primary cursor-pointer"
+								class="flex items-center gap-2 text-sm text-black cursor-pointer"
 							>
 								<input
 									v-model="responden.pkl"

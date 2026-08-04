@@ -35,7 +35,6 @@
 			:class="index < sections.length - 1 ? 'border-b border-border' : ''"
 		>
 			<div class="pt-4 md:pt-6 pb-2 flex items-center gap-2">
-				<span class="w-1.5 h-1.5 rounded-full bg-text-muted shrink-0"></span>
 				<h2 class="text-sm font-medium text-black">
 					{{ section.label }}
 				</h2>
