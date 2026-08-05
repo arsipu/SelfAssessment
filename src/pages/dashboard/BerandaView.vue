@@ -4,7 +4,9 @@
 
 		<!-- ─── Hero ─────────────────────────────────────────── -->
 		<section class="bg-hero relative overflow-hidden">
-			<div class="max-w-5xl mx-16 px-4 md:px-4 pt-10 md:pt-20 pb-12 md:pb-16">
+			<div
+				class="max-w-full mx-16 md:mx-32 px-4 md:px-4 pt-10 md:pt-20 pb-12 md:pb-16"
+			>
 				<div class="flex flex-col md:flex-row items-center gap-10 md:gap-16">
 					<!-- Kiri: Teks -->
 					<div class="flex-1 text-center md:text-left">
@@ -39,6 +41,15 @@
 								/>
 							</a>
 						</div>
+					</div>
+
+					<!-- Kanan: Gambar -->
+					<div class="flex-1 hidden md:block">
+						<img
+							:src="heroIcon"
+							alt="Ilustrasi asesmen diri"
+							class="w-full max-w-md mx-auto drop-shadow-lg"
+						/>
 					</div>
 				</div>
 			</div>
@@ -183,6 +194,7 @@
 
 <script setup>
 import AppTopBar from "@/components/AppTopBar.vue";
+import heroIcon from "@/assets/images/hero_icon4.png";
 import { ref, computed, onMounted } from "vue";
 import { useLikertStore } from "@/stores/likert/likert";
 import { useHollandStore } from "@/stores/holland/holland";

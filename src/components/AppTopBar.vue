@@ -2,12 +2,12 @@
 	<nav
 		class="w-full bg-surface border-b border-border px-4 md:px-6 py-3 relative"
 	>
-		<div class="flex items-center justify-between">
+		<div class="flex items-center gap-4">
 			<span class="text-base font-medium text-text-primary tracking-tight"
 				>persiapankarir.com</span
 			>
 
-			<div class="hidden md:flex items-center gap-1">
+			<div class="hidden md:flex md:flex-row items-start gap-1 md:ml-8">
 				<router-link
 					to="/"
 					class="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
@@ -28,7 +28,7 @@
 							'text-text-primary bg-primary-soft': isInstrumentDropdownOpen,
 						}"
 					>
-						Instrumen
+						Ikuti Tes
 						<font-awesome-icon
 							icon="fa-solid fa-chevron-down"
 							class="w-3.5 h-3.5 transition-transform duration-200"
@@ -89,16 +89,9 @@
 				</router-link>
 			</div>
 
-			<router-link
-				to="/login"
-				class="hidden md:inline-block px-4 py-1.5 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors"
-			>
-				Login
-			</router-link>
-
 			<button
 				@click="mobileMenuOpen = !mobileMenuOpen"
-				class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-text-secondary hover:bg-primary-soft transition-colors"
+				class="md:hidden ml-auto w-9 h-9 flex items-center justify-center rounded-lg text-text-secondary hover:bg-primary-soft transition-colors"
 				:aria-expanded="mobileMenuOpen"
 				aria-label="Buka menu"
 			>
