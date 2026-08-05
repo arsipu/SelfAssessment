@@ -117,6 +117,7 @@
 							:top-code="result.topCode"
 							:top-code-info="topCodeInfo"
 							:score-percent-map="scorePercentMap"
+							:top-codes-info="topCodesInfo"
 						/>
 					</div>
 
@@ -276,7 +277,7 @@ const scorePercentMap = computed(() => {
 });
 
 const topCodeInfo = computed(() => {
-	const code = result.value?.topCode;
+	const code = topCodes.value[0];
 	if (!code) return null;
 	return riasecStore.riasecList.find((r) => r.id === code) || null;
 });
@@ -292,6 +293,18 @@ const formattedBirthDateAge = computed(() =>
 const scoreBreakdown = computed(() => {
 	const scores = result.value?.scores || {};
 	return buildScoreBreakdown(scores, result.value?.topCode);
+});
+
+// 3 kode tertinggi dari scoreBreakdown (sudah urut menurun by percentage)
+const topCodes = computed(() => {
+	return scoreBreakdown.value.slice(0, 3).map((row) => row.code);
+});
+
+// Info lengkap (label, dll) untuk 3 kategori tertinggi
+const topCodesInfo = computed(() => {
+	return topCodes.value
+		.map((code) => riasecStore.riasecList.find((r) => r.id === code) || null)
+		.filter(Boolean);
 });
 
 // answers sekarang array LENGKAP semua soal + isChecked, jadi

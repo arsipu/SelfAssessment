@@ -12,9 +12,20 @@
 		</div>
 		<div>
 			<p class="text-xs text-text-muted mb-1">Kode minat dominan</p>
-			<p class="text-3xl font-semibold tracking-widest text-black mb-2">
-				{{ topCode }}
-			</p>
+			<div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-2">
+				<span
+					v-for="item in displayTopCodes"
+					:key="item.code"
+					class="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-lg text-primary font-semibold tracking-widest"
+				>
+					<span class="text-md md:text-lg leading-none">{{ item.code }}</span>
+					<span
+						class="text-xs md:text-sm font-medium text-black-secondary leading-tight text-center"
+					>
+						{{ item.label }}
+					</span>
+				</span>
+			</div>
 			<p v-if="topCodeInfo" class="text-sm text-black leading-relaxed">
 				{{ topCodeInfo.description }}
 			</p>
@@ -23,11 +34,23 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import RiasecHexChart from "@/components/RiasecHexChart.vue";
 
-defineProps({
+const props = defineProps({
 	topCode: { type: String, required: true },
 	topCodeInfo: { type: Object, default: null },
 	scorePercentMap: { type: Object, required: true },
+	topCodesInfo: { type: Array, default: () => [] },
+});
+
+// 3 kategori tertinggi (kode + label). Fallback: pecah topCode per huruf
+// bila topCodesInfo belum/tidak dikirim (mis. halaman admin).
+const displayTopCodes = computed(() => {
+	const items = props.topCodesInfo.length
+		? props.topCodesInfo
+		: (props.topCode || "").split("").map((code) => ({ code, label: code }));
+
+	return items.slice(0, 3);
 });
 </script>

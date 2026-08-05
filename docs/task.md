@@ -1,100 +1,156 @@
-# Task: Ubah `RiasecAnswerDetails.vue` menjadi format tabel seperti `HollandQuestions.vue`
+# Task: Tampilkan 3 Kategori Tertinggi pada RiasecSummaryHeader
 
-## Latar Belakang
+## Ringkasan
 
-Komponen `RiasecAnswerDetails.vue` saat ini menampilkan rincian jawaban RIASEC dalam bentuk **kartu per kolom** (layout grid dengan border per item jawaban). Tujuannya adalah mengubah tampilan tersebut menjadi **format tabel** seperti yang digunakan di `HollandQuestions.vue`, agar lebih ringkas, rapi, dan konsisten dengan halaman kuesioner.
+Mengubah tampilan `RiasecSummaryHeader` di halaman hasil Holland
+(`src/pages/holland/HollandResult.vue`) agar menampilkan **3 kategori
+tertinggi** beserta labelnya, namun **deskripsi (`description`) tetap
+diambil dari 1 kategori tertinggi saja**.
 
-## Penggunaan Komponen Saat Ini
+## Konteks / Alur Data Saat Ini
 
-Komponen dipakai di **2 tempat**:
+1. Hasil disimpan di `sessionStore` (`src/stores/holland/holland-session.js`):
+   `{ scores, topCode, ... }` — `topCode` string mis. `"S"`.
+2. `computeTopCode(breakdown, topN = 1)` (`src/utils/holland-scoring.js`)
+   sudah mendukung `topN`; dengan `topN = 3` menghasilkan mis. `"SAE"`.
+3. `scoreBreakdown` di `HollandResult.vue` dari
+   `buildScoreBreakdown(scores, topCode)` (`src/utils/holland-result.js`)
+   sudah **urut menurun berdasarkan `percentage`**.
+4. `topCodeInfo` di `HollandResult.vue` saat ini hanya mengambil info
+   dari **1 kode** (`result.topCode`).
+5. `RiasecSummaryHeader.vue` menerima props: `topCode` (String),
+   `topCodeInfo` (Object, hanya `description` dipakai), `scorePercentMap`.
+6. `RiasecNotes` & `RiasecScoreBreakdown` tetap memakai `topCodeInfo`
+   kategori tunggal — tidak ikut berubah.
 
-1. **`src/pages/holland/HollandResult.vue`** (baris 155-159)
-   - Props: `detail-sections`, `answered-ids`, `bare`
-   - Mode: `bare` (tanpa wrapper/title/toggle)
-   - Konteks: collapsible di dalam card hasil, bisa di-print (PDF)
+## Tujuan
 
-2. **`src/pages/admin/holland/AdminHollandSubmissionDetail.vue`** (baris 133-139)
-   - Props: `detail-sections`, `answered-ids`, `bare`, `avoid-break`, `unanswered-class`
-   - Mode: `bare` (selalu expanded)
-   - Konteks: detail submission admin, bisa di-print (PDF)
+- `RiasecSummaryHeader` menampilkan 3 kategori tertinggi (kode + label).
+- Deskripsi tetap dari 1 kategori tertinggi (`topCodeInfo.description`).
+- Komponen lain (`RiasecNotes`, `RiasecScoreBreakdown`, hex chart) tidak berubah.
 
-Kedua pemanggil **hanya menggunakan mode `bare`**. Mode `card` (legacy) tidak dipakai oleh pemanggil mana pun saat ini, tetapi tetap dipertahankan untuk kompatibilitas.
+## Perubahan
 
-## Struktur Data
+### 1. `src/pages/holland/HollandResult.vue`
 
-- `detailSections`: array of sections, masing-masing berisi:
-  - `key`, `code`, `label`, `dot` (warna)
-  - `columns`: array of columns, masing-masing berisi:
-    - `key`, `label`
-    - `questions`: array of questions, masing-masing berisi `id` dan `question`
-- `answeredIds`: `Set` berisi `questionId` yang dijawab (isChecked = true)
+**a. Tambah computed `topCodes` (3 kode tertinggi):**
 
-## Rencana Perubahan
+```js
+const topCodes = computed(() => {
+	return scoreBreakdown.value.slice(0, 3).map((row) => row.code);
+});
+```
 
-### 1. Mode `bare` → Format Tabel (Perubahan Utama)
+**b. Tambah computed `topCodesInfo` (info 3 kategori):**
 
-Ubah blok `v-if="bare"` agar menampilkan tabel per section, mengikuti pola `HollandQuestions.vue`:
+```js
+const topCodesInfo = computed(() => {
+	return topCodes.value
+		.map((code) => riasecStore.riasecList.find((r) => r.id === code) || null)
+		.filter(Boolean);
+});
+```
 
-**Struktur per section:**
+**c. Ubah `topCodeInfo` agar ambil dari `topCodes[0]` (tetap 1 tertinggi):**
 
-- Header section: label + kode (pertahankan gaya saat ini)
-- **Desktop (`md:block`)**: Tabel dengan:
-  - `<thead>` berisi header kolom (label tiap column)
-  - `<tbody>` berisi baris per indeks soal (seperti `Math.max(...section.columns.map(c => c.questions.length))`)
-  - Setiap `<td>` berisi soal pada indeks tersebut (jika ada)
-  - Gaya sel: centang (checkmark SVG) + teks soal
-  - Warna sel: `border-primary bg-primary-soft` jika dijawab, `unansweredClass` jika tidak
-- **Mobile (`md:hidden`)**: Daftar per kolom (seperti saat ini, atau mengikuti pola mobile `HollandQuestions.vue`)
+```js
+const topCodeInfo = computed(() => {
+	const code = topCodes.value[0];
+	if (!code) return null;
+	return riasecStore.riasecList.find((r) => r.id === code) || null;
+});
+```
 
-**Perbedaan dengan `HollandQuestions.vue`:**
+**d. Kirim prop baru ke `<RiasecSummaryHeader>`:**
 
-- Tidak ada checkbox input — diganti **ikon centang SVG** (karena ini tampilan hasil, bukan input)
-- Tidak ada `@change`/`toggleAnswer` — murni read-only
-- Warna sel dijawab: `border-primary bg-primary-soft` (mengikuti gaya saat ini)
-- Warna sel tidak dijawab: `unansweredClass` (prop yang sudah ada)
+```html
+<RiasecSummaryHeader
+	:top-code="result.topCode"
+	:top-code-info="topCodeInfo"
+	:score-percent-map="scorePercentMap"
+	:top-codes-info="topCodesInfo"
+/>
+```
 
-### 2. Mode `card` (Legacy) → Tetap Dipertahankan
+### 2. `src/components/holland/RiasecSummaryHeader.vue`
 
-- Mode `card` tidak diubah (tetap layout grid seperti sekarang)
-- Hanya mode `bare` yang diubah ke tabel
-- Alasan: mode `card` tidak dipakai pemanggil mana pun, tapi dipertahankan agar tidak merusak kompatibilitas jika ada penggunaan lain di masa depan
+**a. Tambah prop `topCodesInfo`:**
 
-### 3. Pertimbangan Print/PDF
+```js
+defineProps({
+	topCode: { type: String, required: true },
+	topCodeInfo: { type: Object, default: null },
+	scorePercentMap: { type: Object, required: true },
+	topCodesInfo: { type: Array, default: () => [] },
+});
+```
 
-- Kedua pemanggil mendukung print/PDF
-- `HollandResult.vue` memiliki aturan print global yang menghilangkan border di dalam `.print-area` (termasuk tabel)
-- `AdminHollandSubmissionDetail.vue` memiliki aturan print sendiri
-- Pastikan tabel tetap terbaca saat print (border dihilangkan, tapi spacing antar baris tetap ada)
-- Pertahankan prop `avoidBreak` untuk mencegah section terpotong antar halaman
+**b. Tambah computed `displayTopCodes` (fallback dari `topCode`):**
 
-### 4. Props yang Dipertahankan
+```js
+import { computed } from "vue";
 
-Semua props tetap dipertahankan (tidak ada yang dihapus):
+const props = defineProps({ ... });
 
-- `detailSections` (Array, required)
-- `answeredIds` (Set, required)
-- `collapsible` (Boolean, default false)
-- `title` (String, default "Rincian jawaban")
-- `noBg` (Boolean, default false)
-- `unansweredClass` (String, default "border-border bg-surface-muted/40")
-- `bare` (Boolean, default false)
-- `avoidBreak` (Boolean, default false)
+const displayTopCodes = computed(() => {
+  const items = props.topCodesInfo.length
+    ? props.topCodesInfo
+    : (props.topCode || "")
+        .split("")
+        .map((code) => ({ code, label: code }));
+  return items.slice(0, 3);
+});
+```
 
-## Langkah Implementasi
+**c. Ubah bagian kanan header — tampilkan 3 kategori + label, deskripsi tetap:**
 
-1. **Buka `src/components/holland/RiasecAnswerDetails.vue`**
-2. **Ubah blok `v-if="bare"`** (baris 3-55) menjadi format tabel:
-   - Tambahkan blok desktop (`hidden md:block`) dengan `<table>` per section
-   - Tambahkan blok mobile (`md:hidden`) dengan daftar per kolom
-   - Gunakan ikon centang SVG (bukan checkbox input)
-   - Terapkan `unansweredClass` untuk sel yang tidak dijawab
-   - Terapkan `avoidBreak` pada section
-3. **Pertahankan blok `v-else`** (mode card legacy) tanpa perubahan
-4. **Verifikasi** di kedua pemanggil (`HollandResult.vue` dan `AdminHollandSubmissionDetail.vue`) bahwa tampilan tetap benar
-5. **Uji print/PDF** untuk memastikan tabel tetap terbaca
+```html
+<div>
+	<p class="text-xs text-text-muted mb-1">Kode minat dominan</p>
+	<div class="flex flex-wrap items-center gap-2 mb-2">
+		<span
+			v-for="item in displayTopCodes"
+			:key="item.code"
+			class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary-soft text-primary font-semibold tracking-widest"
+		>
+			<span class="text-lg">{{ item.code }}</span>
+			<span class="text-xs font-medium text-black-secondary">
+				{{ item.label }}
+			</span>
+		</span>
+	</div>
+	<p v-if="topCodeInfo" class="text-sm text-black leading-relaxed">
+		{{ topCodeInfo.description }}
+	</p>
+</div>
+```
 
-## Catatan Tambahan
+### 3. Komponen Lain yang Memakai `RiasecSummaryHeader`
 
-- Tidak perlu mengubah file pemanggil (`HollandResult.vue`, `AdminHollandSubmissionDetail.vue`) karena props yang dikirim sudah sesuai
-- Tidak perlu mengubah `holland-result.js` (utils) karena struktur `detailSections` sudah sesuai
-- Gaya visual mengikuti `HollandQuestions.vue` (border, padding, ukuran teks) agar konsisten
+- `AdminHollandSubmissionDetail.vue` juga mengimpor komponen ini.
+  Prop baru `topCodesInfo` opsional (`default: () => []`), jadi tetap
+  berfungsi — fallback `topCode.split("")` menampilkan kode saja.
+- Opsional (di luar scope): ubah halaman admin serupa jika ingin label.
+
+### 4. Edge Cases
+
+- `scoreBreakdown` selalu 6 kategori, jadi `topCodes` selalu 3 item.
+- Jika `riasecList` belum lengkap, `topCodesInfo` bisa < 3 — aman karena
+  `displayTopCodes` di-`slice(0, 3)`.
+- Skor seri: urutan stabil mengikuti `RIASEC_CATEGORY_ORDER`.
+- `topCodeInfo` null: deskripsi tidak tampil (`v-if` sudah ada).
+
+## File yang Diubah
+
+| File                                             | Perubahan                                                                                 |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `src/pages/holland/HollandResult.vue`            | Tambah `topCodes`, `topCodesInfo`; sesuaikan `topCodeInfo`; kirim prop `top-codes-info`   |
+| `src/components/holland/RiasecSummaryHeader.vue` | Tambah prop `topCodesInfo`; render 3 kategori + label; deskripsi tetap dari `topCodeInfo` |
+
+## Kriteria Selesai
+
+- [ ] `RiasecSummaryHeader` menampilkan 3 kategori tertinggi (kode + label).
+- [ ] Deskripsi tetap dari 1 kategori tertinggi (`topCodeInfo.description`).
+- [ ] Halaman hasil (`HollandResult.vue`) tidak error & tetap responsif.
+- [ ] Halaman admin (`AdminHollandSubmissionDetail.vue`) tetap berfungsi.
+- [ ] Hasil cetak/print tetap rapi (flex-wrap aman untuk print).
