@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<!-- Header -->
-		<div class="bg-surface p-4 md:p-6 mb-4 md:mb-6">
+		<div class="bg-surface mb-2">
 			<div
 				class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
 			>
@@ -13,22 +13,17 @@
 						Kelola daftar formulir likert. Klik formulir untuk mengelola
 						pertanyaan di dalamnya.
 					</p>
-					<span
-						class="text-xs font-medium text-text-secondary bg-surface-muted px-3 py-1.5 rounded-md border border-border whitespace-nowrap"
-					>
-						{{ likerts.length }} Formulir
-					</span>
 				</div>
+
+				<button
+					@click="showAddModal = true"
+					class="self-end md:self-auto inline-flex items-center justify-center gap-2 bg-primary-soft px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium md:w-auto h-8 md:h-10 cursor-pointer"
+				>
+					<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
+					Tambah
+				</button>
 			</div>
 		</div>
-
-		<button
-			@click="showAddModal = true"
-			class="mb-4 inline-flex items-center justify-center gap-2 bg-primary-soft px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-sm font-medium md:w-auto h-10 cursor-pointer"
-		>
-			<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
-			Tambah
-		</button>
 
 		<!-- Loading -->
 		<div
@@ -47,27 +42,19 @@
 				<table class="app-table w-full text-left border-collapse">
 					<thead>
 						<tr>
-							<th class="px-4 md:px-5 py-3 text-xs font-bold tracking-wider">
+							<th class="px-4 md:px-5 py-3 text-xs md:text-sm font-semibold">
 								No
 							</th>
-							<th
-								class="px-4 md:px-5 py-3 text-xs font-bold uppercase tracking-wider"
-							>
+							<th class="px-4 md:px-5 py-3 text-xs md:text-sm font-semibold">
 								Nama Formulir
 							</th>
-							<th
-								class="px-4 md:px-5 py-3 text-xs font-bold uppercase tracking-wider"
-							>
+							<th class="px-4 md:px-5 py-3 text-xs md:text-sm font-semibold">
 								Deskripsi
 							</th>
-							<th
-								class="px-4 md:px-5 py-3 text-xs font-bold uppercase tracking-wider"
-							>
+							<th class="px-4 md:px-5 py-3 text-xs md:text-sm font-semibold">
 								Status
 							</th>
-							<th
-								class="px-4 md:px-5 py-3 text-xs font-bold uppercase tracking-wider"
-							>
+							<th class="px-4 md:px-5 py-3 text-xs md:text-sm font-semibold">
 								Aksi
 							</th>
 						</tr>
@@ -78,21 +65,21 @@
 							:key="likert.id"
 							class="cursor-pointer"
 						>
-							<td class="px-4 md:px-5 py-3 text-sm text-text-secondary">
+							<td class="px-4 md:px-5 py-3 text-xs text-text-secondary">
 								{{ index + 1 }}
 							</td>
-							<td class="px-4 md:px-5 py-3 text-sm">
+							<td class="px-4 md:px-5 py-3 text-xs">
 								<button
 									@click="goToQuestions(likert)"
-									class="text-sm font-medium hover:text-primary hover:underline transition-colors text-left cursor-pointer"
+									class="text-xs font-medium hover:text-primary hover:underline transition-colors text-left cursor-pointer"
 								>
 									{{ likert.name }}
 								</button>
 							</td>
-							<td class="px-4 md:px-5 py-3 text-sm max-w-xs truncate">
+							<td class="px-4 md:px-5 py-3 text-xs max-w-xs truncate">
 								{{ likert.description }}
 							</td>
-							<td class="px-4 md:px-5 py-3 text-sm">
+							<td class="px-4 md:px-5 py-3 text-xs">
 								<div class="relative inline-block">
 									<button
 										:ref="(el) => setStatusButtonRef(likert.id, el)"
