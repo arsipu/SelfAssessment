@@ -1,102 +1,64 @@
-# Rencana: Samakan Desain HollandQuestions.vue dengan LikertQuestions.vue
+# Task: Samakan Tampilan HollandResult.vue dengan LikertResult.vue
 
 ## Tujuan
 
-Mengubah tampilan/desain halaman `src/pages/holland/HollandQuestions.vue` agar **mirip** dengan `src/pages/likert/LikertQuestions.vue`.
+Mengubah **tampilan** halaman `src/pages/holland/HollandResult.vue` agar konsisten dengan
+halaman `src/pages/likert/LikertResult.vue` (gaya khas Likert: teks hitam `#262625`,
+card putih dengan border `#262625`, tombol `btn-primary`, box kode polos, dan aturan print
+A4 18mm).
 
-> Hanya perubahan desain/tampilan (template + class styling). **Tidak ada perubahan** pada logika `script setup`, alur sesi, penyimpanan jawaban, maupun struktur data.
-
----
-
-## Analisis Perbedaan Desain Saat Ini
-
-| Aspek             | LikertQuestions.vue (acuan)                                  | HollandQuestions.vue (sekarang)                                        |
-| ----------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- | --- |
-| Tombol kembali    | Ada ("Kembali" + icon panah)                                 | Tidak ada                                                              |
-| Container utama   | Card `bg-surface card rounded-2xl overflow-hidden`           | Tanpa card, konten langsung di halaman                                 |
-| Judul             | `card-title p-6 text-center` → nama + deskripsi instrumen    | Header teks biasa ("Holland RIASEC")                                   |     |
-| Bagian kategori   | Tanpa kotak border, hanya label section                      | Kotak border `border rounded-xl p-4 bg-surface` + dot warna            |
-| Item pertanyaan   | Nomor + teks pertanyaan, opsi polos di bawahnya              | Kotak label checkbox `border rounded-lg p-2.5`, highlight saat dipilih |
-| Gaya opsi/jawaban | Radio polos `flex items-center gap-2` + input kecil          | Checkbox dalam kotak ber-border                                        |
-| Area submit       | Teks sisa soal + tombol `btn-primary` lebar penuh (`w-full`) | Teks jumlah dipilih + tombol `sm:w-auto`                               |
-| Modal konfirmasi  | Ada                                                          | Ada (sudah hampir sama)                                                |
+> ⚠️ **Batasan:** JANGAN mengubah logic / business logic. `<script setup>` (store,
+> fetch data, computed, router, watcher, handler print) dipertahankan **100%**.
+> Perubahan hanya pada `<template>` (class/struktur styling) dan `<style>`.
 
 ---
 
-## Rencana Perubahan (Template HollandQuestions.vue)
+## Lingkup Perubahan
 
-### 1. Tombol Kembali (baru)
+### A. Template
 
-- Tambahkan tombol "Kembali" di atas card, persis seperti Likert:
-  - `<button @click="$router.push('/')">` dengan icon `fa-solid fa-arrow-left` + teks "Kembali"
-  - Class: `flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer`
+| #   | Bagian                         | Dari (Holland sekarang)                                         | Menjadi (meniru Likert)                                                                                           |
+| --- | ------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 1   | Warna teks umum                | `text-text-primary` / `text-text-secondary` / `text-text-muted` | `text-black` (`#262625`) / `text-black-secondary` (`#636362`)                                                     |
+| 2   | Card rapor                     | `bg-surface border border-border`                               | `card border border-border` (class global `.card`: bg putih + border `#262625`) + tambah `print:p-8`              |
+| 3   | Kop                            | Subtitle "Laporan hasil tes" (uppercase)                        | "Hai, Berikut Hasil dari :" (tanpa uppercase), judul tetap "Minat karier RIASEC"                                  |
+| 4   | Box kode tracking              | `bg-primary-soft border border-primary/20`                      | Polos (tanpa bg/border), tombol Salin jadi plain `text-black`                                                     |
+| 5   | Label & value data responden   | Token tema                                                      | `text-black-secondary` (label) & `text-black` (value)                                                             |
+| 6   | Ringkasan (hex chart)          | `p-5 md:p-6`                                                    | `p-5 md:p-8` (sama seperti section ringkasan Likert)                                                              |
+| 7   | Ikon chevron "Rincian jawaban" | SVG manual + `rotate-180`                                       | `<font-awesome-icon>` `fa-chevron-down` + `fa-rotate-180`, tombol diberi `print:hidden`                           |
+| 8   | Tombol aksi bawah              | `border-border` + `bg-primary`                                  | `border-black-secondary` + `btn-primary`                                                                          |
+| 9   | Modal PDF                      | `p-4 md:p-6` + `flex-col-reverse`                               | `p-6` + `max-h-[90vh] overflow-y-auto` + `flex gap-3`, teks modal "Rekap jawaban akan diunduh dalam format .pdf." |
 
-### 2. Card Container (ubah)
+### B. Style
 
-- Bungkus seluruh konten kuis dalam:
-  - `<div class="bg-surface card rounded-2xl overflow-hidden">`
+1. **Hapus** seluruh aturan `<style scoped>` print lama (pendekatan `position: absolute`).
+   Pertahankan hanya `.avoid-break`.
+2. **Tambah** `<style>` global (tidak scoped) berisi aturan print ala Likert:
+   - `@page { size: A4 portrait; margin: 18mm }`
+   - `body * { visibility: hidden }`, `.print-area, .print-area * { visibility: visible }`
+   - Hapus margin/padding kontainer (`.min-h-screen`, `.max-w-3xl`, `.space-y-6`)
+   - `.print-area { overflow: visible }` agar tidak terpotong antar halaman
+   - Hilangkan semua border & shadow saat print (menembus komponen child)
 
-### 3. Header Card — `card-title` (ubah)
+   Catatan: selector kontainer disesuaikan `max-w-2xl` → `max-w-3xl` karena Holland
+   memakai kontainer lebih lebar.
 
-- Ganti blok header teks biasa dengan header ala Likert:
-  - Judul: `{{ hollandStore.currentHolland?.name }}` — class `text-xl sm:text-2xl font-semi-bold`
-  - Deskripsi: `{{ hollandStore.currentHolland?.description }}` — class `text-xs sm:text-sm mt-1`
-  - Wrapper: `card-title p-6 text-center`
-- `hollandStore.currentHolland` sudah tersedia & punya field `name` dan `description` (terverifikasi di `src/stores/holland/holland.js`).
+### C. Yang Tidak Diubah
 
-### 4. Padding Konten (ubah)
-
-- Konten di dalam card memakai `p-3 md:p-6` (sama seperti Likert).
-
-### 6. Bagian Kategori / Section (ubah styling)
-
-- **Hapus** kotak border luar (`border border-border rounded-xl p-4 md:p-5 bg-surface`).
-- Header section disamakan dengan Likert:
-  - `<div class="flex items-center gap-3 mb-3">`
-  - Label: `text-sm md:text-md font-medium text-black` → `{{ section.label }} <span class="text-xs text-text-muted">({{ section.code }})</span>`
-  - **Hapus dot warna** (penanda lingkaran `w-2.5 h-2.5`) agar konsisten dengan Likert. (Variabel `dotColors` di script boleh dibiarkan, tinggal tak dipakai, atau dirapikan saat implementasi.)
-- **Pertahankan** layout kolom dinamis (grid `repeat(columns.length, ...)`) karena ini kebutuhan fungsional Holland (kolom per kategori dari Firestore).
-
-### 7. Item Pertanyaan (ubah styling — bagian terbesar)
-
-- **Hapus** kotak label checkbox ber-border (`bg-surface border rounded-lg p-2.5 hover:border-primary`).
-- Ganti dengan gaya pertanyaan ala Likert:
-  - Wrapper per pertanyaan: `rounded-xl p-1 md:p-4` + header `flex items-start gap-3 mb-3`
-  - Nomor: `text-xs md:text-sm font-medium text-black w-2 md:w-6 shrink-0` (index dalam kolom: `colIndex`/indeks pertanyaan + 1)
-  - Teks pertanyaan: `text-xs md:text-sm text-black`
-- Opsi/jawaban di bawah pertanyaan (dalam baris/kolom sesuai layout kolom):
-  - Label checkbox: `flex items-center gap-2 text-xs md:text-sm text-black cursor-pointer`
-  - Input checkbox: `w-3 md:w-4 h-3 md:h-4 accent-primary` (tetap `type="checkbox"`, fungsi `isChecked`/`toggleAnswer` dipertahankan)
-  - Indikator terpilih dibuat minimal agar tetap terlihat: misalnya warna teks `text-primary` atau `font-medium` saat dicentang (bukan kotak border).
-
-### 8. Label Kolom (pertahankan, rapikan)
-
-- Label nama kolom (`col.label`) tetap tampil sebagai sub-header per kolom:
-  - `text-xs font-semibold text-text-secondary mb-2` (dipertahankan).
-
-### 9. Area Submit (ubah, samakan dengan Likert)
-
-- Ganti menjadi:
-  - Wrapper: `mt-8 flex flex-col items-left justify-between gap-3` (tanpa `sm:flex-row`)
-  - Tombol: `w-full px-6 py-2.5 h-10 btn-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer` (lebar penuh `w-full`)
-
-### 10. Modal Konfirmasi (pertahankan)
-
-- Struktur modal sudah mirip dengan Likert; cukup dipertahankan apa adanya (kecil kemungkinan ada penyesuaian minor, mis. konsistensi wording).
+- `<script setup>` — semua logic dipertahankan apa adanya
+- Komponen child Holland (RiasecSummaryHeader, RiasecScoreBreakdown, RiasecNotes,
+  RiasecAnswerDetails)
+- Data/isi (nama, skor, RIASEC, catatan) tidak berubah
 
 ---
 
-## Yang TIDAK Diubah
+## File yang Diubah
 
-- Seluruh `script setup` (state, computed, watch, fungsi `toggleAnswer`, `buildAnswers`, `handleSubmit`, dll.)
-- Alur sesi & restore jawaban (`checkedMap` dari `session.answers`)
-- Layout kolom dinamis per kategori (grid) — kebutuhan fungsional Holland
-- Tipe jawaban tetap **checkbox multi-pilih** (bukan radio)
-- `progressPct` / `answeredCount` / `sections` computed — hanya dipakai ulang di template
+- `src/pages/holland/HollandResult.vue`
+- `docs/task.md` (file rencana ini)
 
-## Catatan Implementasi
+## Verifikasi
 
-- `progressPct` dan `answeredCount` sudah tersedia di script, tinggal dipakai di template.
-- `hollandStore.currentHolland` tersedia dan memiliki `name` & `description`.
-- Font-awesome sudah dipakai di Likert, jadi aman digunakan untuk icon panah.
-- Setelah edit, verifikasi: halaman tetap berfungsi (restore jawaban, centang/uncentang, submit, modal) — hanya tampilan yang berubah.
+- Buka hasil Holland (submit tes atau `?code=...`) → pastikan tampilan mengikuti gaya Likert
+- Uji fitur "Unduh PDF" / Ctrl+P → hasil print A4, tanpa border, konten tidak terpotong
+- Pastikan tombol Salin, expand rincian jawaban, dan navigasi tetap berfungsi
