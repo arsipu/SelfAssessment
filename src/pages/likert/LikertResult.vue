@@ -1,6 +1,6 @@
 <template>
 	<div class="min-h-screen bg-bg">
-		<div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+		<div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
 			<div
 				v-if="!result || loading"
 				class="text-center text-sm text-black-secondary py-20"

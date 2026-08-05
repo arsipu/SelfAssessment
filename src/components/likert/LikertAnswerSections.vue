@@ -13,7 +13,7 @@
 					:key="item.questionId"
 					class="flex items-start justify-between gap-3 py-2.5 px-3 rounded-lg bg-surface-muted"
 				>
-					<p class="text-sm text-black leading-relaxed flex-1">
+					<p class="text-xs md:text-sm text-black leading-relaxed flex-1">
 						<span class="text-black-secondary mr-1">{{ i + 1 }}.</span
 						>{{ item.questionText }}
 					</p>
@@ -35,44 +35,46 @@
 			:class="index < sections.length - 1 ? 'border-b border-border' : ''"
 		>
 			<div class="pt-4 md:pt-6 pb-2 flex items-center gap-2">
-				<h2 class="text-sm font-medium text-black">
+				<h2 class="text-xs md:text-sm font-medium text-black">
 					{{ section.label }}
 				</h2>
 			</div>
 			<div class="overflow-x-auto pb-4 md:pb-6">
-				<table class="w-full text-left border-collapse table-fixed text-sm">
+				<table
+					class="w-full text-left border-collapse table-fixed text-xs md:text-sm"
+				>
 					<thead>
-						<tr class="border-b border-border">
+						<tr>
 							<th
-								class="w-[8%] px-3 py-2 text-[11px] font-normal text-black-secondary"
+								class="w-[10%] md:w-[8%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
 							>
 								No
 							</th>
 							<th
-								class="w-[50%] px-3 py-2 text-[11px] font-normal text-black-secondary"
+								class="w-[60%] md:w-[50%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
 							>
 								Pertanyaan
 							</th>
 							<th
-								class="w-[30%] px-3 py-2 text-[11px] font-normal text-black-secondary"
+								class="w-[30%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
 							>
 								Jawaban
 							</th>
 						</tr>
 					</thead>
 
-					<tbody class="divide-y divide-border bg-surface">
+					<tbody class="bg-surface">
 						<tr
 							v-for="(item, itemIndex) in section.items"
 							:key="item.questionId"
 						>
-							<td class="px-3 py-2 text-black-secondary">
+							<td class="px-3 py-2 text-xs md:text-sm text-black-secondary">
 								{{ itemIndex + 1 }}
 							</td>
-							<td class="px-3 py-2 text-black">
+							<td class="px-3 py-2 text-xs md:text-sm text-black">
 								{{ item.questionText }}
 							</td>
-							<td class="px-3 py-2 text-black-secondary">
+							<td class="px-3 py-2 text-xs md:text-sm text-black-secondary">
 								{{ item.answerLabel }}
 							</td>
 						</tr>

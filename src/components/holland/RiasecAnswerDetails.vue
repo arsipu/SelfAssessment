@@ -4,7 +4,6 @@
 		<div
 			v-for="section in detailSections"
 			:key="section.key"
-			class="border border-border rounded-xl p-4"
 			:class="{ 'avoid-break': avoidBreak }"
 		>
 			<div class="flex items-center gap-2 mb-4">
@@ -14,64 +13,89 @@
 				<span class="text-sm text-black">({{ section.code }})</span>
 			</div>
 
+			<!-- Tabel pernyataan per kolom (desktop) -->
 			<div
-				class="flex flex-col lg:grid gap-6"
-				:class="
-					section.columns.length === 2
-						? 'lg:grid-cols-2'
-						: section.columns.length === 3
-							? 'lg:grid-cols-3'
-							: section.columns.length >= 4
-								? 'lg:grid-cols-4'
-								: ''
-				"
+				class="hidden md:block overflow-x-auto rounded-xl border border-border"
 			>
-				<div
-					v-for="col in section.columns"
-					:key="col.key"
-					class="md:border-l md:border-border md:pl-6 md:first:border-l-0 md:first:pl-0"
-				>
-					<p class="text-xs font-semibold text-black mb-2">
+				<table class="w-full text-left border-collapse table-fixed">
+					<thead class="border-b border-border">
+						<tr>
+							<th
+								v-for="col in section.columns"
+								:key="col.key"
+								class="px-3 md:px-4 py-2.5 text-xs md:text-sm font-medium tracking-wider"
+							>
+								{{ col.label }}
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="i in Math.max(
+								...section.columns.map((c) => c.questions.length),
+							)"
+							:key="i"
+							class="divide-x divide-border"
+						>
+							<td
+								v-for="col in section.columns"
+								:key="col.key"
+								class="px-3 md:px-4 py-1 align-top"
+							>
+								<label
+									v-if="col.questions[i - 1]"
+									class="flex items-start gap-2.5 text-xs md:text-sm"
+								>
+									<input
+										type="checkbox"
+										class="mt-0.5 w-3 md:w-4 h-3 md:h-4 shrink-0"
+										:checked="answeredIds.has(col.questions[i - 1].id)"
+										disabled
+									/>
+									<span
+										class="leading-relaxed"
+										:class="
+											answeredIds.has(col.questions[i - 1].id)
+												? 'text-black-secondary'
+												: 'text-black'
+										"
+										>{{ col.questions[i - 1].question }}</span
+									>
+								</label>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Daftar pernyataan per kolom (mobile) -->
+			<div
+				class="md:hidden rounded-xl border border-border divide-y divide-border"
+			>
+				<div v-for="col in section.columns" :key="col.key" class="p-4">
+					<h3 class="text-xs font-semibold uppercase tracking-wider mb-3">
 						{{ col.label }}
-					</p>
-					<div class="space-y-2">
-						<div
+					</h3>
+					<div class="space-y-3">
+						<label
 							v-for="q in col.questions"
 							:key="q.id"
-							class="flex items-start gap-2.5 rounded-lg p-2.5 border transition-colors"
-							:class="
-								answeredIds.has(q.id)
-									? 'border-primary bg-primary-soft'
-									: unansweredClass
-							"
+							class="flex items-start gap-2.5 text-xs"
 						>
+							<input
+								type="checkbox"
+								class="mt-0.5 w-4 h-4 shrink-0"
+								:checked="answeredIds.has(q.id)"
+								disabled
+							/>
 							<span
-								class="mt-0.5 w-4 h-4 shrink-0 rounded flex items-center justify-center border"
+								class="leading-relaxed"
 								:class="
-									answeredIds.has(q.id)
-										? 'bg-primary border-primary'
-										: 'border-border'
+									answeredIds.has(q.id) ? 'text-black-secondary' : 'text-black'
 								"
+								>{{ q.question }}</span
 							>
-								<svg
-									v-if="answeredIds.has(q.id)"
-									class="w-3 h-3 text-text-on-primary"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-									stroke-width="3"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
-							</span>
-							<span class="text-xs leading-relaxed text-black">
-								{{ q.question }}
-							</span>
-						</div>
+						</label>
 					</div>
 				</div>
 			</div>
