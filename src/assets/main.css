@@ -21,6 +21,7 @@
 	--color-primary: #e86a09;
 	--color-primary-hover: #6b4226;
 	--color-primary-soft: #f7a565;
+	--color-primary-active: #c95b06;
 
 	/* ── Categorical / data-viz (dot indicator, chart, legend) ── */
 	--color-viz-1: #e23a3a;
@@ -173,10 +174,10 @@ tr.bg-table-value {
 @layer components {
 	.app-table {
 		/* nilai default, bisa dioverride per instance */
-		--table-header-bg: var(--color-table-header);
-		--table-header-text: var(--color-table-header-text);
-		--table-value-bg: var(--color-table-value);
-		--table-value-text: var(--color-table-value-text);
+		--table-header-bg: var(--color-primary-soft);
+		--table-header-text: #262625;
+		--table-value-bg: var(--color-surface);
+		--table-value-text: #262625;
 	}
 
 	.app-table thead {
