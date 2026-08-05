@@ -2,27 +2,26 @@
 	<div>
 		<!-- Header -->
 		<div class="bg-surface mb-2">
-			<div
-				class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-			>
-				<div>
-					<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
-						Likert Form
-					</h1>
-					<p class="text-sm text-text-secondary max-w-3xl mb-3">
-						Kelola daftar formulir likert. Klik formulir untuk mengelola
-						pertanyaan di dalamnya.
-					</p>
-				</div>
-
-				<button
-					@click="showAddModal = true"
-					class="self-end md:self-auto inline-flex items-center justify-center gap-2 bg-primary-soft px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium md:w-auto h-8 md:h-10 cursor-pointer"
-				>
-					<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
-					Tambah
-				</button>
+			<div>
+				<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
+					Likert Form
+				</h1>
+				<p class="text-sm text-text-secondary max-w-3xl mb-3">
+					Kelola daftar formulir likert. Klik formulir untuk mengelola
+					pertanyaan di dalamnya.
+				</p>
 			</div>
+		</div>
+
+		<!-- Aksi -->
+		<div class="flex justify-end mb-3">
+			<button
+				@click="showAddModal = true"
+				class="inline-flex items-center justify-center gap-2 bg-primary-soft hover:bg-primary-soft/80 px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium h-8 md:h-10 cursor-pointer transition-colors active:scale-[0.98]"
+			>
+				<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
+				Tambah
+			</button>
 		</div>
 
 		<!-- Loading -->
@@ -63,23 +62,27 @@
 						<tr
 							v-for="(likert, index) in likerts"
 							:key="likert.id"
-							class="cursor-pointer"
+							class="cursor-pointer hover:bg-surface-muted/50 transition-colors"
 						>
-							<td class="px-4 md:px-5 py-3 text-xs text-text-secondary">
+							<td
+								class="px-4 md:px-5 py-3 text-xs md:text-sm text-text-secondary"
+							>
 								{{ index + 1 }}
 							</td>
-							<td class="px-4 md:px-5 py-3 text-xs">
+							<td class="px-4 md:px-5 py-3 text-xs md:text-sm">
 								<button
 									@click="goToQuestions(likert)"
-									class="text-xs font-medium hover:text-primary hover:underline transition-colors text-left cursor-pointer"
+									class="text-xs md:text-sm font-medium hover:text-primary hover:underline transition-colors text-left cursor-pointer"
 								>
 									{{ likert.name }}
 								</button>
 							</td>
-							<td class="px-4 md:px-5 py-3 text-xs max-w-xs truncate">
+							<td
+								class="px-4 md:px-5 py-3 text-xs md:text-sm max-w-xs truncate"
+							>
 								{{ likert.description }}
 							</td>
-							<td class="px-4 md:px-5 py-3 text-xs">
+							<td class="px-4 md:px-5 py-3 text-xs md:text-sm">
 								<div class="relative inline-block">
 									<button
 										:ref="(el) => setStatusButtonRef(likert.id, el)"
