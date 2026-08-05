@@ -17,9 +17,9 @@
 					<h1 class="text-xl sm:text-2xl font-semi-bold">
 						{{ hollandStore.currentHolland?.name }}
 					</h1>
-					<p class="text-xs sm:text-sm mt-1">
+					<!-- <p class="text-xs sm:text-sm mt-1">
 						{{ hollandStore.currentHolland?.description }}
-					</p>
+					</p> -->
 				</div>
 
 				<div class="p-3 md:p-6">
@@ -34,15 +34,17 @@
 							</div>
 						</div>
 
-						<!-- Tabel pernyataan per kolom -->
-						<div class="overflow-x-auto rounded-xl border border-border">
+						<!-- Tabel pernyataan per kolom (desktop) -->
+						<div
+							class="hidden md:block overflow-x-auto rounded-xl border border-border"
+						>
 							<table class="w-full text-left border-collapse table-fixed">
 								<thead class="border-b border-border">
 									<tr>
 										<th
 											v-for="col in section.columns"
 											:key="col.key"
-											class="px-3 md:px-4 py-2.5 text-xs font-semibold uppercase tracking-wider"
+											class="px-3 md:px-4 py-2.5 text-xs md:text-sm font-medium tracking-wider"
 										>
 											{{ col.label }}
 										</th>
@@ -59,11 +61,11 @@
 										<td
 											v-for="col in section.columns"
 											:key="col.key"
-											class="px-3 md:px-4 py-1 align-top text-xs md:text-sm"
+											class="px-3 md:px-4 py-2.5 align-top"
 										>
 											<label
 												v-if="col.questions[i - 1]"
-												class="flex items-start gap-2 cursor-pointer"
+												class="flex items-start text-xs md:text-sm gap-2 cursor-pointer"
 											>
 												<input
 													type="checkbox"
@@ -75,7 +77,7 @@
 													class="leading-relaxed"
 													:class="
 														isChecked(col.questions[i - 1].id)
-															? 'font-medium text-primary'
+															? 'text-black-secondary'
 															: 'text-black'
 													"
 													>{{ col.questions[i - 1].question }}</span
@@ -86,17 +88,42 @@
 								</tbody>
 							</table>
 						</div>
+
+						<!-- Daftar pernyataan per kolom (mobile) -->
+						<div
+							class="md:hidden rounded-xl border border-border divide-y divide-border"
+						>
+							<div v-for="col in section.columns" :key="col.key" class="p-4">
+								<h3 class="text-xs font-semibold uppercase tracking-wider mb-3">
+									{{ col.label }}
+								</h3>
+								<div class="space-y-3">
+									<label
+										v-for="q in col.questions"
+										:key="q.id"
+										class="flex items-start gap-2 cursor-pointer"
+									>
+										<input
+											type="checkbox"
+											class="mt-0.5 w-4 h-4 shrink-0"
+											:checked="isChecked(q.id)"
+											@change="toggleAnswer(q)"
+										/>
+										<span
+											class="leading-relaxed text-xs"
+											:class="
+												isChecked(q.id) ? 'text-black-secondary' : 'text-black'
+											"
+											>{{ q.question }}</span
+										>
+									</label>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<!-- Submit -->
 					<div class="mt-8 flex flex-col items-left justify-between gap-3">
-						<p class="text-xs text-black-secondary text-left">
-							{{
-								answeredCount === 0
-									? "Belum ada pernyataan yang dipilih"
-									: "Semua pernyataan sudah dipilih ✓"
-							}}
-						</p>
 						<button
 							@click="showConfirmModal = true"
 							:disabled="answeredCount === 0"
