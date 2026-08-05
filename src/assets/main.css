@@ -103,7 +103,7 @@ body {
 .btn-primary {
 	background-color: var(--color-primary);
 	color: white;
-	border: 1.5px solid #262625;
+	border: 1.5px solid #5f5f5f;
 	border-radius: 20px;
 }
 
@@ -174,8 +174,8 @@ tr.bg-table-value {
 @layer components {
 	.app-table {
 		/* nilai default, bisa dioverride per instance */
-		--table-header-bg: var(--color-primary-soft);
-		--table-header-text: #262625;
+		--table-header-bg: var(--color-primary);
+		--table-header-text: #f8f8f5;
 		--table-value-bg: var(--color-surface);
 		--table-value-text: #262625;
 	}

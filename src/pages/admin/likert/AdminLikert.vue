@@ -17,7 +17,7 @@
 		<div class="flex justify-end mb-3">
 			<button
 				@click="showAddModal = true"
-				class="inline-flex items-center justify-center gap-2 bg-primary-soft hover:bg-primary-soft/80 px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium h-8 md:h-10 cursor-pointer transition-colors active:scale-[0.98]"
+				class="inline-flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/80 px-2 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium h-8 md:h-10 cursor-pointer transition-colors active:scale-[0.98]"
 			>
 				<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
 				Tambah
@@ -35,7 +35,7 @@
 		<!-- Tabel Data Formulir -->
 		<div
 			v-else
-			class="bg-surface border border-primary-soft rounded-xl overflow-hidden"
+			class="bg-surface border border-black/30 rounded-md overflow-hidden"
 		>
 			<div class="overflow-x-auto">
 				<table class="app-table w-full text-left border-collapse">
@@ -58,7 +58,7 @@
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-border">
+					<tbody class="divide-y divide-black/30">
 						<tr
 							v-for="(likert, index) in likerts"
 							:key="likert.id"
@@ -185,9 +185,7 @@
 			<div
 				class="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-auto flex flex-col max-h-[90vh]"
 			>
-				<div
-					class="px-6 py-4 border-b border-border flex justify-between items-center shrink-0"
-				>
+				<div class="px-6 py-4 flex justify-between items-center shrink-0">
 					<div>
 						<h3 class="text-base font-semibold text-text-primary">
 							{{ isEditing ? "Edit Formulir" : "Tambah Formulir Baru" }}
@@ -235,19 +233,17 @@
 					</div>
 				</div>
 
-				<div
-					class="px-6 py-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0"
-				>
+				<div class="px-6 py-4 flex justify-end gap-3 shrink-0">
 					<button
 						@click="closeModal"
-						class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+						class="px-4 py-2 text-sm font-medium text-text-primary bg-surface border border-black/30 rounded-lg hover:bg-surface-muted transition-colors cursor-pointer active:scale-[0.98]"
 					>
 						Batal
 					</button>
 					<button
 						@click="saveForm"
 						:disabled="!isFormValid || saving"
-						class="px-4 py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
+						class="px-4 py-2 text-sm font-medium btn-primary hover:bg-primary-soft/80 rounded-lg transition-colors active:scale-[0.98] disabled:bg-text-muted disabled:cursor-not-allowed cursor-pointer"
 					>
 						{{ saving ? "Menyimpan..." : "Simpan" }}
 					</button>
