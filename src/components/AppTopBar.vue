@@ -118,38 +118,57 @@
 					<router-link
 						to="/"
 						@click="mobileMenuOpen = false"
-						class="block px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-primary-soft rounded-lg transition-colors"
+						class="block w-full px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
 						active-class="text-text-primary bg-primary-soft"
 					>
 						Beranda
 					</router-link>
 
 					<div v-if="allInstruments.length > 0" class="pt-1">
-						<p
-							class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted"
+						<button
+							@click="isInstrumentsExpanded = !isInstrumentsExpanded"
+							class="w-full flex items-center justify-between px-3 pt-2 pb-1.5 text-sm racking-wide text-text-secondary hover:text-text-primary hover:bg-primary-soft transition-colors cursor-pointer"
+							:aria-expanded="isInstrumentsExpanded"
 						>
-							Instrumen
-						</p>
-						<router-link
-							v-for="item in allInstruments"
-							:key="item.key"
-							:to="item.to"
-							@click="mobileMenuOpen = false"
-							class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary-soft transition-colors"
-						>
-							<span class="text-sm font-medium text-text-primary">{{
-								item.name
-							}}</span>
-						</router-link>
+							Ikuti Tes
+							<font-awesome-icon
+								icon="fa-solid fa-chevron-down"
+								class="w-3 h-3 transition-transform duration-200"
+								:class="{ 'fa-rotate-180': isInstrumentsExpanded }"
+							/>
+						</button>
 
-						<router-link
-							to="/cek-hasil"
-							class="w-full px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
-							active-class="text-text-primary bg-primary-soft"
+						<transition
+							enter-active-class="transition duration-150 ease-out"
+							enter-from-class="opacity-0 -translate-y-1"
+							enter-to-class="opacity-100 translate-y-0"
+							leave-active-class="transition duration-100 ease-in"
+							leave-from-class="opacity-100 translate-y-0"
+							leave-to-class="opacity-0 -translate-y-1"
 						>
-							Cek Hasil
-						</router-link>
+							<div v-show="isInstrumentsExpanded" class="space-y-1">
+								<router-link
+									v-for="item in allInstruments"
+									:key="item.key"
+									:to="item.to"
+									@click="mobileMenuOpen = false"
+									class="block w-full px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
+									active-class="text-text-primary bg-primary-soft"
+								>
+									{{ item.name }}
+								</router-link>
+							</div>
+						</transition>
 					</div>
+
+					<router-link
+						to="/cek-hasil"
+						@click="mobileMenuOpen = false"
+						class="block w-full px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
+						active-class="text-text-primary bg-primary-soft"
+					>
+						Cek Hasil
+					</router-link>
 				</div>
 			</div>
 		</transition>
@@ -170,6 +189,7 @@ const route = useRoute();
 const isInstrumentDropdownOpen = ref(false);
 const instrumentDropdownRef = ref(null);
 const mobileMenuOpen = ref(false);
+const isInstrumentsExpanded = ref(false);
 
 const likertStore = useLikertStore();
 const { likerts } = storeToRefs(likertStore);
