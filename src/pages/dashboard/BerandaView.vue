@@ -5,7 +5,7 @@
 		<!-- ─── Hero ─────────────────────────────────────────── -->
 		<section class="bg-hero relative overflow-hidden">
 			<div
-				class="max-w-full mx-16 md:mx-32 px-4 md:px-4 pt-10 md:pt-20 pb-12 md:pb-16"
+				class="max-w-full mx-4 md:mx-16 md:mx-32 px-4 md:px-4 pt-10 md:pt-20 pb-12 md:pb-16"
 			>
 				<div class="flex flex-col md:flex-row items-center gap-10 md:gap-16">
 					<!-- Kiri: Teks -->
@@ -15,7 +15,9 @@
 						>
 							Platform Asesmen Diri
 						</span> -->
-						<h1 class="header-title text-5xl text-text-primary mb-5">
+						<h1
+							class="header-title text-2xl md:text-5xl text-text-primary mb-5"
+						>
 							Temukan arah minat<br class="hidden sm:block" />
 							& kesiapan kerjamu
 						</h1>
@@ -58,7 +60,7 @@
 		<!-- ─── Instrumen Tersedia (Tetap pakai card karena interaktif) ─── -->
 		<section
 			id="instrumen"
-			class="max-w-full mx-16 px-4 md:px-6 py-12 md:py-16 scroll-mt-16 border-t border-border/50"
+			class="max-w-full mx-4 md:mx-16 px-4 md:px-6 py-12 md:py-16 scroll-mt-16 border-t border-border/50"
 		>
 			<div class="flex flex-col items-center text-center mb-10">
 				<h2 class="text-xl md:text-2xl font-bold text-text-primary">

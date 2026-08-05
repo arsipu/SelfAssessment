@@ -137,31 +137,19 @@
 							@click="mobileMenuOpen = false"
 							class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary-soft transition-colors"
 						>
-							<span
-								class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-primary-soft"
-							>
-								<font-awesome-icon
-									:icon="
-										item.type === 'holland'
-											? 'fa-solid fa-chart-bar'
-											: 'fa-solid fa-file-lines'
-									"
-									class="w-3.5 h-3.5 text-primary"
-								/>
-							</span>
 							<span class="text-sm font-medium text-text-primary">{{
 								item.name
 							}}</span>
 						</router-link>
-					</div>
 
-					<router-link
-						to="/login"
-						@click="mobileMenuOpen = false"
-						class="block mt-2 px-3 py-2.5 text-sm font-semibold text-center text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors"
-					>
-						Login
-					</router-link>
+						<router-link
+							to="/cek-hasil"
+							class="w-full px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-primary-soft rounded-lg transition-colors"
+							active-class="text-text-primary bg-primary-soft"
+						>
+							Cek Hasil
+						</router-link>
+					</div>
 				</div>
 			</div>
 		</transition>
