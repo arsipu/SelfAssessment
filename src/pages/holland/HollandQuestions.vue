@@ -23,81 +23,68 @@
 				</div>
 
 				<div class="p-3 md:p-6">
-					<!-- Progress bar -->
-					<div class="mb-8">
-						<div class="flex items-center justify-between mb-1.5">
-							<span class="text-xs text-text-muted">Progress</span>
-							<span class="text-xs text-text-secondary font-medium"
-								>{{ answeredCount }}/{{ allQuestions.length }}</span
-							>
-						</div>
-						<div class="h-1.5 bg-surface-muted rounded-full overflow-hidden">
-							<div
-								class="h-full bg-primary rounded-full transition-all duration-300"
-								:style="{ width: progressPct + '%' }"
-							></div>
-						</div>
-					</div>
-
 					<!-- Category sections — grouped by riasecId from riasecList -->
 					<div v-for="section in sections" :key="section.key" class="mb-6">
 						<!-- Section header -->
 						<div class="flex items-center gap-3 mb-3">
 							<div class="flex items-center gap-2 shrink-0">
-								<span class="text-sm md:text-md font-medium text-black">{{
+								<span class="text-sm md:text-xl font-medium text-black">{{
 									section.label
 								}}</span>
-								<span class="text-xs text-text-muted"
-									>({{ section.code }})</span
-								>
 							</div>
 						</div>
 
-						<!-- Kolom sejajar di desktop (sejumlah kolom dinamis dari Firestore), stack di mobile -->
-						<div
-							class="grid grid-cols-1 gap-4 md:gap-4"
-							:style="{
-								gridTemplateColumns: `repeat(${section.columns.length}, minmax(0, 1fr))`,
-							}"
-						>
-							<div
-								v-for="(col, colIndex) in section.columns"
-								:key="col.key"
-								class="md:border-l md:border-border md:pl-4"
-								:class="colIndex === 0 ? 'md:border-l-0 md:pl-0' : ''"
-							>
-								<p class="text-xs font-semibold text-text-secondary mb-2">
-									{{ col.label }}
-								</p>
-
-								<div class="space-y-1 md:space-y-1.5">
-									<div
-										v-for="q in col.questions"
-										:key="q.id"
-										class="flex items-start gap-2 rounded-xl px-1 py-0.5 transition-colors"
-									>
-										<label
-											class="flex items-start gap-2 text-xs md:text-sm cursor-pointer"
+						<!-- Tabel pernyataan per kolom -->
+						<div class="overflow-x-auto rounded-xl border border-border">
+							<table class="w-full text-left border-collapse">
+								<thead class="border-b border-border">
+									<tr>
+										<th
+											v-for="col in section.columns"
+											:key="col.key"
+											class="px-3 md:px-4 py-2.5 text-xs font-semibold uppercase tracking-wider"
 										>
-											<input
-												type="checkbox"
-												class="mt-0.5 w-3 md:w-4 h-3 md:h-4 shrink-0"
-												:checked="isChecked(q.id)"
-												@change="toggleAnswer(q)"
-											/>
-											<span
-												class="leading-relaxed"
-												:class="
-													isChecked(q.id)
-														? 'font-medium text-primary'
-														: 'text-black'
-												"
-												>{{ q.question }}</span
+											{{ col.label }}
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr
+										v-for="i in Math.max(
+											...section.columns.map((c) => c.questions.length),
+										)"
+										:key="i"
+										class="divide-x divide-border"
+									>
+										<td
+											v-for="col in section.columns"
+											:key="col.key"
+											class="px-3 md:px-4 py-2.5 align-top text-xs md:text-sm"
+										>
+											<label
+												v-if="col.questions[i - 1]"
+												class="flex items-start gap-2 cursor-pointer"
 											>
-										</label>
-									</div>
-								</div>
-							</div>
+												<input
+													type="checkbox"
+													class="mt-0.5 w-3 md:w-4 h-3 md:h-4 shrink-0"
+													:checked="isChecked(col.questions[i - 1].id)"
+													@change="toggleAnswer(col.questions[i - 1])"
+												/>
+												<span
+													class="leading-relaxed"
+													:class="
+														isChecked(col.questions[i - 1].id)
+															? 'font-medium text-primary'
+															: 'text-black'
+													"
+													>{{ col.questions[i - 1].question }}</span
+												>
+											</label>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
 					</div>
 
