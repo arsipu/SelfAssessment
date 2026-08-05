@@ -12,20 +12,16 @@
 		</div>
 		<div>
 			<p class="text-xs text-text-muted mb-1">Kode minat dominan</p>
-			<div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-2">
-				<span
-					v-for="item in displayTopCodes"
-					:key="item.code"
-					class="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-lg text-primary font-semibold tracking-widest"
-				>
-					<span class="text-md md:text-lg leading-none">{{ item.code }}</span>
-					<span
-						class="text-xs md:text-sm font-medium text-black-secondary leading-tight text-center"
-					>
-						{{ item.label }}
-					</span>
-				</span>
-			</div>
+			<p
+				class="text-md md:tex-xl font-semibold tracking-widest text-primary mb-1"
+			>
+				{{ topCodesString }}
+			</p>
+			<p
+				class="text-xs md:text-sm font-medium text-black-secondary leading-snug mb-2"
+			>
+				{{ topCodesLabel }}
+			</p>
 			<p v-if="topCodeInfo" class="text-sm text-black leading-relaxed">
 				{{ topCodeInfo.description }}
 			</p>
@@ -52,5 +48,15 @@ const displayTopCodes = computed(() => {
 		: (props.topCode || "").split("").map((code) => ({ code, label: code }));
 
 	return items.slice(0, 3);
+});
+
+// Kode digabung jadi satu string, mis. "SCR"
+const topCodesString = computed(() => {
+	return displayTopCodes.value.map((item) => item.code).join("");
+});
+
+// Label digabung dengan koma, mis. "Sosial, Konvensional, Realistis"
+const topCodesLabel = computed(() => {
+	return displayTopCodes.value.map((item) => item.label).join(", ");
 });
 </script>
