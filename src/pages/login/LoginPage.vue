@@ -1,25 +1,26 @@
 <template>
 	<div class="min-h-screen bg-bg flex items-center justify-center px-4">
 		<div class="w-full max-w-sm">
-			<!-- Logo / Brand -->
-			<div class="text-center mb-8">
-				<div
-					class="w-10 h-10 bg-primary rounded-xl mx-auto mb-4 flex items-center justify-center"
-				>
-					<font-awesome-icon icon="fa-solid fa-user" class="w-5 h-5 text-text-on-primary" />
-				</div>
-				<h1 class="text-lg font-medium text-text-primary">Self Assessment</h1>
-				<p class="text-sm text-text-muted mt-1">Masuk ke panel admin</p>
-			</div>
-
 			<!-- Card -->
-			<div class="bg-surface border border-border rounded-2xl p-6">
+			<div class="card bg-surface border border-border rounded-2xl p-6">
+				<!-- Icon kunci -->
+				<div class="flex justify-center mb-5">
+					<div
+						class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center"
+					>
+						<font-awesome-icon
+							icon="fa-solid fa-lock"
+							class="w-6 h-6 text-primary"
+						/>
+					</div>
+				</div>
+
 				<form @submit.prevent="handleLogin" class="space-y-4">
 					<!-- Username -->
 					<div>
 						<label
 							for="username"
-							class="block text-xs font-medium text-text-secondary mb-1.5"
+							class="block text-xs font-medium text-black mb-1.5"
 						>
 							Username
 						</label>
@@ -29,7 +30,7 @@
 							type="text"
 							required
 							placeholder="username"
-							class="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-surface-muted text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-colors"
+							class="w-full px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition"
 						/>
 					</div>
 
@@ -37,7 +38,7 @@
 					<div>
 						<label
 							for="password"
-							class="block text-xs font-medium text-text-secondary mb-1.5"
+							class="block text-xs font-medium text-black mb-1.5"
 						>
 							Kata sandi
 						</label>
@@ -48,7 +49,7 @@
 								:type="showPassword ? 'text' : 'password'"
 								required
 								placeholder="••••••••"
-								class="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-surface-muted text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-colors pr-10"
+								class="w-full px-3 py-2.5 border border-border-primary rounded-lg text-sm bg-surface focus:outline-none focus:border-primary focus:bg-surface transition pr-10"
 							/>
 							<button
 								type="button"
@@ -56,8 +57,16 @@
 								class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
 								tabindex="-1"
 							>
-								<font-awesome-icon v-if="!showPassword" icon="fa-solid fa-eye" class="w-4 h-4" />
-								<font-awesome-icon v-else icon="fa-solid fa-eye-slash" class="w-4 h-4" />
+								<font-awesome-icon
+									v-if="!showPassword"
+									icon="fa-solid fa-eye"
+									class="w-4 h-4"
+								/>
+								<font-awesome-icon
+									v-else
+									icon="fa-solid fa-eye-slash"
+									class="w-4 h-4"
+								/>
 							</button>
 						</div>
 					</div>
@@ -72,7 +81,10 @@
 							v-if="errorMessage"
 							class="flex items-start gap-2.5 bg-danger-soft border border-danger rounded-lg px-3 py-2.5"
 						>
-							<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="w-4 h-4 text-danger shrink-0 mt-0.5" />
+							<font-awesome-icon
+								icon="fa-solid fa-circle-exclamation"
+								class="w-4 h-4 text-danger shrink-0 mt-0.5"
+							/>
 							<p class="text-xs text-danger leading-relaxed">
 								{{ errorMessage }}
 							</p>
@@ -83,7 +95,7 @@
 					<button
 						type="submit"
 						:disabled="isLoading"
-						class="w-full py-2.5 bg-primary text-text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+						class="w-full py-3 btn-primary text-sm font-semibold rounded-xl transition active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						<font-awesome-icon
 							v-if="isLoading"
@@ -135,5 +147,5 @@ const handleLogin = async () => {
 	} finally {
 		isLoading.value = false;
 	}
-}
+};
 </script>
