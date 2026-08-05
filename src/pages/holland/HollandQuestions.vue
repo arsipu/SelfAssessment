@@ -36,7 +36,7 @@
 
 						<!-- Tabel pernyataan per kolom -->
 						<div class="overflow-x-auto rounded-xl border border-border">
-							<table class="w-full text-left border-collapse">
+							<table class="w-full text-left border-collapse table-fixed">
 								<thead class="border-b border-border">
 									<tr>
 										<th
@@ -59,7 +59,7 @@
 										<td
 											v-for="col in section.columns"
 											:key="col.key"
-											class="px-3 md:px-4 py-2.5 align-top text-xs md:text-sm"
+											class="px-3 md:px-4 py-1 align-top text-xs md:text-sm"
 										>
 											<label
 												v-if="col.questions[i - 1]"
