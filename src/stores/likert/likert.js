@@ -5,21 +5,22 @@ import {
 	collection,
 	doc,
 	getDocs,
-	getDoc,
 	addDoc,
 	updateDoc,
 	deleteDoc,
 	writeBatch,
 	serverTimestamp,
-	collectionGroup,
-	query,
-	where,
-	limit,
 } from "firebase/firestore";
 
 import { ACTIVE, INACTIVE } from "@/apps/status";
 import { slugify } from "@/utils/slug";
 import { addLikert as addLikertFirebase } from "@/firebase/add-likert";
+import {
+	fetchLikerts as fetchLikertsFirebase,
+	getLikertById as getLikertByIdFirebase,
+	getLikertBySlug as getLikertBySlugFirebase,
+	fetchLikertScales as fetchLikertScalesFirebase,
+} from "@/firebase/fetch-likert";
 
 export const useLikertStore = defineStore("likert", () => {
 	const likerts = ref([]);
@@ -32,8 +33,7 @@ export const useLikertStore = defineStore("likert", () => {
 	const fetchLikerts = async () => {
 		loading.value = true;
 		try {
-			const snap = await getDocs(collection(db, "likert"));
-			likerts.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+			likerts.value = await fetchLikertsFirebase();
 		} catch (error) {
 			console.error("Error fetching likerts:", error);
 		} finally {
@@ -42,45 +42,23 @@ export const useLikertStore = defineStore("likert", () => {
 	};
 
 	const getLikertById = async (likertId) => {
-		console.log("Fetching likert:", likertId);
 		try {
-			const snap = await getDoc(doc(db, "likert", likertId));
-			if (snap.exists()) {
-				currentLikert.value = { id: snap.id, ...snap.data() };
-				console.log("Likert fetched:", currentLikert.value.name);
-			} else {
-				console.log("No such likert document!");
-				currentLikert.value = null;
-			}
+			currentLikert.value = await getLikertByIdFirebase(likertId);
+			return currentLikert.value;
 		} catch (error) {
 			console.error("Error fetching likert:", error);
 		}
-		return currentLikert.value;
 	};
 
 	// ── Detail 1 survei berdasarkan slug ──────────────────────
 
 	const getLikertBySlug = async (slug) => {
-		console.log("Fetching likert by slug:", slug);
 		try {
-			const q = query(
-				collection(db, "likert"),
-				where("slug", "==", slug),
-				limit(1),
-			);
-			const snap = await getDocs(q);
-			if (!snap.empty) {
-				const d = snap.docs[0];
-				currentLikert.value = { id: d.id, ...d.data() };
-				console.log("Likert fetched by slug:", currentLikert.value.name);
-			} else {
-				console.log("No such likert document for slug:", slug);
-				currentLikert.value = null;
-			}
+			currentLikert.value = await getLikertBySlugFirebase(slug);
+			return currentLikert.value;
 		} catch (error) {
 			console.error("Error fetching likert by slug:", error);
 		}
-		return currentLikert.value;
 	};
 
 	const addLikert = async ({ name, description }) => {
@@ -197,27 +175,8 @@ export const useLikertStore = defineStore("likert", () => {
 
 	const fetchLikertScales = async (likertId) => {
 		try {
-			const snap = await getDocs(collection(db, "likert", likertId, "scale"));
-			const scales = snap.docs.map((d) => {
-				const data = d.data();
-				// regex ini nangkep -, –, — dikelilingi spasi opsional
-				const parts = data.range.split(/\s*[-–—]\s*/).map((s) => s.trim());
-				const min = Number(parts[0]);
-				const max = Number(parts[1]);
-
-				return {
-					id: d.id,
-					label: data.score,
-					description: data.description,
-					min,
-					max,
-				};
-			});
-
-			// urutkan dari min terbesar ke terkecil (biar konsisten kayak array hardcode sebelumnya)
-			scales.sort((a, b) => b.min - a.min);
-			currentLikertScales.value = scales;
-			return scales;
+			currentLikertScales.value = await fetchLikertScalesFirebase(likertId);
+			return currentLikertScales.value;
 		} catch (error) {
 			console.error("Error fetching likert scales:", error);
 			currentLikertScales.value = [];
