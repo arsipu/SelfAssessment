@@ -1,173 +1,127 @@
-# Task Plan: Optimasi Update di Store — Tidak Fetch Ulang Semua Data
+# Task Plan: Pisahkan Halaman Skala Penilaian dari AdminLikertQuestions
 
 ## Tujuan
 
-Mengoptimalkan fungsi-fungsi update di `src/stores/likert/likert.js` agar setelah update selesai, **tidak perlu fetch ulang semua data dari Firebase** (`fetchLikerts()`). Cukup **mengubah state store secara langsung** berdasarkan data yang diupdate, sehingga lebih hemat data/bandwidth.
+Memisahkan bagian **Skala Penilaian** dari `src/pages/admin/likert/AdminLikertQuestions.vue` ke halaman terpisah dengan routing sendiri. Di `AdminLikertQuestions.vue`, bagian skala hanya menampilkan **hasil skala saja** (read-only) dengan link/button untuk menuju halaman skala yang menangani tambah, edit, dan delete.
 
-## Analisis Kode Saat Ini (`src/stores/likert/likert.js`)
+## Analisis Kode Saat Ini (`src/pages/admin/likert/AdminLikertQuestions.vue`)
 
-### Fungsi yang Masih Memanggil `fetchLikerts()` Setelah Update
+### Bagian Skala yang Ada di Halaman Ini
 
-| Fungsi                                          | Masalah                                                                     |
-| ----------------------------------------------- | --------------------------------------------------------------------------- |
-| `updateLikert(likertId, { name, description })` | Setelah update, memanggil `fetchLikerts()` — fetch semua data dari Firebase |
-| `updateLikertStatus(id, status)`                | Setelah update, memanggil `fetchLikerts()` — fetch semua data dari Firebase |
+1. **Card "Skala Penilaian"** — menampilkan tabel skala:
+   - Kolom: Rentang, Label, Deskripsi, Aksi
+   - Aksi: Edit (modal), Hapus (modal konfirmasi)
+   - Empty state: "Belum ada skala penilaian."
 
-### Alur Saat Ini
+2. **Inline Add Form** — form tambah skala di bagian bawah card:
+   - Input: Min, Max, Label (score), Deskripsi
+   - Tombol: Simpan, Batal
 
-#### `updateLikert`
+3. **Modal Edit Skala** — modal untuk edit skala:
+   - Input: Label, Min, Max, Deskripsi
+
+4. **Modal Konfirmasi Hapus Skala** — konfirmasi hapus skala
+
+### State & Fungsi Skala yang Ada
+
+| State                  | Fungsi                 |
+| ---------------------- | ---------------------- |
+| `scales`               | `fetchScales()`        |
+| `scaleSaving`          | `openAddScale()`       |
+| `scaleForm`            | `cancelAddScale()`     |
+| `editingScaleId`       | `saveScale()`          |
+| `showAddScaleForm`     | `editScaleItem()`      |
+| `showEditScaleModal`   | `cancelScaleEdit()`    |
+| `showDeleteScaleModal` | `deleteScaleItem()`    |
+| `deletingScaleId`      | `confirmDeleteScale()` |
+
+### Routing Saat Ini (`src/router/index.js`)
 
 ```js
-const updateLikert = async (likertId, { name, description }) => {
-	try {
-		await updateLikertFirebase(likertId, { name, description });
-		await fetchLikerts(); // ← BOROS: fetch semua data
-	} catch (error) {
-		console.error("Error updating likert:", error);
-		throw error;
-	}
-};
-```
-
-#### `updateLikertStatus`
-
-```js
-const updateLikertStatus = async (id, status) => {
-	try {
-		const activeLikertIds =
-			status === ACTIVE
-				? likerts.value
-						.filter((l) => l.id !== id && l.status === ACTIVE)
-						.map((l) => l.id)
-				: [];
-
-		await updateLikertStatusFirebase(id, status, activeLikertIds);
-		await fetchLikerts(); // ← BOROS: fetch semua data
-	} catch (error) {
-		console.error("Error updating likert status:", error);
-		throw error;
-	}
-};
+{
+    path: "likert/:slug",
+    name: "admin-likert-questions",
+    component: AdminLikertQuestions,
+},
 ```
 
 ## Rencana Implementasi
 
-### 1. Update `updateLikert` — Ubah State Store Langsung
+### 1. Buat halaman baru `src/pages/admin/likert/AdminLikertScales.vue`
 
-Setelah `updateLikertFirebase` berhasil, **ubah item di `likerts.value`** yang sesuai dengan `likertId`:
+Buat halaman baru yang berisi **seluruh** fungsionalitas skala penilaian:
 
-```js
-const updateLikert = async (likertId, { name, description }) => {
-	try {
-		await updateLikertFirebase(likertId, { name, description });
+- **Breadcrumb**: `Likert Form / {nama likert} / Skala Penilaian`
+- **Header**: Nama likert + deskripsi + tombol kembali ke pertanyaan
+- **Card "Skala Penilaian"**:
+  - Tabel skala (Rentang, Label, Deskripsi, Aksi)
+  - Inline add form (Min, Max, Label, Deskripsi)
+  - Modal edit skala
+  - Modal konfirmasi hapus skala
+- **State & fungsi skala** dipindahkan dari `AdminLikertQuestions.vue`:
+  - `scales`, `scaleSaving`, `scaleForm`, `editingScaleId`
+  - `showAddScaleForm`, `showEditScaleModal`, `showDeleteScaleModal`, `deletingScaleId`
+  - `fetchScales`, `openAddScale`, `cancelAddScale`, `saveScale`, `editScaleItem`, `cancelScaleEdit`, `deleteScaleItem`, `confirmDeleteScale`
+- Menggunakan `likertStore.getLikertBySlug(slug)` untuk mendapatkan `likertId` dan `currentLikert`
 
-		// Ubah state store langsung — tidak perlu fetch ulang
-		const index = likerts.value.findIndex((l) => l.id === likertId);
-		if (index !== -1) {
-			likerts.value[index] = {
-				...likerts.value[index],
-				name,
-				slug: slugify(name),
-				description,
-				updatedAt: new Date(), // atau serverTimestamp — lihat catatan
-			};
-		}
-	} catch (error) {
-		console.error("Error updating likert:", error);
-		throw error;
-	}
-};
-```
+### 2. Update `src/pages/admin/likert/AdminLikertQuestions.vue`
 
-> **Catatan:** Untuk `slug`, store perlu mengimpor `slugify` dari `@/utils/slug` (karena `updateLikertFirebase` yang menghitung slug di file firebase, tapi store juga perlu menghitungnya untuk state). Alternatif: fungsi firebase `updateLikert` bisa mengembalikan data yang diupdate (termasuk `slug`), sehingga store tidak perlu menghitung ulang.
+- **Hapus** semua state & fungsi skala:
+  - State: `scales`, `scaleSaving`, `scaleForm`, `editingScaleId`, `showAddScaleForm`, `showEditScaleModal`, `showDeleteScaleModal`, `deletingScaleId`
+  - Fungsi: `fetchScales`, `openAddScale`, `cancelAddScale`, `saveScale`, `editScaleItem`, `cancelScaleEdit`, `deleteScaleItem`, `confirmDeleteScale`
+- **Hapus** template skala:
+  - Card "Skala Penilaian" (tabel + inline add form)
+  - Modal Edit Skala
+  - Modal Konfirmasi Hapus Skala
+- **Ganti** dengan card read-only yang menampilkan hasil skala saja:
+  - Tabel skala (Rentang, Label, Deskripsi) — tanpa kolom Aksi
+  - Empty state: "Belum ada skala penilaian."
+  - Button "Kelola Skala" yang mengarah ke halaman skala:
+    ```js
+    router.push({
+    	name: "admin-likert-scales",
+    	params: { slug: likertSlug },
+    });
+    ```
+- **Hapus** pemanggilan `fetchScales()` di `onMounted` (tidak lagi diperlukan di halaman ini)
+- **Tambahkan** `fetchScales()` di halaman ini untuk menampilkan hasil skala (read-only)
 
-**Opsi yang direkomendasikan:** Ubah `src/firebase/update-likert.js` agar mengembalikan data yang diupdate (lengkap dengan `slug`), sehingga store tinggal meng-assign hasilnya ke state:
+### 3. Update `src/router/index.js`
 
-```js
-// src/firebase/update-likert.js — mengembalikan data yang diupdate
-export const updateLikert = async (likertId, { name, description }) => {
-	const slug = slugify(name);
-	await updateDoc(doc(db, "likert", likertId), {
-		name,
-		slug,
-		description,
-		updatedAt: serverTimestamp(),
-	});
-	return { id: likertId, name, slug, description, updatedAt: new Date() };
-};
-```
-
-Kemudian di store:
+Tambahkan route baru untuk halaman skala:
 
 ```js
-const updateLikert = async (likertId, { name, description }) => {
-	try {
-		const updated = await updateLikertFirebase(likertId, { name, description });
+import AdminLikertScales from '@/pages/admin/likert/AdminLikertScales.vue';
 
-		// Ubah state store langsung — tidak perlu fetch ulang
-		const index = likerts.value.findIndex((l) => l.id === likertId);
-		if (index !== -1) {
-			likerts.value[index] = { ...likerts.value[index], ...updated };
-		}
-	} catch (error) {
-		console.error("Error updating likert:", error);
-		throw error;
-	}
-};
+// Di dalam children admin, setelah route admin-likert-questions
+{
+    path: "likert/:slug/scales",
+    name: "admin-likert-scales",
+    component: AdminLikertScales,
+},
 ```
 
-### 2. Update `updateLikertStatus` — Ubah State Store Langsung
+### 4. Verifikasi
 
-Setelah `updateLikertStatusFirebase` berhasil, **ubah status di `likerts.value`**:
-
-```js
-const updateLikertStatus = async (id, status) => {
-	try {
-		// Cari likert lain yang masih active (state management di store)
-		const activeLikertIds =
-			status === ACTIVE
-				? likerts.value
-						.filter((l) => l.id !== id && l.status === ACTIVE)
-						.map((l) => l.id)
-				: [];
-
-		await updateLikertStatusFirebase(id, status, activeLikertIds);
-
-		// Ubah state store langsung — tidak perlu fetch ulang
-		// 1. Nonaktifkan likert lain yang masih active
-		if (status === ACTIVE) {
-			likerts.value = likerts.value.map((l) =>
-				activeLikertIds.includes(l.id)
-					? { ...l, status: INACTIVE, updatedAt: new Date() }
-					: l,
-			);
-		}
-
-		// 2. Update status likert yang dimaksud
-		likerts.value = likerts.value.map((l) =>
-			l.id === id ? { ...l, status, updatedAt: new Date() } : l,
-		);
-	} catch (error) {
-		console.error("Error updating likert status:", error);
-		throw error;
-	}
-};
-```
-
-> **Catatan:** Store perlu mengimpor `INACTIVE` dari `@/apps/status` (karena `updateLikertStatusFirebase` yang mengelola status di file firebase, tapi store juga perlu tahu nilai `INACTIVE` untuk mengubah state).
-
-### 3. Verifikasi
-
-- Pastikan `updateLikert` dan `updateLikertStatus` **tidak lagi memanggil `fetchLikerts()`**
-- Pastikan state store (`likerts.value`) diperbarui dengan benar setelah update
+- Pastikan halaman `AdminLikertQuestions.vue` hanya menampilkan hasil skala (read-only) + link ke halaman skala
+- Pastikan halaman `AdminLikertScales.vue` menangani tambah, edit, dan delete skala
+- Pastikan routing `admin-likert-scales` berfungsi
 - Pastikan tidak ada import yang rusak
-- Pastikan pemanggil di komponen tetap berfungsi karena nama fungsi di store tidak berubah
 - Jalankan `npm run build` untuk memastikan tidak ada error
+
+## Struktur Routing Setelah Implementasi
+
+```
+/admin/likert                          → AdminLikert (daftar formulir)
+/admin/likert/:slug                    → AdminLikertQuestions (kategori & pertanyaan + hasil skala read-only)
+/admin/likert/:slug/scales             → AdminLikertScales (kelola skala: tambah, edit, hapus)
+/admin/likert/:slug/submissions        → AdminLikertSubmissions
+/admin/likert/:slug/submissions/:submissionSlug → AdminLikertSubmissionDetail
+```
 
 ## Catatan
 
-- Nama fungsi di store **tidak berubah** agar pemanggil di komponen tidak perlu diubah
-- `updateLikert` dan `updateLikertStatus` akan mengubah state store secara langsung setelah update berhasil
-- `fetchLikerts()` hanya dipanggil saat inisialisasi halaman (onMounted) atau saat benar-benar perlu sinkronisasi penuh
-- Store perlu mengimpor `slugify` (jika menghitung slug di store) atau fungsi firebase mengembalikan data yang diupdate
-- Store perlu mengimpor `INACTIVE` dari `@/apps/status` untuk `updateLikertStatus`
+- Nama route baru: `admin-likert-scales`
+- Path route baru: `likert/:slug/scales`
+- Halaman `AdminLikertQuestions.vue` tetap menampilkan hasil skala (read-only) agar admin bisa melihat skala tanpa pindah halaman
+- Halaman `AdminLikertScales.vue` menangani semua operasi CRUD skala
