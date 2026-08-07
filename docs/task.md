@@ -1,158 +1,19 @@
-# Task Plan: Pisahkan Semua Operasi Baca/Tulis Firestore dari Store
+# Task Plan: Optimasi Update di Store — Tidak Fetch Ulang Semua Data
 
 ## Tujuan
 
-Memisahkan **semua** operasi baca/tulis Firestore dari `src/stores/likert/likert.js` ke file terpisah di folder `src/firebase/`. Store hanya fokus ke **state management** (ref, computed, actions yang mengelola state) dan memanggil fungsi-fungsi dari folder firebase. Tidak ada lagi import `firebase/firestore` langsung di store.
+Mengoptimalkan fungsi-fungsi update di `src/stores/likert/likert.js` agar setelah update selesai, **tidak perlu fetch ulang semua data dari Firebase** (`fetchLikerts()`). Cukup **mengubah state store secara langsung** berdasarkan data yang diupdate, sehingga lebih hemat data/bandwidth.
 
 ## Analisis Kode Saat Ini (`src/stores/likert/likert.js`)
 
-### Operasi Firestore yang Sudah Dipisahkan
+### Fungsi yang Masih Memanggil `fetchLikerts()` Setelah Update
 
-| Operasi             | File Firebase                   |
-| ------------------- | ------------------------------- |
-| `addLikert`         | `src/firebase/add-likert.js`    |
-| `deleteLikert`      | `src/firebase/delete-likert.js` |
-| `fetchLikerts`      | `src/firebase/fetch-likert.js`  |
-| `getLikertById`     | `src/firebase/fetch-likert.js`  |
-| `getLikertBySlug`   | `src/firebase/fetch-likert.js`  |
-| `fetchLikertScales` | `src/firebase/fetch-likert.js`  |
+| Fungsi                                          | Masalah                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| `updateLikert(likertId, { name, description })` | Setelah update, memanggil `fetchLikerts()` — fetch semua data dari Firebase |
+| `updateLikertStatus(id, status)`                | Setelah update, memanggil `fetchLikerts()` — fetch semua data dari Firebase |
 
-### Operasi Firestore yang Masih Langsung di Store
-
-| Operasi              | Fungsi Store                                                    | Operasi Firestore                                                    |
-| -------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `updateLikert`       | `updateLikert(likertId, { name, description })`                 | `updateDoc` + `serverTimestamp`                                      |
-| `updateLikertStatus` | `updateLikertStatus(id, status)`                                | `updateDoc` + `serverTimestamp` (loop untuk nonaktifkan likert lain) |
-| `addScale`           | `addScale(likertId, { score, range, description })`             | `addDoc`                                                             |
-| `updateScale`        | `updateScale(likertId, scaleId, { score, range, description })` | `updateDoc`                                                          |
-| `deleteScale`        | `deleteScale(likertId, scaleId)`                                | `deleteDoc`                                                          |
-
-### Import `firebase/firestore` yang Masih Ada di Store
-
-```js
-import {
-	collection,
-	doc,
-	addDoc,
-	updateDoc,
-	deleteDoc,
-	serverTimestamp,
-} from "firebase/firestore";
-```
-
-Semua import ini harus dihapus dari store setelah operasi dipindahkan.
-
-## Rencana Implementasi
-
-### 1. Buat file `src/firebase/update-likert.js`
-
-Buat file baru untuk operasi update likert:
-
-```js
-// Struktur yang direncanakan
-import { db } from "@/firebase/firebase-config";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { slugify } from "@/utils/slug";
-```
-
-**Fungsi yang diekspor: `updateLikert(likertId, { name, description })`**
-
-- Mengupdate dokumen `likert/{likertId}` dengan field:
-  - `name`
-  - `slug` — hasil `slugify(name)`
-  - `description`
-  - `updatedAt` — `serverTimestamp()`
-
-### 2. Buat file `src/firebase/update-likert-status.js`
-
-Buat file baru untuk operasi update status likert:
-
-```js
-// Struktur yang direncanakan
-import { db } from "@/firebase/firebase-config";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { INACTIVE } from "@/apps/status";
-```
-
-**Fungsi yang diekspor: `updateLikertStatus(id, status, activeLikertIds)`**
-
-- Jika status = `ACTIVE`:
-  - Loop `activeLikertIds` (daftar id likert lain yang masih active) dan update statusnya menjadi `INACTIVE` + `updatedAt`
-- Update dokumen `likert/{id}` dengan:
-  - `status`
-  - `updatedAt` — `serverTimestamp()`
-
-> **Catatan:** Logika untuk mencari likert lain yang active (`likerts.value.filter(...)`) tetap di store karena itu bagian dari state management. Store mengirimkan daftar `activeLikertIds` ke fungsi firebase.
-
-### 3. Buat file `src/firebase/add-scale.js`
-
-Buat file baru untuk operasi tambah scale:
-
-```js
-// Struktur yang direncanakan
-import { db } from "@/firebase/firebase-config";
-import { collection, addDoc } from "firebase/firestore";
-```
-
-**Fungsi yang diekspor: `addScale(likertId, { score, range, description })`**
-
-- Menambahkan dokumen ke subcollection `likert/{likertId}/scale`
-- Mengembalikan `ref.id`
-
-### 4. Buat file `src/firebase/update-scale.js`
-
-Buat file baru untuk operasi update scale:
-
-```js
-// Struktur yang direncanakan
-import { db } from "@/firebase/firebase-config";
-import { doc, updateDoc } from "firebase/firestore";
-```
-
-**Fungsi yang diekspor: `updateScale(likertId, scaleId, { score, range, description })`**
-
-- Mengupdate dokumen `likert/{likertId}/scale/{scaleId}` dengan field:
-  - `score`
-  - `range`
-  - `description`
-
-### 5. Buat file `src/firebase/delete-scale.js`
-
-Buat file baru untuk operasi hapus scale:
-
-```js
-// Struktur yang direncanakan
-import { db } from "@/firebase/firebase-config";
-import { doc, deleteDoc } from "firebase/firestore";
-```
-
-**Fungsi yang diekspor: `deleteScale(likertId, scaleId)`**
-
-- Menghapus dokumen `likert/{likertId}/scale/{scaleId}`
-
-### 6. Update `src/stores/likert/likert.js`
-
-- **Hapus semua** import dari `firebase/firestore`:
-  ```js
-  import {
-  	collection,
-  	doc,
-  	addDoc,
-  	updateDoc,
-  	deleteDoc,
-  	serverTimestamp,
-  } from "firebase/firestore";
-  ```
-- **Hapus** import `db` dari `@/firebase/firebase-config` (tidak lagi digunakan)
-- **Tambahkan** import dari file-file firebase baru:
-  ```js
-  import { updateLikert as updateLikertFirebase } from "@/firebase/update-likert";
-  import { updateLikertStatus as updateLikertStatusFirebase } from "@/firebase/update-likert-status";
-  import { addScale as addScaleFirebase } from "@/firebase/add-scale";
-  import { updateScale as updateScaleFirebase } from "@/firebase/update-scale";
-  import { deleteScale as deleteScaleFirebase } from "@/firebase/delete-scale";
-  ```
-- **Ganti implementasi** fungsi-fungsi di store agar memanggil fungsi dari file firebase:
+### Alur Saat Ini
 
 #### `updateLikert`
 
@@ -160,7 +21,7 @@ import { doc, deleteDoc } from "firebase/firestore";
 const updateLikert = async (likertId, { name, description }) => {
 	try {
 		await updateLikertFirebase(likertId, { name, description });
-		await fetchLikerts();
+		await fetchLikerts(); // ← BOROS: fetch semua data
 	} catch (error) {
 		console.error("Error updating likert:", error);
 		throw error;
@@ -169,6 +30,95 @@ const updateLikert = async (likertId, { name, description }) => {
 ```
 
 #### `updateLikertStatus`
+
+```js
+const updateLikertStatus = async (id, status) => {
+	try {
+		const activeLikertIds =
+			status === ACTIVE
+				? likerts.value
+						.filter((l) => l.id !== id && l.status === ACTIVE)
+						.map((l) => l.id)
+				: [];
+
+		await updateLikertStatusFirebase(id, status, activeLikertIds);
+		await fetchLikerts(); // ← BOROS: fetch semua data
+	} catch (error) {
+		console.error("Error updating likert status:", error);
+		throw error;
+	}
+};
+```
+
+## Rencana Implementasi
+
+### 1. Update `updateLikert` — Ubah State Store Langsung
+
+Setelah `updateLikertFirebase` berhasil, **ubah item di `likerts.value`** yang sesuai dengan `likertId`:
+
+```js
+const updateLikert = async (likertId, { name, description }) => {
+	try {
+		await updateLikertFirebase(likertId, { name, description });
+
+		// Ubah state store langsung — tidak perlu fetch ulang
+		const index = likerts.value.findIndex((l) => l.id === likertId);
+		if (index !== -1) {
+			likerts.value[index] = {
+				...likerts.value[index],
+				name,
+				slug: slugify(name),
+				description,
+				updatedAt: new Date(), // atau serverTimestamp — lihat catatan
+			};
+		}
+	} catch (error) {
+		console.error("Error updating likert:", error);
+		throw error;
+	}
+};
+```
+
+> **Catatan:** Untuk `slug`, store perlu mengimpor `slugify` dari `@/utils/slug` (karena `updateLikertFirebase` yang menghitung slug di file firebase, tapi store juga perlu menghitungnya untuk state). Alternatif: fungsi firebase `updateLikert` bisa mengembalikan data yang diupdate (termasuk `slug`), sehingga store tidak perlu menghitung ulang.
+
+**Opsi yang direkomendasikan:** Ubah `src/firebase/update-likert.js` agar mengembalikan data yang diupdate (lengkap dengan `slug`), sehingga store tinggal meng-assign hasilnya ke state:
+
+```js
+// src/firebase/update-likert.js — mengembalikan data yang diupdate
+export const updateLikert = async (likertId, { name, description }) => {
+	const slug = slugify(name);
+	await updateDoc(doc(db, "likert", likertId), {
+		name,
+		slug,
+		description,
+		updatedAt: serverTimestamp(),
+	});
+	return { id: likertId, name, slug, description, updatedAt: new Date() };
+};
+```
+
+Kemudian di store:
+
+```js
+const updateLikert = async (likertId, { name, description }) => {
+	try {
+		const updated = await updateLikertFirebase(likertId, { name, description });
+
+		// Ubah state store langsung — tidak perlu fetch ulang
+		const index = likerts.value.findIndex((l) => l.id === likertId);
+		if (index !== -1) {
+			likerts.value[index] = { ...likerts.value[index], ...updated };
+		}
+	} catch (error) {
+		console.error("Error updating likert:", error);
+		throw error;
+	}
+};
+```
+
+### 2. Update `updateLikertStatus` — Ubah State Store Langsung
+
+Setelah `updateLikertStatusFirebase` berhasil, **ubah status di `likerts.value`**:
 
 ```js
 const updateLikertStatus = async (id, status) => {
@@ -182,7 +132,21 @@ const updateLikertStatus = async (id, status) => {
 				: [];
 
 		await updateLikertStatusFirebase(id, status, activeLikertIds);
-		await fetchLikerts();
+
+		// Ubah state store langsung — tidak perlu fetch ulang
+		// 1. Nonaktifkan likert lain yang masih active
+		if (status === ACTIVE) {
+			likerts.value = likerts.value.map((l) =>
+				activeLikertIds.includes(l.id)
+					? { ...l, status: INACTIVE, updatedAt: new Date() }
+					: l,
+			);
+		}
+
+		// 2. Update status likert yang dimaksud
+		likerts.value = likerts.value.map((l) =>
+			l.id === id ? { ...l, status, updatedAt: new Date() } : l,
+		);
 	} catch (error) {
 		console.error("Error updating likert status:", error);
 		throw error;
@@ -190,76 +154,20 @@ const updateLikertStatus = async (id, status) => {
 };
 ```
 
-#### `addScale`
+> **Catatan:** Store perlu mengimpor `INACTIVE` dari `@/apps/status` (karena `updateLikertStatusFirebase` yang mengelola status di file firebase, tapi store juga perlu tahu nilai `INACTIVE` untuk mengubah state).
 
-```js
-const addScale = async (likertId, { score, range, description }) => {
-	try {
-		return await addScaleFirebase(likertId, { score, range, description });
-	} catch (error) {
-		console.error("Error adding scale:", error);
-		throw error;
-	}
-};
-```
+### 3. Verifikasi
 
-#### `updateScale`
-
-```js
-const updateScale = async (
-	likertId,
-	scaleId,
-	{ score, range, description },
-) => {
-	try {
-		await updateScaleFirebase(likertId, scaleId, { score, range, description });
-	} catch (error) {
-		console.error("Error updating scale:", error);
-		throw error;
-	}
-};
-```
-
-#### `deleteScale`
-
-```js
-const deleteScale = async (likertId, scaleId) => {
-	try {
-		await deleteScaleFirebase(likertId, scaleId);
-	} catch (error) {
-		console.error("Error deleting scale:", error);
-		throw error;
-	}
-};
-```
-
-### 7. Verifikasi
-
-- Pastikan **tidak ada** import `firebase/firestore` di `src/stores/likert/likert.js`
-- Pastikan **tidak ada** import `db` dari `@/firebase/firebase-config` di store
-- Pastikan semua operasi baca/tulis Firestore ada di folder `src/firebase/`
-- Pastikan store hanya fokus ke state management
+- Pastikan `updateLikert` dan `updateLikertStatus` **tidak lagi memanggil `fetchLikerts()`**
+- Pastikan state store (`likerts.value`) diperbarui dengan benar setelah update
+- Pastikan tidak ada import yang rusak
 - Pastikan pemanggil di komponen tetap berfungsi karena nama fungsi di store tidak berubah
 - Jalankan `npm run build` untuk memastikan tidak ada error
-
-## Struktur Folder `src/firebase/` Setelah Implementasi
-
-```
-src/firebase/
-├── add-likert.js          # (sudah ada) Tambah likert
-├── add-scale.js           # (baru) Tambah scale
-├── delete-likert.js       # (sudah ada) Hapus likert (cascading)
-├── delete-scale.js        # (baru) Hapus scale
-├── fetch-likert.js        # (sudah ada) Fetch likert & scales
-├── firebase-config.js     # (sudah ada) Konfigurasi Firebase
-├── update-likert.js       # (baru) Update likert
-├── update-likert-status.js # (baru) Update status likert
-└── update-scale.js        # (baru) Update scale
-```
 
 ## Catatan
 
 - Nama fungsi di store **tidak berubah** agar pemanggil di komponen tidak perlu diubah
-- Store tetap bertanggung jawab untuk state management dan error handling
-- Logika untuk mencari likert lain yang active (`likerts.value.filter(...)`) tetap di store karena itu bagian dari state management
-- File-file firebase murni berisi logika Firestore (baca/tulis data)
+- `updateLikert` dan `updateLikertStatus` akan mengubah state store secara langsung setelah update berhasil
+- `fetchLikerts()` hanya dipanggil saat inisialisasi halaman (onMounted) atau saat benar-benar perlu sinkronisasi penuh
+- Store perlu mengimpor `slugify` (jika menghitung slug di store) atau fungsi firebase mengembalikan data yang diupdate
+- Store perlu mengimpor `INACTIVE` dari `@/apps/status` untuk `updateLikertStatus`

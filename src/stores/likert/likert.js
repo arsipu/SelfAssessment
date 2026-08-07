@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-import { ACTIVE } from "@/apps/status";
+import { ACTIVE, INACTIVE } from "@/apps/status";
 import { addLikert as addLikertFirebase } from "@/firebase/add-likert";
 import {
 	fetchLikerts as fetchLikertsFirebase,
@@ -71,8 +71,16 @@ export const useLikertStore = defineStore("likert", () => {
 
 	const updateLikert = async (likertId, { name, description }) => {
 		try {
-			await updateLikertFirebase(likertId, { name, description });
-			await fetchLikerts();
+			const updated = await updateLikertFirebase(likertId, {
+				name,
+				description,
+			});
+
+			// Ubah state store langsung — tidak perlu fetch ulang
+			const index = likerts.value.findIndex((l) => l.id === likertId);
+			if (index !== -1) {
+				likerts.value[index] = { ...likerts.value[index], ...updated };
+			}
 		} catch (error) {
 			console.error("Error updating likert:", error);
 			throw error;
@@ -107,7 +115,21 @@ export const useLikertStore = defineStore("likert", () => {
 					: [];
 
 			await updateLikertStatusFirebase(id, status, activeLikertIds);
-			await fetchLikerts();
+
+			// Ubah state store langsung — tidak perlu fetch ulang
+			// 1. Nonaktifkan likert lain yang masih active
+			if (status === ACTIVE) {
+				likerts.value = likerts.value.map((l) =>
+					activeLikertIds.includes(l.id)
+						? { ...l, status: INACTIVE, updatedAt: new Date() }
+						: l,
+				);
+			}
+
+			// 2. Update status likert yang dimaksud
+			likerts.value = likerts.value.map((l) =>
+				l.id === id ? { ...l, status, updatedAt: new Date() } : l,
+			);
 		} catch (error) {
 			console.error("Error updating likert status:", error);
 			throw error;
