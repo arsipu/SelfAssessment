@@ -23,6 +23,7 @@ import AdminSetting from "@/pages/admin/AdminSetting.vue";
 
 import AdminLikert from "@/pages/admin/likert/AdminLikert.vue";
 import AdminLikertQuestions from "@/pages/admin/likert/AdminLikertQuestions.vue";
+import AdminLikertCategoryQuestions from "@/pages/admin/likert/AdminLikertCategoryQuestions.vue";
 import AdminLikertScales from "@/pages/admin/likert/AdminLikertScales.vue";
 import AdminLikertSubmissions from "@/pages/admin/likert/AdminLikertSubmissions.vue";
 import AdminLikertSubmissionDetail from "@/pages/admin/likert/AdminLikertSubmissionDetail.vue";
@@ -112,6 +113,11 @@ const routes = [
 				path: "likert/:slug",
 				name: "admin-likert-questions",
 				component: AdminLikertQuestions,
+			},
+			{
+				path: "likert/:slug/categories/:categoryId",
+				name: "admin-likert-category-questions",
+				component: AdminLikertCategoryQuestions,
 			},
 			{
 				path: "likert/:slug/scales",
