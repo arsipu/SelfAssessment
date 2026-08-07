@@ -19,14 +19,7 @@ import {
 
 import { ACTIVE, INACTIVE } from "@/apps/status";
 import { slugify } from "@/utils/slug";
-
-// ── 4 kategori default untuk likert baru ────────────────────
-const DEFAULT_CATEGORIES = [
-	"Personal Characteristics",
-	"Organisational Acumen",
-	"Work Competence",
-	"Social Intelligence",
-];
+import { addLikert as addLikertFirebase } from "@/firebase/add-likert";
 
 export const useLikertStore = defineStore("likert", () => {
 	const likerts = ref([]);
@@ -90,56 +83,16 @@ export const useLikertStore = defineStore("likert", () => {
 		return currentLikert.value;
 	};
 
-	// ── Seed 4 kategori default untuk likert baru ────────────────
-	// Dipanggil sekali pas instrumen baru dibuat, dalam satu writeBatch.
-	// Tiap kategori default dibuat dengan `questions: []` — admin bebas
-	// nambah/edit/hapus kategori kemudian.
-
-	const seedLikertCategories = async (likertId) => {
-		const batch = writeBatch(db);
-
-		DEFAULT_CATEGORIES.forEach((name, index) => {
-			const ref = doc(collection(db, "likert", likertId, "categories"));
-			batch.set(ref, {
-				name,
-				order: index,
-				questions: [],
-				createdAt: serverTimestamp(),
-			});
-		});
-
-		await batch.commit();
-	};
-
 	const addLikert = async ({ name, description }) => {
-		console.log("Adding likert:", name);
 		try {
-			const ref = await addDoc(collection(db, "likert"), {
-				name,
-				slug: slugify(name),
-				description,
-				status: INACTIVE,
-				createdAt: serverTimestamp(),
-				updatedAt: serverTimestamp(),
-			});
+			const created = await addLikertFirebase({ name, description });
+			// tambahkan ke store list
+			// likerts.value = likerts.value.push(created);
 
-			// Seed 4 kategori default langsung setelah doc likert berhasil dibuat.
-			try {
-				// await seedLikertCategories(ref.id)
-			} catch (seedError) {
-				console.error(
-					"Gagal seed kategori default untuk likert baru:",
-					ref.id,
-					seedError,
-				);
-				throw new Error(
-					"Instrumen dibuat, tapi gagal menyiapkan 4 kategori default. Silakan cek atau hapus dan coba lagi.",
-				);
-			}
-
-			console.log("Likert added with ID:", ref.id);
-			await fetchLikerts();
-			return ref.id;
+			likerts.value.push(created);
+			// console log list
+			console.log("Likert List", likerts.value);
+			return created;
 		} catch (error) {
 			console.error("Error adding likert:", error);
 			throw error;

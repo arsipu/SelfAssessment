@@ -403,8 +403,11 @@ const saveForm = async () => {
 		if (isEditing.value) {
 			await likertStore.updateLikert(editingId.value, form.value);
 		} else {
-			await likertStore.addLikert(form.value);
+			const doc = await likertStore.addLikert(form.value);
+			// pergi ke detail
+			goToQuestions(doc);
 		}
+
 		closeModal();
 	} catch (e) {
 		console.error(e);
