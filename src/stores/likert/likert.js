@@ -1,17 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { db } from "@/firebase/firebase-config";
-import {
-	collection,
-	doc,
-	addDoc,
-	updateDoc,
-	deleteDoc,
-	serverTimestamp,
-} from "firebase/firestore";
 
-import { ACTIVE, INACTIVE } from "@/apps/status";
-import { slugify } from "@/utils/slug";
+import { ACTIVE } from "@/apps/status";
 import { addLikert as addLikertFirebase } from "@/firebase/add-likert";
 import {
 	fetchLikerts as fetchLikertsFirebase,
@@ -20,6 +10,11 @@ import {
 	fetchLikertScales as fetchLikertScalesFirebase,
 } from "@/firebase/fetch-likert";
 import { deleteLikert as deleteLikertFirebase } from "@/firebase/delete-likert";
+import { updateLikert as updateLikertFirebase } from "@/firebase/update-likert";
+import { updateLikertStatus as updateLikertStatusFirebase } from "@/firebase/update-likert-status";
+import { addScale as addScaleFirebase } from "@/firebase/add-scale";
+import { updateScale as updateScaleFirebase } from "@/firebase/update-scale";
+import { deleteScale as deleteScaleFirebase } from "@/firebase/delete-scale";
 
 export const useLikertStore = defineStore("likert", () => {
 	const likerts = ref([]);
@@ -75,15 +70,8 @@ export const useLikertStore = defineStore("likert", () => {
 	};
 
 	const updateLikert = async (likertId, { name, description }) => {
-		console.log("Updating likert:", likertId);
 		try {
-			await updateDoc(doc(db, "likert", likertId), {
-				name,
-				slug: slugify(name),
-				description,
-				updatedAt: serverTimestamp(),
-			});
-			console.log("Likert updated:", likertId);
+			await updateLikertFirebase(likertId, { name, description });
 			await fetchLikerts();
 		} catch (error) {
 			console.error("Error updating likert:", error);
@@ -109,25 +97,21 @@ export const useLikertStore = defineStore("likert", () => {
 	};
 
 	const updateLikertStatus = async (id, status) => {
-		if (status === ACTIVE) {
-			// cari likert lain yang masih active, turunkan jadi inactive dulu
-			const others = likerts.value.filter(
-				(l) => l.id !== id && l.status === ACTIVE,
-			);
-			for (const other of others) {
-				await updateDoc(doc(db, "likert", other.id), {
-					status: INACTIVE,
-					updatedAt: serverTimestamp(),
-				});
-			}
+		try {
+			// Cari likert lain yang masih active (state management di store)
+			const activeLikertIds =
+				status === ACTIVE
+					? likerts.value
+							.filter((l) => l.id !== id && l.status === ACTIVE)
+							.map((l) => l.id)
+					: [];
+
+			await updateLikertStatusFirebase(id, status, activeLikertIds);
+			await fetchLikerts();
+		} catch (error) {
+			console.error("Error updating likert status:", error);
+			throw error;
 		}
-
-		await updateDoc(doc(db, "likert", id), {
-			status,
-			updatedAt: serverTimestamp(),
-		});
-
-		await fetchLikerts();
 	};
 
 	const fetchLikertScales = async (likertId) => {
@@ -145,13 +129,7 @@ export const useLikertStore = defineStore("likert", () => {
 
 	const addScale = async (likertId, { score, range, description }) => {
 		try {
-			const ref = await addDoc(collection(db, "likert", likertId, "scale"), {
-				score,
-				range,
-				description,
-			});
-			console.log("Scale added with ID:", ref.id);
-			return ref.id;
+			return await addScaleFirebase(likertId, { score, range, description });
 		} catch (error) {
 			console.error("Error adding scale:", error);
 			throw error;
@@ -164,12 +142,11 @@ export const useLikertStore = defineStore("likert", () => {
 		{ score, range, description },
 	) => {
 		try {
-			await updateDoc(doc(db, "likert", likertId, "scale", scaleId), {
+			await updateScaleFirebase(likertId, scaleId, {
 				score,
 				range,
 				description,
 			});
-			console.log("Scale updated:", scaleId);
 		} catch (error) {
 			console.error("Error updating scale:", error);
 			throw error;
@@ -178,8 +155,7 @@ export const useLikertStore = defineStore("likert", () => {
 
 	const deleteScale = async (likertId, scaleId) => {
 		try {
-			await deleteDoc(doc(db, "likert", likertId, "scale", scaleId));
-			console.log("Scale deleted:", scaleId);
+			await deleteScaleFirebase(likertId, scaleId);
 		} catch (error) {
 			console.error("Error deleting scale:", error);
 			throw error;
