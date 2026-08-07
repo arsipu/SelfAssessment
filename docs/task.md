@@ -1,156 +1,62 @@
-# Task: Tampilkan 3 Kategori Tertinggi pada RiasecSummaryHeader
-
-## Ringkasan
-
-Mengubah tampilan `RiasecSummaryHeader` di halaman hasil Holland
-(`src/pages/holland/HollandResult.vue`) agar menampilkan **3 kategori
-tertinggi** beserta labelnya, namun **deskripsi (`description`) tetap
-diambil dari 1 kategori tertinggi saja**.
-
-## Konteks / Alur Data Saat Ini
-
-1. Hasil disimpan di `sessionStore` (`src/stores/holland/holland-session.js`):
-   `{ scores, topCode, ... }` — `topCode` string mis. `"S"`.
-2. `computeTopCode(breakdown, topN = 1)` (`src/utils/holland-scoring.js`)
-   sudah mendukung `topN`; dengan `topN = 3` menghasilkan mis. `"SAE"`.
-3. `scoreBreakdown` di `HollandResult.vue` dari
-   `buildScoreBreakdown(scores, topCode)` (`src/utils/holland-result.js`)
-   sudah **urut menurun berdasarkan `percentage`**.
-4. `topCodeInfo` di `HollandResult.vue` saat ini hanya mengambil info
-   dari **1 kode** (`result.topCode`).
-5. `RiasecSummaryHeader.vue` menerima props: `topCode` (String),
-   `topCodeInfo` (Object, hanya `description` dipakai), `scorePercentMap`.
-6. `RiasecNotes` & `RiasecScoreBreakdown` tetap memakai `topCodeInfo`
-   kategori tunggal — tidak ikut berubah.
+# Task Plan: Dedicated Firestore Function untuk Add Likert
 
 ## Tujuan
 
-- `RiasecSummaryHeader` menampilkan 3 kategori tertinggi (kode + label).
-- Deskripsi tetap dari 1 kategori tertinggi (`topCodeInfo.description`).
-- Komponen lain (`RiasecNotes`, `RiasecScoreBreakdown`, hex chart) tidak berubah.
+Membuat fungsi khusus Firestore di `src/firebase/add-likert.js` untuk menambahkan instrumen Likert baru, berdasarkan skema di `docs/firestore_schema.md` dan logika `addLikert` yang ada di `src/stores/likert/likert.js`.
 
-## Perubahan
+## Analisis Kode Saat Ini (`src/stores/likert/likert.js`)
 
-### 1. `src/pages/holland/HollandResult.vue`
+Fungsi `addLikert` saat ini melakukan:
 
-**a. Tambah computed `topCodes` (3 kode tertinggi):**
+1. **Membuat dokumen** di collection `likert` dengan field:
+   - `name` — dari parameter `{ name }`
+   - `slug` — hasil `slugify(name)`
+   - `description` — dari parameter `{ description }`
+   - `status` — `INACTIVE` (dari `@/apps/status`)
+   - `createdAt` — `serverTimestamp()`
+   - `updatedAt` — `serverTimestamp()`
 
-```js
-const topCodes = computed(() => {
-	return scoreBreakdown.value.slice(0, 3).map((row) => row.code);
-});
-```
+2. **Mengembalikan** dokumen yang baru dibuat (bukan hanya ID)
 
-**b. Tambah computed `topCodesInfo` (info 3 kategori):**
+## Rencana Implementasi
 
-```js
-const topCodesInfo = computed(() => {
-	return topCodes.value
-		.map((code) => riasecStore.riasecList.find((r) => r.id === code) || null)
-		.filter(Boolean);
-});
-```
+### 1. Buat file `src/firebase/add-likert.js`
 
-**c. Ubah `topCodeInfo` agar ambil dari `topCodes[0]` (tetap 1 tertinggi):**
+Buat fungsi `addLikert` yang mengekspor fungsi utama:
 
 ```js
-const topCodeInfo = computed(() => {
-	const code = topCodes.value[0];
-	if (!code) return null;
-	return riasecStore.riasecList.find((r) => r.id === code) || null;
-});
+// Struktur yang direncanakan
+import { db } from "@/firebase/firebase-config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { INACTIVE } from "@/apps/status";
+import { slugify } from "@/utils/slug";
 ```
 
-**d. Kirim prop baru ke `<RiasecSummaryHeader>`:**
+**Fungsi utama: `addLikert({ name, description })`**
 
-```html
-<RiasecSummaryHeader
-	:top-code="result.topCode"
-	:top-code-info="topCodeInfo"
-	:score-percent-map="scorePercentMap"
-	:top-codes-info="topCodesInfo"
-/>
-```
+- Membuat dokumen di collection `likert` sesuai skema:
+  - `name` (string)
+  - `slug` (string) — `slugify(name)`
+  - `description` (string)
+  - `status` (string) — `INACTIVE`
+  - `createdAt` (timestamp) — `serverTimestamp()`
+  - `updatedAt` (timestamp) — `serverTimestamp()`
+- Mengembalikan dokumen yang baru dibuat (lengkap dengan `id` dan semua field)
 
-### 2. `src/components/holland/RiasecSummaryHeader.vue`
+### 2. Update `src/stores/likert/likert.js`
 
-**a. Tambah prop `topCodesInfo`:**
+- Ganti implementasi `addLikert` di store agar memanggil fungsi dari `src/firebase/add-likert.js`
+- Hapus logika duplikat (pembuatan dokumen) dari store
+- Store tetap bertanggung jawab untuk `fetchLikerts()` setelah berhasil
 
-```js
-defineProps({
-	topCode: { type: String, required: true },
-	topCodeInfo: { type: Object, default: null },
-	scorePercentMap: { type: Object, required: true },
-	topCodesInfo: { type: Array, default: () => [] },
-});
-```
+### 3. Verifikasi
 
-**b. Tambah computed `displayTopCodes` (fallback dari `topCode`):**
+- Pastikan field yang dibuat sesuai dengan `docs/firestore_schema.md`
+- Pastikan error handling tetap ada
+- Pastikan tidak ada import yang rusak
 
-```js
-import { computed } from "vue";
+## Catatan
 
-const props = defineProps({ ... });
-
-const displayTopCodes = computed(() => {
-  const items = props.topCodesInfo.length
-    ? props.topCodesInfo
-    : (props.topCode || "")
-        .split("")
-        .map((code) => ({ code, label: code }));
-  return items.slice(0, 3);
-});
-```
-
-**c. Ubah bagian kanan header — tampilkan 3 kategori + label, deskripsi tetap:**
-
-```html
-<div>
-	<p class="text-xs text-text-muted mb-1">Kode minat dominan</p>
-	<div class="flex flex-wrap items-center gap-2 mb-2">
-		<span
-			v-for="item in displayTopCodes"
-			:key="item.code"
-			class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary-soft text-primary font-semibold tracking-widest"
-		>
-			<span class="text-lg">{{ item.code }}</span>
-			<span class="text-xs font-medium text-black-secondary">
-				{{ item.label }}
-			</span>
-		</span>
-	</div>
-	<p v-if="topCodeInfo" class="text-sm text-black leading-relaxed">
-		{{ topCodeInfo.description }}
-	</p>
-</div>
-```
-
-### 3. Komponen Lain yang Memakai `RiasecSummaryHeader`
-
-- `AdminHollandSubmissionDetail.vue` juga mengimpor komponen ini.
-  Prop baru `topCodesInfo` opsional (`default: () => []`), jadi tetap
-  berfungsi — fallback `topCode.split("")` menampilkan kode saja.
-- Opsional (di luar scope): ubah halaman admin serupa jika ingin label.
-
-### 4. Edge Cases
-
-- `scoreBreakdown` selalu 6 kategori, jadi `topCodes` selalu 3 item.
-- Jika `riasecList` belum lengkap, `topCodesInfo` bisa < 3 — aman karena
-  `displayTopCodes` di-`slice(0, 3)`.
-- Skor seri: urutan stabil mengikuti `RIASEC_CATEGORY_ORDER`.
-- `topCodeInfo` null: deskripsi tidak tampil (`v-if` sudah ada).
-
-## File yang Diubah
-
-| File                                             | Perubahan                                                                                 |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `src/pages/holland/HollandResult.vue`            | Tambah `topCodes`, `topCodesInfo`; sesuaikan `topCodeInfo`; kirim prop `top-codes-info`   |
-| `src/components/holland/RiasecSummaryHeader.vue` | Tambah prop `topCodesInfo`; render 3 kategori + label; deskripsi tetap dari `topCodeInfo` |
-
-## Kriteria Selesai
-
-- [ ] `RiasecSummaryHeader` menampilkan 3 kategori tertinggi (kode + label).
-- [ ] Deskripsi tetap dari 1 kategori tertinggi (`topCodeInfo.description`).
-- [ ] Halaman hasil (`HollandResult.vue`) tidak error & tetap responsif.
-- [ ] Halaman admin (`AdminHollandSubmissionDetail.vue`) tetap berfungsi.
-- [ ] Hasil cetak/print tetap rapi (flex-wrap aman untuk print).
+- `slugify` diambil dari `@/utils/slug`
+- `INACTIVE` diambil dari `@/apps/status`
+- `serverTimestamp()` digunakan untuk `createdAt` dan `updatedAt` agar konsisten dengan skema

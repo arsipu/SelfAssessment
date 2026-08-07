@@ -187,7 +187,7 @@
 			>
 				<div class="px-6 py-4 flex justify-between items-center shrink-0">
 					<div>
-						<h3 class="text-base font-semibold text-text-primary">
+						<h3 class="text-base font-semibold text-black">
 							{{ isEditing ? "Edit Formulir" : "Tambah Formulir Baru" }}
 						</h3>
 						<p class="text-xs text-text-muted mt-0.5">
@@ -208,26 +208,26 @@
 
 				<div class="p-6 space-y-4 overflow-y-auto">
 					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
+						<label class="block text-sm font-medium text-black mb-1"
 							>Nama Formulir <span class="text-danger">*</span></label
 						>
 						<input
 							v-model="form.name"
 							type="text"
-							class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+							class="w-full px-3 py-2 border border-black-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
 							placeholder="Contoh: Pemutusan Peraturan Baru"
 							autofocus
 							@keyup.enter="saveForm"
 						/>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
+						<label class="block text-sm font-medium text-black mb-1"
 							>Deskripsi</label
 						>
 						<textarea
 							v-model="form.description"
 							rows="3"
-							class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
+							class="w-full px-3 py-2 border border-black-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
 							placeholder="Deskripsi singkat tentang formulir ini..."
 						></textarea>
 					</div>
