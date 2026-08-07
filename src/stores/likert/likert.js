@@ -4,11 +4,9 @@ import { db } from "@/firebase/firebase-config";
 import {
 	collection,
 	doc,
-	getDocs,
 	addDoc,
 	updateDoc,
 	deleteDoc,
-	writeBatch,
 	serverTimestamp,
 } from "firebase/firestore";
 
@@ -21,6 +19,7 @@ import {
 	getLikertBySlug as getLikertBySlugFirebase,
 	fetchLikertScales as fetchLikertScalesFirebase,
 } from "@/firebase/fetch-likert";
+import { deleteLikert as deleteLikertFirebase } from "@/firebase/delete-likert";
 
 export const useLikertStore = defineStore("likert", () => {
 	const likerts = ref([]);
@@ -65,8 +64,6 @@ export const useLikertStore = defineStore("likert", () => {
 		try {
 			const created = await addLikertFirebase({ name, description });
 			// tambahkan ke store list
-			// likerts.value = likerts.value.push(created);
-
 			likerts.value.push(created);
 			// console log list
 			console.log("Likert List", likerts.value);
@@ -101,50 +98,10 @@ export const useLikertStore = defineStore("likert", () => {
 	//   - Semua skala penilaian
 	//   - Document utama
 	const deleteLikert = async (likertId) => {
-		console.log("Deleting likert with cascading:", likertId);
 		try {
-			// 1. Hapus submissions
-			const submissionsSnap = await getDocs(
-				collection(db, "likert", likertId, "submissions"),
-			);
-
-			// 2. Hapus categories
-			const categoriesSnap = await getDocs(
-				collection(db, "likert", likertId, "categories"),
-			);
-
-			// 3. Hapus scales
-			const scalesSnap = await getDocs(
-				collection(db, "likert", likertId, "scale"),
-			);
-
-			// Kumpulkan semua operasi delete dalam batch
-			const batch = writeBatch(db);
-			let operationCount = 0;
-
-			submissionsSnap.docs.forEach((doc) => {
-				batch.delete(doc.ref);
-				operationCount++;
-			});
-			categoriesSnap.docs.forEach((doc) => {
-				batch.delete(doc.ref);
-				operationCount++;
-			});
-			scalesSnap.docs.forEach((doc) => {
-				batch.delete(doc.ref);
-				operationCount++;
-			});
-
-			// Hapus document utama
-			batch.delete(doc(db, "likert", likertId));
-			operationCount++;
-
-			if (operationCount > 0) {
-				await batch.commit();
-			}
-
-			console.log("Likert cascading deleted:", likertId);
-			await fetchLikerts();
+			await deleteLikertFirebase(likertId);
+			// Hapus dari state store berdasarkan id — tidak perlu fetch ulang
+			likerts.value = likerts.value.filter((l) => l.id !== likertId);
 		} catch (error) {
 			console.error("Error deleting likert:", error);
 			throw error;
