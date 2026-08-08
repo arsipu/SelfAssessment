@@ -28,42 +28,34 @@
 			</span>
 		</div>
 
-		<!-- Header -->
-		<div
-			class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6"
-		>
-			<div
-				class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
-			>
-				<div>
-					<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
-						{{ currentLikert?.name ?? "Memuat..." }}
-					</h1>
-					<p class="text-sm text-text-secondary max-w-3xl">
-						{{ currentLikert?.description }}
-					</p>
-					<p class="text-xs text-text-muted mt-1">
-						Kelola skala penilaian untuk menentukan interpretasi akhir skor.
-					</p>
-				</div>
-				<div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-					<button
-						@click="
-							router.push({
-								name: 'admin-likert-questions',
-								params: { slug: likertSlug },
-							})
-						"
-						class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
-					>
-						<font-awesome-icon
-							icon="fa-solid fa-arrow-left"
-							class="w-4 h-4 shrink-0"
-						/>
-						Kembali ke Pertanyaan
-					</button>
-				</div>
+		<div class="bg-surface mb-4">
+			<div>
+				<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
+					Skala Likert Form
+				</h1>
+				<p class="text-sm text-text-secondary max-w-3xl mb-3">
+					Kelola skala penilaian formulir likert.
+				</p>
 			</div>
+		</div>
+
+		<!-- Tombol Kembali -->
+		<div class="mb-1 md:mb-2 mt-8">
+			<button
+				@click="
+					router.push({
+						name: 'admin-likert-questions',
+						params: { slug: likertSlug },
+					})
+				"
+				class="inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+			>
+				<font-awesome-icon
+					icon="fa-solid fa-arrow-left"
+					class="w-4 h-4 shrink-0"
+				/>
+				Kembali
+			</button>
 		</div>
 
 		<!-- Card Kelola Skala -->
@@ -153,7 +145,7 @@
 			</div>
 
 			<!-- Inline Add Form -->
-			<div class="border-t border-border">
+			<div class="border border-black-secondary">
 				<div v-if="showAddScaleForm" class="px-4 md:px-5 py-4 bg-table-value">
 					<div class="flex flex-col sm:flex-row items-start gap-3">
 						<input
@@ -234,13 +226,13 @@
 
 				<div class="p-4 md:p-6 space-y-4 overflow-y-auto">
 					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
+						<label class="block text-sm font-medium text-black mb-1"
 							>Label</label
 						>
 						<input
 							v-model="scaleForm.score"
 							type="text"
-							class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+							class="w-full px-3 py-2.5 md:py-2 border border-black-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
 							placeholder="Contoh: Sangat Tinggi"
 						/>
 					</div>
