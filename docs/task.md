@@ -1,99 +1,91 @@
-# Task: Optimasi getLikertBySlug — Cek State Dulu Sebelum Fetch Firebase
+# Task: Tambah Argumen `cached` pada fetchLikertScales
 
 ## Tujuan
 
-Mengoptimalkan fungsi `getLikertBySlug` di `src/stores/likert/likert.js` agar:
+Menambahkan argumen `cached = false` pada fungsi `fetchLikertScales` di `src/stores/likert/likert.js` agar:
 
-1. Jika data likert dengan slug tersebut **sudah ada di state** (`likerts`), langsung gunakan dari state (hemat data / request Firebase).
-2. Jika **tidak ada**, baru fetch dari Firebase.
+1. Jika `cached = true` → data diambil dari state management (`currentLikertScales`) jika sudah ada. Jika tidak ada data di state, baru fetch dari Firebase.
+2. Jika `cached = false` (default) → selalu fetch dari Firebase (perilaku saat ini, tidak berubah).
 
 ---
 
 ## Analisis State yang Tersedia
 
-Di dalam store `useLikertStore` (Pinia setup store), terdapat state:
-
 | State                 | Tipe        | Isi                                                                         |
 | --------------------- | ----------- | --------------------------------------------------------------------------- |
-| `likerts`             | `ref([])`   | Daftar semua likert hasil `fetchLikerts()`                                  |
 | `currentLikert`       | `ref(null)` | Likert yang sedang aktif/dibuka (hasil `getLikertById` / `getLikertBySlug`) |
-| `currentLikertScales` | `ref([])`   | Skala penilaian likert aktif                                                |
+| `currentLikertScales` | `ref([])`   | Skala penilaian likert yang sedang aktif (hasil `fetchLikertScales`)        |
+
+> **Catatan penting:** `currentLikertScales` hanya menyimpan skala untuk **satu** likert (yang terakhir di-fetch). Jika user berpindah antar likert, data skala bisa tertimpa. Oleh karena itu, perlu validasi bahwa data di state memang milik `likertId` yang diminta.
 
 ---
 
 ## Rencana Implementasi
 
-### 1. Modifikasi fungsi `getLikertBySlug` di `src/stores/likert/likert.js`
+### 1. Modifikasi fungsi `fetchLikertScales` di `src/stores/likert/likert.js`
 
-Ubah logika menjadi urutan pencarian berikut:
+Ubah signature fungsi menjadi:
 
-#### a. Cek di `currentLikert` (data yang sedang aktif)
+```
+const fetchLikertScales = async (likertId, cached = false) => { ... }
+```
 
-- Jika `currentLikert.value` ada **dan** `currentLikert.value.slug === slug`, langsung kembalikan `currentLikert.value` tanpa fetch.
+#### a. Jika `cached = true`:
 
-#### b. Cek di `likerts` (daftar semua likert)
+- Cek apakah `currentLikertScales.value` sudah terisi **dan** milik `likertId` yang diminta.
+- **Validasi kepemilikan data:** Gunakan `currentLikert.value.id` sebagai penanda pemilik data skala. Karena `currentLikert` sudah menyimpan likert yang sedang aktif, dan `currentLikertScales` adalah skala untuk likert tersebut, maka:
+  - Jika `currentLikert.value?.id === likertId` **dan** `currentLikertScales.value.length > 0` → data di state valid, kembalikan tanpa fetch.
+  - Jika `currentLikert.value?.id !== likertId` atau `currentLikertScales.value` kosong → data tidak valid / belum ada, lanjut fetch dari Firebase.
+- **Tidak perlu menambah state baru** — cukup gunakan `currentLikert` yang sudah ada.
 
-- Cari `likerts.value.find((l) => l.slug === slug)`.
-- Jika ketemu, set `currentLikert.value` ke hasil tersebut dan kembalikan, tanpa fetch.
+#### b. Jika `cached = false` (default):
 
-#### c. Jika tidak ada di kedua state → fetch dari Firebase
+- Perilaku tetap seperti sekarang: selalu fetch dari Firebase, simpan ke `currentLikertScales`.
 
-- Panggil `getLikertBySlugFirebase(slug)`.
-- Simpan hasilnya ke `currentLikert.value`.
-- **Opsional (disarankan):** Jika likert hasil fetch belum ada di `likerts`, tambahkan ke `likerts.value` agar fetch berikutnya tidak perlu request lagi.
+#### c. Error handling:
 
-#### d. Error handling
-
-- Tetap gunakan `try/catch` dan `console.error` seperti sekarang.
+- Tetap gunakan `try/catch`, `console.error`, dan set `currentLikertScales.value = []` saat error (seperti sekarang).
 
 ---
 
 ### 2. Contoh pseudocode fungsi baru
 
 ```
-const getLikertBySlug = async (slug) => {
-  // 1. Cek currentLikert
-  if (currentLikert.value?.slug === slug) {
-    return currentLikert.value
+const fetchLikertScales = async (likertId, cached = false) => {
+  // Jika cached = true dan data sudah ada di state untuk likert ini
+  if (
+    cached &&
+    currentLikert.value?.id === likertId &&
+    currentLikertScales.value.length > 0
+  ) {
+    return currentLikertScales.value;
   }
 
-  // 2. Cek daftar likerts
-  const cached = likerts.value.find((l) => l.slug === slug)
-  if (cached) {
-    currentLikert.value = cached
-    return cached
-  }
-
-  // 3. Fetch dari Firebase
   try {
-    const likert = await getLikertBySlugFirebase(slug)
-    currentLikert.value = likert
-
-    // Simpan ke list jika belum ada (untuk caching)
-    if (!likerts.value.some((l) => l.id === likert.id)) {
-      likerts.value.push(likert)
-    }
-
-    return likert
+    const data = await fetchLikertScalesFirebase(likertId);
+    currentLikertScales.value = data;
+    return currentLikertScales.value;
   } catch (error) {
-    console.error("Error fetching likert by slug:", error)
+    console.error("Error fetching likert scales:", error);
+    currentLikertScales.value = [];
+    throw error;
   }
-}
+};
 ```
 
 ---
 
 ## Pertimbangan / Catatan
 
-- **Sinkronisasi:** Jika `currentLikert` sudah terisi dari likert yang sama (slug sama), data tidak perlu di-refetch — menghemat request dan menjaga konsistensi.
-- **Update data:** Setelah user mengedit likert (`updateLikert`), state `currentLikert` dan `likerts` akan diupdate langsung; sehingga `getLikertBySlug` berikutnya tetap mendapat data terbaru dari state.
-- **Perilaku lain tidak berubah:** Semua pemanggil (`AdminLikertQuestions`, `AdminLikertScales`, `AdminLikertSubmissions`, `LikertForm`, `LikertQuestions`, `LikertResult`, dll.) tetap menerima return value yang sama (objek likert atau `undefined` jika gagal).
-- **Field `slug`:** Perlu dipastikan objek likert hasil fetch dari Firebase memiliki field `slug` (dipakai untuk pembanding). Jika tidak yakin, bisa juga membandingkan berdasarkan `id` sebagai fallback, namun karena fungsi menerima `slug` sebagai parameter, perbandingan `slug` adalah yang paling tepat.
+- **Default `cached = false`:** Semua pemanggil yang ada (`AdminLikertQuestions`, `AdminLikertScales`, `AdminLikertSubmissions`, `AdminLikertSubmissionDetail`, `LikertResult`) tetap berperilaku sama — selalu fetch dari Firebase. Tidak ada perubahan perilaku untuk pemanggilan yang sudah ada.
+- **Tidak ada state baru:** Cukup gunakan `currentLikert.value.id` sebagai penanda pemilik data skala — lebih sederhana dan tidak mengubah struktur store.
+- **Kapan memakai `cached = true`:** Halaman yang sering diakses berulang (misal navigasi bolak-balik antara halaman questions dan scales) bisa memakai `cached = true` untuk menghindari fetch berulang.
+- **Kapan TIDAK memakai `cached = true`:** Setelah operasi CRUD skala (tambah/edit/hapus), harus fetch ulang dengan `cached = false` agar data selalu terbaru.
 
 ---
 
 ## File yang Diubah
 
-| File                          | Perubahan                                                                                               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `src/stores/likert/likert.js` | Modifikasi fungsi `getLikertBySlug` untuk cek state (currentLikert & likerts) sebelum fetch ke Firebase |
+| File                          | Perubahan                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/stores/likert/likert.js` | Tambah argumen `cached = false` pada `fetchLikertScales` dan logika cek state (`currentLikert` + `currentLikertScales`) sebelum fetch |

@@ -156,9 +156,19 @@ export const useLikertStore = defineStore("likert", () => {
 		}
 	};
 
-	const fetchLikertScales = async (likertId) => {
+	const fetchLikertScales = async (likertId, cached = false) => {
+		// Jika cached = true dan data sudah ada di state untuk likert ini
+		if (
+			cached &&
+			currentLikert.value?.id === likertId &&
+			currentLikertScales.value.length > 0
+		) {
+			return currentLikertScales.value;
+		}
+
 		try {
-			currentLikertScales.value = await fetchLikertScalesFirebase(likertId);
+			const data = await fetchLikertScalesFirebase(likertId);
+			currentLikertScales.value = data;
 			return currentLikertScales.value;
 		} catch (error) {
 			console.error("Error fetching likert scales:", error);
