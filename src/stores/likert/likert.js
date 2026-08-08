@@ -47,9 +47,29 @@ export const useLikertStore = defineStore("likert", () => {
 	// ── Detail 1 survei berdasarkan slug ──────────────────────
 
 	const getLikertBySlug = async (slug) => {
-		try {
-			currentLikert.value = await getLikertBySlugFirebase(slug);
+		// 1. Cek currentLikert (data yang sedang aktif)
+		if (currentLikert.value?.slug === slug) {
 			return currentLikert.value;
+		}
+
+		// 2. Cek daftar likerts
+		const cached = likerts.value.find((l) => l.slug === slug);
+		if (cached) {
+			currentLikert.value = cached;
+			return cached;
+		}
+
+		// 3. Fetch dari Firebase
+		try {
+			const likert = await getLikertBySlugFirebase(slug);
+			currentLikert.value = likert;
+
+			// Simpan ke list jika belum ada (untuk caching)
+			if (likert && !likerts.value.some((l) => l.id === likert.id)) {
+				likerts.value.push(likert);
+			}
+
+			return likert;
 		} catch (error) {
 			console.error("Error fetching likert by slug:", error);
 		}
