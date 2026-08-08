@@ -59,53 +59,29 @@
 		</div>
 
 		<!-- Card Kelola Skala -->
-		<div
-			class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6"
-		>
+		<div class="table-content mb-4 md:mb-6">
 			<div
-				class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted"
+				class="table-header px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
 			>
-				<h2 class="text-sm font-medium text-text-primary">Skala Penilaian</h2>
+				<h2 class="text-sm font-medium text-white">Skala Penilaian</h2>
 			</div>
 
 			<div class="overflow-x-auto">
-				<table class="app-table w-full text-left border-collapse table-fixed">
-					<thead>
+				<table class="w-full text-left border-collapse table-fixed">
+					<thead class="border-b border-black-secondary">
 						<tr>
-							<th
-								class="w-[18%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Rentang
-							</th>
-							<th
-								class="w-[27%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Label
-							</th>
-							<th
-								class="w-[35%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Deskripsi
-							</th>
-							<th
-								class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Aksi
-							</th>
+							<th class="w-[25%]">Rentang</th>
+							<th class="w-[30%]">Label</th>
+							<th class="w-[30%]">Deskripsi</th>
+							<th class="w-[15%]">Aksi</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-border">
 						<tr v-for="s in scales" :key="s.id">
-							<td class="px-4 md:px-5 py-3 text-sm text-table-value-text">
-								{{ s.min }} – {{ s.max }}
-							</td>
-							<td class="px-4 md:px-5 py-3 text-sm text-table-value-text">
-								{{ s.label }}
-							</td>
-							<td class="px-4 md:px-5 py-3 text-sm text-table-value-text">
-								{{ s.description }}
-							</td>
-							<td class="px-4 md:px-5 py-3">
+							<td>{{ s.min }} – {{ s.max }}</td>
+							<td>{{ s.label }}</td>
+							<td>{{ s.description }}</td>
+							<td>
 								<div class="flex items-center gap-2">
 									<button
 										@click="editScaleItem(s)"
@@ -133,10 +109,7 @@
 
 						<!-- Empty state -->
 						<tr v-if="scales.length === 0">
-							<td
-								colspan="4"
-								class="px-4 md:px-5 py-6 text-center text-sm text-text-muted"
-							>
+							<td colspan="4" class="text-center py-6 text-text-muted">
 								Belum ada skala penilaian.
 							</td>
 						</tr>
@@ -145,7 +118,7 @@
 			</div>
 
 			<!-- Inline Add Form -->
-			<div class="border border-black-secondary">
+			<div class="border-t border-border">
 				<div v-if="showAddScaleForm" class="px-4 md:px-5 py-4 bg-table-value">
 					<div class="flex flex-col sm:flex-row items-start gap-3">
 						<input

@@ -195,4 +195,72 @@ tr.bg-table-value {
 	.app-table tbody td {
 		color: var(--table-value-text);
 	}
+
+	/* ── Table Content (standar untuk card tabel) ── */
+	.table-content {
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border-primary);
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+
+	.table-content > .table-header {
+		background-color: var(--color-primary);
+		border-bottom: 1px solid var(--color-border-primary);
+		padding: 0.75rem 1rem;
+	}
+
+	.table-content > .table-header h2 {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #ffffff;
+	}
+
+	.table-content table {
+		width: 100%;
+		text-align: left;
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
+
+	.table-content thead {
+		border-bottom: 1px solid var(--color-border-primary);
+	}
+
+	.table-content th {
+		padding: 0.75rem 1rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.table-content tbody {
+		border-collapse: collapse;
+	}
+
+	.table-content tbody tr {
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.table-content tbody tr:last-child {
+		border-bottom: none;
+	}
+
+	.table-content td {
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		color: var(--color-table-value-text);
+	}
+
+	@media (min-width: 768px) {
+		.table-content > .table-header {
+			padding: 1rem 1.25rem;
+		}
+
+		.table-content th,
+		.table-content td {
+			padding: 0.75rem 1.25rem;
+		}
+	}
 }
