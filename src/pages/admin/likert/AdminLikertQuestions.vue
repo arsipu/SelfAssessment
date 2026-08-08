@@ -200,12 +200,12 @@
 
 		<!-- Card Skala Penilaian (read-only) -->
 		<div
-			class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6"
+			class="bg-surface border border-black-secondary rounded-xl overflow-hidden mb-4 md:mb-6"
 		>
 			<div
-				class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+				class="px-4 md:px-5 py-3 md:py-4 border-b bg-primary border-black-secondary flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
 			>
-				<h2 class="text-sm font-medium text-text-primary">Skala Penilaian</h2>
+				<h2 class="text-sm font-medium text-white">Skala Penilaian</h2>
 				<button
 					@click="
 						router.push({
@@ -213,7 +213,7 @@
 							params: { slug: likertSlug },
 						})
 					"
-					class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap cursor-pointer"
+					class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white border border-border rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap cursor-pointer"
 				>
 					<font-awesome-icon
 						icon="fa-solid fa-gear"
@@ -224,8 +224,8 @@
 			</div>
 
 			<div class="overflow-x-auto">
-				<table class="app-table w-full text-left border-collapse table-fixed">
-					<thead>
+				<table class="w-full text-left border-collapse table-fixed">
+					<thead class="border-b border-black-secondary">
 						<tr>
 							<th
 								class="w-[25%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
@@ -327,6 +327,14 @@
 							<font-awesome-icon icon="fa-solid fa-trash" class="w-4 h-4" />
 						</button>
 					</div>
+				</div>
+
+				<!-- Empty state: belum ada soal -->
+				<div
+					v-if="(cat.questions?.length ?? 0) === 0"
+					class="px-4 md:px-5 py-6 text-center text-sm text-text-muted"
+				>
+					Belum ada soal untuk kategori ini.
 				</div>
 			</div>
 
