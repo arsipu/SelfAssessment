@@ -572,7 +572,7 @@ const confirmDeleteCategory = async () => {
 
 const fetchScales = async () => {
 	try {
-		const data = await likertStore.fetchLikertScales(likertId.value);
+		const data = await likertStore.fetchLikertScales(likertId.value, false);
 		scales.value = data;
 	} catch (e) {
 		console.error(e);

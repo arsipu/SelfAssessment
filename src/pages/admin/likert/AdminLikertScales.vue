@@ -332,7 +332,7 @@ const resetScaleForm = () => {
 
 const fetchScales = async () => {
 	try {
-		const data = await likertStore.fetchLikertScales(likertId.value);
+		const data = await likertStore.fetchLikertScales(likertId.value, true);
 		scales.value = data;
 	} catch (e) {
 		console.error(e);
