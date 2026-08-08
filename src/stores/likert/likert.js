@@ -181,7 +181,17 @@ export const useLikertStore = defineStore("likert", () => {
 
 	const addScale = async (likertId, { score, range, description }) => {
 		try {
-			return await addScaleFirebase(likertId, { score, range, description });
+			const created = await addScaleFirebase(likertId, {
+				score,
+				range,
+				description,
+			});
+
+			// Update state langsung — tidak perlu fetch ulang
+			currentLikertScales.value.push(created);
+			currentLikertScales.value.sort((a, b) => b.min - a.min);
+
+			return created;
 		} catch (error) {
 			console.error("Error adding scale:", error);
 			throw error;
@@ -194,11 +204,22 @@ export const useLikertStore = defineStore("likert", () => {
 		{ score, range, description },
 	) => {
 		try {
-			await updateScaleFirebase(likertId, scaleId, {
+			const updated = await updateScaleFirebase(likertId, scaleId, {
 				score,
 				range,
 				description,
 			});
+
+			// Update state langsung — tidak perlu fetch ulang
+			const index = currentLikertScales.value.findIndex(
+				(s) => s.id === scaleId,
+			);
+			if (index !== -1) {
+				currentLikertScales.value[index] = updated;
+			}
+			currentLikertScales.value.sort((a, b) => b.min - a.min);
+
+			return updated;
 		} catch (error) {
 			console.error("Error updating scale:", error);
 			throw error;
@@ -208,6 +229,11 @@ export const useLikertStore = defineStore("likert", () => {
 	const deleteScale = async (likertId, scaleId) => {
 		try {
 			await deleteScaleFirebase(likertId, scaleId);
+
+			// Hapus dari state langsung — tidak perlu fetch ulang
+			currentLikertScales.value = currentLikertScales.value.filter(
+				(s) => s.id !== scaleId,
+			);
 		} catch (error) {
 			console.error("Error deleting scale:", error);
 			throw error;
