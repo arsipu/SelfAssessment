@@ -27,93 +27,62 @@
 			>
 		</div>
 
-		<!-- Header -->
-		<div
-			class="bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6"
-		>
-			<div
-				class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
-			>
-				<div>
-					<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
-						{{ currentCategory?.name ?? "Memuat..." }}
-					</h1>
-					<p class="text-sm text-text-secondary max-w-3xl">
-						{{ currentLikert?.description }}
-					</p>
-					<p class="text-xs text-text-muted mt-1">
-						Kelola pertanyaan dalam kategori ini. Pertanyaan bisa ditambah,
-						diedit, atau dihapus.
-					</p>
-				</div>
-				<div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-					<button
-						@click="
-							router.push({
-								name: 'admin-likert-questions',
-								params: { slug: likertSlug },
-							})
-						"
-						class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
-					>
-						<font-awesome-icon
-							icon="fa-solid fa-arrow-left"
-							class="w-4 h-4 shrink-0"
-						/>
-						Kembali ke Kategori
-					</button>
-				</div>
+		<div class="bg-surface mb-4">
+			<div>
+				<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
+					{{ currentCategory?.name ?? "Memuat..." }}
+				</h1>
+				<p class="text-sm text-text-secondary max-w-3xl mb-3">
+					Kelola pertanyaan dalam kategori ini. Pertanyaan bisa ditambah,
+					diedit, atau dihapus.
+				</p>
 			</div>
 		</div>
 
-		<!-- Card Soal -->
-		<div
-			class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6"
-		>
-			<div
-				class="px-4 md:px-5 py-3 md:py-4 border-b border-border bg-surface-muted flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+		<!-- Tombol Kembali -->
+		<div class="mb-1 md:mb-2 mt-8">
+			<button
+				@click="
+					router.push({
+						name: 'admin-likert-questions',
+						params: { slug: likertSlug },
+					})
+				"
+				class="inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
 			>
-				<h2 class="text-sm font-medium text-text-primary">
+				<font-awesome-icon
+					icon="fa-solid fa-arrow-left"
+					class="w-4 h-4 shrink-0"
+				/>
+				Kembali
+			</button>
+		</div>
+
+		<!-- Card Kelola Soal -->
+		<div class="table-content mb-4 md:mb-6">
+			<div
+				class="table-header px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+			>
+				<h2 class="text-sm font-medium text-white">
 					Soal ({{ questions.length }})
 				</h2>
 			</div>
 
-			<!-- Tabel -->
 			<div class="overflow-x-auto">
-				<table class="app-table w-full text-left border-collapse table-fixed">
-					<thead>
+				<table class="w-full text-left border-collapse table-fixed">
+					<thead class="border-b border-black-secondary">
 						<tr>
-							<th
-								class="w-[8%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								No
-							</th>
-							<th
-								class="w-[48%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Pertanyaan
-							</th>
-							<th
-								class="w-[24%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Jenis
-							</th>
-							<th
-								class="w-[20%] px-4 md:px-5 py-3 text-xs font-medium uppercase tracking-wider"
-							>
-								Aksi
-							</th>
+							<th class="w-[8%]">No</th>
+							<th class="w-[48%]">Pertanyaan</th>
+							<th class="w-[24%]">Jenis</th>
+							<th class="w-[20%]">Aksi</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-border">
 						<tr v-for="(q, index) in questions" :key="q.id">
-							<td class="px-4 md:px-5 py-3 text-sm text-table-value-text">
-								{{ index + 1 }}
-							</td>
-							<td class="px-4 md:px-5 py-3 text-sm text-table-value-text">
-								{{ q.question }}
-							</td>
-							<td class="px-4 md:px-5 py-3">
+							<td>{{ index + 1 }}</td>
+							<td>{{ q.question }}</td>
+							<td>
 								<span
 									class="text-xs px-2 py-1 rounded-full font-medium"
 									:class="
@@ -127,10 +96,10 @@
 									}}
 								</span>
 							</td>
-							<td class="px-4 md:px-5 py-3">
+							<td>
 								<div class="flex items-center gap-2">
 									<button
-										@click="openEditModal(q)"
+										@click="editQuestionItem(q)"
 										class="p-2.5 md:p-2 rounded-lg text-primary hover:bg-primary-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
 										title="Edit"
 									>
@@ -140,7 +109,7 @@
 										/>
 									</button>
 									<button
-										@click="openDeleteModal(q.id)"
+										@click="deleteQuestionItem(q.id)"
 										class="p-2.5 md:p-2 rounded-lg text-danger hover:bg-danger-soft transition-colors h-10 w-10 md:h-auto md:w-auto flex items-center justify-center cursor-pointer"
 										title="Hapus"
 									>
@@ -155,10 +124,7 @@
 
 						<!-- Empty state -->
 						<tr v-if="questions.length === 0">
-							<td
-								colspan="4"
-								class="px-4 md:px-5 py-6 text-center text-sm text-text-muted"
-							>
+							<td colspan="4" class="text-center py-6 text-text-muted">
 								Belum ada pertanyaan untuk kategori ini.
 							</td>
 						</tr>
@@ -166,17 +132,18 @@
 				</table>
 			</div>
 
-			<!-- Inline Add Form -->
+			<!-- Inline Add/Edit Form -->
 			<div class="border-t border-border">
-				<!-- Form aktif -->
-				<div v-if="showAddForm" class="px-4 md:px-5 py-4 bg-table-value">
+				<div v-if="showQuestionForm" class="px-4 md:px-5 py-4 bg-table-value">
+					<p class="text-sm font-medium text-text-primary mb-3">
+						{{ editingQuestionId ? "Edit Soal" : "Tambah Soal" }}
+					</p>
 					<div class="flex flex-col sm:flex-row items-start gap-3">
 						<textarea
-							v-model="inlineForm.question"
+							v-model="questionForm.question"
 							rows="2"
 							class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
 							placeholder="Masukkan teks pertanyaan..."
-							autofocus
 						></textarea>
 
 						<div
@@ -185,7 +152,7 @@
 							<label class="flex items-center gap-2 cursor-pointer">
 								<input
 									type="radio"
-									v-model="inlineForm.favorable"
+									v-model="questionForm.favorable"
 									value="favorable"
 									class="h-4 w-4 shrink-0"
 								/>
@@ -196,7 +163,7 @@
 							<label class="flex items-center gap-2 cursor-pointer">
 								<input
 									type="radio"
-									v-model="inlineForm.favorable"
+									v-model="questionForm.favorable"
 									value="unfavorable"
 									class="h-4 w-4 shrink-0"
 								/>
@@ -210,14 +177,14 @@
 							class="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto"
 						>
 							<button
-								@click="saveInline"
-								:disabled="!inlineForm.question.trim() || saving"
+								@click="saveQuestion"
+								:disabled="!questionForm.question.trim() || saving"
 								class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
 							>
 								{{ saving ? "Menyimpan..." : "Simpan" }}
 							</button>
 							<button
-								@click="cancelInline"
+								@click="cancelQuestionForm"
 								class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
 							>
 								Batal
@@ -226,10 +193,9 @@
 					</div>
 				</div>
 
-				<!-- Tombol tambah -->
 				<button
 					v-else
-					@click="openInlineAdd"
+					@click="openAddQuestion"
 					class="w-full px-4 md:px-5 py-3 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors flex items-center gap-2 h-10 cursor-pointer"
 				>
 					<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
@@ -238,96 +204,7 @@
 			</div>
 		</div>
 
-		<!-- Modal Edit Soal -->
-		<div
-			v-if="showEditModal"
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-		>
-			<div
-				class="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-auto flex flex-col max-h-[90vh]"
-			>
-				<div
-					class="px-4 md:px-6 py-4 border-b border-border flex justify-between items-center shrink-0"
-				>
-					<h3 class="text-base font-semibold text-text-primary">Edit Soal</h3>
-					<button
-						@click="closeEditModal"
-						class="text-text-muted hover:text-text-secondary transition-colors p-1 cursor-pointer"
-					>
-						<font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
-					</button>
-				</div>
-
-				<div class="p-4 md:p-6 space-y-4 overflow-y-auto">
-					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
-							>Kategori</label
-						>
-						<select
-							v-model="editForm.categoryId"
-							class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-						>
-							<option v-for="cat in categories" :key="cat.id" :value="cat.id">
-								{{ cat.name }}
-							</option>
-						</select>
-					</div>
-
-					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
-							>Pertanyaan</label
-						>
-						<textarea
-							v-model="editForm.question"
-							rows="3"
-							class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
-							placeholder="Masukkan teks pertanyaan..."
-						></textarea>
-					</div>
-
-					<div class="flex flex-col sm:flex-row gap-4">
-						<label class="flex items-center gap-2 cursor-pointer">
-							<input
-								type="radio"
-								v-model="editForm.favorable"
-								value="favorable"
-								class="h-4 w-4 shrink-0"
-							/>
-							<span class="text-sm text-text-primary">Favorable</span>
-						</label>
-						<label class="flex items-center gap-2 cursor-pointer">
-							<input
-								type="radio"
-								v-model="editForm.favorable"
-								value="unfavorable"
-								class="h-4 w-4 shrink-0"
-							/>
-							<span class="text-sm text-text-primary">Unfavorable</span>
-						</label>
-					</div>
-				</div>
-
-				<div
-					class="px-4 md:px-6 py-4 border-t border-border bg-surface flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0"
-				>
-					<button
-						@click="closeEditModal"
-						class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
-					>
-						Batal
-					</button>
-					<button
-						@click="saveEdit"
-						:disabled="!editForm.question.trim() || saving"
-						class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
-					>
-						{{ saving ? "Menyimpan..." : "Simpan" }}
-					</button>
-				</div>
-			</div>
-		</div>
-
-		<!-- Modal Hapus Soal -->
+		<!-- Modal Konfirmasi Hapus Soal -->
 		<ConfirmDeleteModal
 			:show="showDeleteModal"
 			title="Hapus Soal"
@@ -374,15 +251,10 @@ const currentCategory = computed(() =>
 
 const saving = ref(false);
 
-// Inline add
-const showAddForm = ref(false);
-const inlineForm = ref({ question: "", favorable: "favorable" });
-
-// Edit modal
-const showEditModal = ref(false);
-const editingId = ref(null);
-const editOriginalCategoryId = ref(null);
-const editForm = ref({ question: "", favorable: "favorable", categoryId: "" });
+// Inline add/edit form
+const showQuestionForm = ref(false);
+const editingQuestionId = ref(null);
+const questionForm = ref({ question: "", favorable: "favorable" });
 
 // Delete modal
 const showDeleteModal = ref(false);
@@ -415,77 +287,53 @@ onMounted(async () => {
 	await likertQuestionsStore.fetchQuestions(likertId.value, categoryId);
 });
 
-// ── Inline Add ─────────────────────────────────────────────
+// ── Inline Add/Edit ────────────────────────────────────────
 
-const openInlineAdd = () => {
-	showAddForm.value = true;
-	inlineForm.value = { question: "", favorable: "favorable" };
+const resetQuestionForm = () => {
+	questionForm.value = { question: "", favorable: "favorable" };
+	editingQuestionId.value = null;
 };
 
-const cancelInline = () => {
-	showAddForm.value = false;
-	inlineForm.value = { question: "", favorable: "favorable" };
+const openAddQuestion = () => {
+	resetQuestionForm();
+	showQuestionForm.value = true;
 };
 
-const saveInline = async () => {
-	if (!inlineForm.value.question.trim()) return;
-	saving.value = true;
-	try {
-		await likertQuestionsStore.addQuestion(likertId.value, categoryId, {
-			question: inlineForm.value.question.trim(),
-			favorable: inlineForm.value.favorable,
-		});
-		cancelInline();
-	} catch (e) {
-		console.error(e);
-	} finally {
-		saving.value = false;
-	}
-};
-
-// ── Edit Modal ─────────────────────────────────────────────
-
-const openEditModal = (q) => {
-	editingId.value = q.id;
-	editOriginalCategoryId.value = categoryId;
-	editForm.value = {
+const editQuestionItem = (q) => {
+	editingQuestionId.value = q.id;
+	questionForm.value = {
 		question: q.question,
 		favorable: q.favorable,
-		categoryId,
 	};
-	showEditModal.value = true;
+	showQuestionForm.value = true;
 };
 
-const closeEditModal = () => {
-	showEditModal.value = false;
-	editingId.value = null;
-	editOriginalCategoryId.value = null;
-	editForm.value = { question: "", favorable: "favorable", categoryId: "" };
+const cancelQuestionForm = () => {
+	resetQuestionForm();
+	showQuestionForm.value = false;
 };
 
-const saveEdit = async () => {
-	if (!editForm.value.question.trim()) return;
+const saveQuestion = async () => {
+	if (!questionForm.value.question.trim()) return;
 	saving.value = true;
 	try {
-		await likertQuestionsStore.updateQuestion(
-			likertId.value,
-			editOriginalCategoryId.value,
-			editingId.value,
-			{
-				question: editForm.value.question.trim(),
-				favorable: editForm.value.favorable,
-				newCategoryId:
-					editForm.value.categoryId !== editOriginalCategoryId.value
-						? editForm.value.categoryId
-						: null,
-			},
-		);
-
-		// Jika soal dipindah ke kategori lain, muat ulang soal kategori ini
-		if (editForm.value.categoryId !== editOriginalCategoryId.value) {
-			await likertQuestionsStore.fetchQuestions(likertId.value, categoryId);
+		if (editingQuestionId.value) {
+			await likertQuestionsStore.updateQuestion(
+				likertId.value,
+				categoryId,
+				editingQuestionId.value,
+				{
+					question: questionForm.value.question.trim(),
+					favorable: questionForm.value.favorable,
+				},
+			);
+		} else {
+			await likertQuestionsStore.addQuestion(likertId.value, categoryId, {
+				question: questionForm.value.question.trim(),
+				favorable: questionForm.value.favorable,
+			});
 		}
-		closeEditModal();
+		cancelQuestionForm();
 	} catch (e) {
 		console.error(e);
 	} finally {
@@ -495,7 +343,7 @@ const saveEdit = async () => {
 
 // ── Delete Modal ───────────────────────────────────────────
 
-const openDeleteModal = (id) => {
+const deleteQuestionItem = (id) => {
 	deletingId.value = id;
 	showDeleteModal.value = true;
 };
