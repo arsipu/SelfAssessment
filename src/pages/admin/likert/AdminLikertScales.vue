@@ -117,9 +117,12 @@
 				</table>
 			</div>
 
-			<!-- Inline Add Form -->
+			<!-- Inline Add/Edit Form -->
 			<div class="border-t border-border">
 				<div v-if="showAddScaleForm" class="px-4 md:px-5 py-4 bg-table-value">
+					<p class="text-sm font-medium text-text-primary mb-3">
+						{{ editingScaleId ? "Edit Skala" : "Tambah Skala" }}
+					</p>
 					<div class="flex flex-col sm:flex-row items-start gap-3">
 						<input
 							v-model="scaleForm.min"
@@ -177,93 +180,6 @@
 			</div>
 		</div>
 
-		<!-- Modal Edit Skala -->
-		<div
-			v-if="showEditScaleModal"
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-		>
-			<div
-				class="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-auto flex flex-col max-h-[90vh]"
-			>
-				<div
-					class="px-4 md:px-6 py-4 border-b border-border flex justify-between items-center shrink-0"
-				>
-					<h3 class="text-base font-semibold text-text-primary">Edit Skala</h3>
-					<button
-						@click="cancelScaleEdit"
-						class="text-text-muted hover:text-text-secondary transition-colors p-1 cursor-pointer"
-					>
-						<font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
-					</button>
-				</div>
-
-				<div class="p-4 md:p-6 space-y-4 overflow-y-auto">
-					<div>
-						<label class="block text-sm font-medium text-black mb-1"
-							>Label</label
-						>
-						<input
-							v-model="scaleForm.score"
-							type="text"
-							class="w-full px-3 py-2.5 md:py-2 border border-black-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-							placeholder="Contoh: Sangat Tinggi"
-						/>
-					</div>
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<label class="block text-sm font-medium text-text-primary mb-1"
-								>Min</label
-							>
-							<input
-								v-model.number="scaleForm.min"
-								type="number"
-								class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-							/>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-text-primary mb-1"
-								>Max</label
-							>
-							<input
-								v-model.number="scaleForm.max"
-								type="number"
-								class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-							/>
-						</div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-text-primary mb-1"
-							>Deskripsi</label
-						>
-						<textarea
-							v-model="scaleForm.description"
-							rows="3"
-							class="w-full px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-y"
-							placeholder="Deskripsi (opsional)"
-						></textarea>
-					</div>
-				</div>
-
-				<div
-					class="px-4 md:px-6 py-4 border-t border-border bg-surface-muted flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0"
-				>
-					<button
-						@click="cancelScaleEdit"
-						class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-primary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
-					>
-						Batal
-					</button>
-					<button
-						@click="saveScale"
-						:disabled="!scaleForm.score.trim() || scaleSaving"
-						class="w-full sm:w-auto px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed h-10 cursor-pointer"
-					>
-						{{ scaleSaving ? "Menyimpan..." : "Simpan" }}
-					</button>
-				</div>
-			</div>
-		</div>
-
 		<!-- Modal Konfirmasi Hapus Skala -->
 		<ConfirmDeleteModal
 			:show="showDeleteScaleModal"
@@ -302,9 +218,6 @@ const editingScaleId = ref(null);
 
 // Inline add scale
 const showAddScaleForm = ref(false);
-
-// Edit scale modal
-const showEditScaleModal = ref(false);
 
 // Delete scale
 const showDeleteScaleModal = ref(false);
@@ -366,15 +279,14 @@ const saveScale = async () => {
 				range,
 				description: scaleForm.value.description.trim(),
 			});
-			showEditScaleModal.value = false;
 		} else {
 			await likertStore.addScale(likertId.value, {
 				score: scaleForm.value.score.trim(),
 				range,
 				description: scaleForm.value.description.trim(),
 			});
-			showAddScaleForm.value = false;
 		}
+		showAddScaleForm.value = false;
 		resetScaleForm();
 		await fetchScales();
 	} catch (e) {
@@ -392,12 +304,7 @@ const editScaleItem = (s) => {
 		max: s.max,
 		description: s.description || "",
 	};
-	showEditScaleModal.value = true;
-};
-
-const cancelScaleEdit = () => {
-	resetScaleForm();
-	showEditScaleModal.value = false;
+	showAddScaleForm.value = true;
 };
 
 const deleteScaleItem = (scaleId) => {

@@ -1,175 +1,77 @@
-# Task: Kembalikan Dokumen Scale yang Sudah Diupdate untuk Update State Langsung
+# Task: Ubah Edit Skala dari Modal ke Inline Form
 
 ## Tujuan
 
-Mengubah fungsi di `src/firebase/add-scale.js` dan `src/firebase/update-scale.js` agar mengembalikan dokumen scale yang sudah dibuat/diupdate, sehingga `src/stores/likert/likert.js` dapat mengupdate state `currentLikertScales` secara langsung **tanpa fetch ulang** ke Firebase.
+Mengubah mekanisme **edit skala** pada halaman `src/pages/admin/likert/AdminLikertScales.vue` dari **modal dialog** menjadi **inline form**, dengan pola yang sama persis seperti saat menambahkan skala (inline form di bagian bawah tabel).
 
 ---
 
-## Analisis Struktur Data Scale
+## Kondisi Saat Ini
 
-### Format data scale yang dikembalikan `fetchLikertScalesFirebase`:
-
-```js
-{
-  id: string,
-  label: string,        // dari field `score` di Firestore
-  description: string,  // dari field `description` di Firestore
-  min: number,          // dipecah dari field `range` ("min – max")
-  max: number,          // dipecah dari field `range` ("min – max")
-}
-```
-
-### Fungsi Firebase saat ini:
-
-| File                           | Return saat ini   | Masalah                                   |
-| ------------------------------ | ----------------- | ----------------------------------------- |
-| `src/firebase/add-scale.js`    | `ref.id` (string) | Tidak ada data lengkap untuk update state |
-| `src/firebase/update-scale.js` | `undefined`       | Tidak ada data lengkap untuk update state |
+| Aksi   | Mekanisme                                                         |
+| ------ | ----------------------------------------------------------------- |
+| Tambah | Inline form di bawah tabel (`showAddScaleForm`)                   |
+| Edit   | Modal dialog (`showEditScaleModal`)                               |
+| Hapus  | Modal konfirmasi (`ConfirmDeleteModal`) — **tetap dipertahankan** |
 
 ---
 
-## Rencana Implementasi
+## Rencana Perubahan
 
-### 1. `src/firebase/add-scale.js` — Kembalikan dokumen lengkap
+### 1. Hapus Modal Edit Skala
 
-Setelah `addDoc` berhasil, baca kembali dokumen yang baru dibuat (atau konstruksi objek dari data yang dikirim + `ref.id`), lalu kembalikan dalam format yang sama dengan `fetchLikertScalesFirebase`:
+- Hapus seluruh blok template **Modal Edit Skala** (`v-if="showEditScaleModal"` ... sampai penutupnya).
+- Hapus state `showEditScaleModal` pada `<script setup>`.
 
-```
-{
-  id: ref.id,
-  label: score,              // dari argumen
-  description,               // dari argumen
-  min: Number(parts[0]),     // dipecah dari argumen range
-  max: Number(parts[1]),     // dipecah dari argumen range
-}
-```
+### 2. Gunakan Satu Inline Form untuk Tambah & Edit
 
-**Catatan:** Karena argumen `range` sudah tersedia, tidak perlu membaca ulang dari Firestore — cukup pecah `range` dengan regex yang sama (`/\s*[-–—]\s*/`) seperti di `fetchLikertScales`.
+- **Satu** form inline di bawah tabel yang dipakai untuk dua mode: tambah & edit.
+- Form ini sudah ada (blok `showAddScaleForm`). Yang perlu ditambah:
+  - **Judul/indikator mode**: tampilkan teks kecil seperti `"Edit Skala"` atau `"Tambah Skala"` di atas form agar jelas mode aktif.
+  - **Tombol aksi** tetap sama: `Simpan` & `Batal`.
 
----
+### 3. Ubah Logika `editScaleItem`
 
-### 2. `src/firebase/update-scale.js` — Kembalikan dokumen yang sudah diupdate
+Saat tombol edit diklik:
 
-Setelah `updateDoc` berhasil, konstruksi objek dari argumen (`score`, `range`, `description`) + `scaleId`, dengan format yang sama:
+1. Isi `scaleForm` dengan data baris yang diedit (`score`, `min`, `max`, `description`).
+2. Set `editingScaleId` ke `s.id`.
+3. Set `showAddScaleForm = true` (tampilkan inline form).
+4. **Hapus** `showEditScaleModal.value = true`.
 
-```
-{
-  id: scaleId,
-  label: score,              // dari argumen
-  description,               // dari argumen
-  min: Number(parts[0]),     // dipecah dari argumen range
-  max: Number(parts[1]),     // dipecah dari argumen range
-}
-```
+### 4. Ubah Logika `saveScale`
 
-Kembalikan objek tersebut sehingga store bisa langsung mengupdate state.
+- Saat `editingScaleId` terisi → lakukan update, lalu **tutup inline form** (`showAddScaleForm = false`).
+- Saat `editingScaleId` kosong → tambah data baru, lalu tutup inline form.
+- Hapus baris `showEditScaleModal.value = false`.
 
----
+### 5. Ubah Logika `cancelScaleEdit`
 
-### 3. `src/stores/likert/likert.js` — Update state langsung tanpa fetch ulang
+- Fungsi ini tidak lagi menutup modal, melainkan:
+  - `resetScaleForm()`
+  - `showAddScaleForm = false`
 
-#### a. `addScale`
+### 6. Perilaku Tombol "Tambah Skala"
 
-- Terima hasil dari `addScaleFirebase` (objek dokumen lengkap).
-- Tambahkan objek tersebut ke `currentLikertScales.value`.
-- Urutkan ulang `currentLikertScales.value` dari `min` terbesar ke terkecil (konsisten dengan `fetchLikertScalesFirebase`).
-- Kembalikan objek dokumen.
-
-#### b. `updateScale`
-
-- Terima hasil dari `updateScaleFirebase` (objek dokumen lengkap).
-- Ganti item di `currentLikertScales.value` yang `id`-nya sama dengan `scaleId`.
-- Urutkan ulang `currentLikertScales.value` dari `min` terbesar ke terkecil.
-- Kembalikan objek dokumen.
-
-#### c. `deleteScale`
-
-- Setelah `deleteScaleFirebase` berhasil, hapus item dari `currentLikertScales.value` berdasarkan `scaleId` langsung (tanpa fetch ulang).
-- Ini juga menghemat fetch tambahan.
+- Jika sedang dalam mode edit, tombol `Tambah Skala` (yang muncul saat form tertutup) tetap berfungsi normal: reset form lalu tampilkan form dalam mode tambah.
 
 ---
 
-### 4. Contoh pseudocode
+## Ringkasan Perubahan Kode
 
-#### `addScale` di store:
-
-```
-const addScale = async (likertId, { score, range, description }) => {
-  try {
-    const created = await addScaleFirebase(likertId, { score, range, description });
-
-    // Update state langsung — tidak perlu fetch ulang
-    currentLikertScales.value.push(created);
-    currentLikertScales.value.sort((a, b) => b.min - a.min);
-
-    return created;
-  } catch (error) {
-    console.error("Error adding scale:", error);
-    throw error;
-  }
-};
-```
-
-#### `updateScale` di store:
-
-```
-const updateScale = async (likertId, scaleId, { score, range, description }) => {
-  try {
-    const updated = await updateScaleFirebase(likertId, scaleId, {
-      score,
-      range,
-      description,
-    });
-
-    // Update state langsung — tidak perlu fetch ulang
-    const index = currentLikertScales.value.findIndex((s) => s.id === scaleId);
-    if (index !== -1) {
-      currentLikertScales.value[index] = updated;
-    }
-    currentLikertScales.value.sort((a, b) => b.min - a.min);
-
-    return updated;
-  } catch (error) {
-    console.error("Error updating scale:", error);
-    throw error;
-  }
-};
-```
-
-#### `deleteScale` di store:
-
-```
-const deleteScale = async (likertId, scaleId) => {
-  try {
-    await deleteScaleFirebase(likertId, scaleId);
-
-    // Hapus dari state langsung — tidak perlu fetch ulang
-    currentLikertScales.value = currentLikertScales.value.filter(
-      (s) => s.id !== scaleId,
-    );
-  } catch (error) {
-    console.error("Error deleting scale:", error);
-    throw error;
-  }
-};
-```
+| Bagian                             | Perubahan                                        |
+| ---------------------------------- | ------------------------------------------------ |
+| Template: Modal Edit               | Dihapus                                          |
+| Template: Inline form              | Ditambah indikator mode (Tambah/Edit)            |
+| `showEditScaleModal`               | Dihapus                                          |
+| `editScaleItem`                    | Isi form + tampilkan inline form, tanpa modal    |
+| `saveScale`                        | Tutup inline form setelah simpan (tambah/update) |
+| `cancelScaleEdit`                  | Reset form + tutup inline form                   |
+| Modal Hapus (`ConfirmDeleteModal`) | Tidak berubah                                    |
 
 ---
 
-## Pertimbangan / Catatan
+## Catatan
 
-- **Format konsisten:** Objek yang dikembalikan dari `add-scale.js` dan `update-scale.js` harus persis sama dengan format dari `fetchLikertScalesFirebase` (`{ id, label, description, min, max }`) agar state konsisten.
-- **Tidak perlu baca ulang dari Firestore:** Karena data (`score`, `range`, `description`) sudah tersedia sebagai argumen, cukup konstruksi objek langsung — hemat 1 request per operasi.
-- **Pemanggil tidak berubah:** Semua halaman yang memanggil `addScale` / `updateScale` / `deleteScale` tetap bekerja — mereka hanya menerima return value tambahan.
-- **Manfaat:** Halaman `AdminLikertScales.vue` setelah CRUD tidak perlu memanggil `fetchScales()` lagi — state sudah terupdate langsung dari store.
-
----
-
-## File yang Diubah
-
-| File                           | Perubahan                                                                                        |
-| ------------------------------ | ------------------------------------------------------------------------------------------------ |
-| `src/firebase/add-scale.js`    | Kembalikan objek dokumen lengkap `{ id, label, description, min, max }`                          |
-| `src/firebase/update-scale.js` | Kembalikan objek dokumen lengkap `{ id, label, description, min, max }`                          |
-| `src/stores/likert/likert.js`  | `addScale`, `updateScale`, `deleteScale` update `currentLikertScales` langsung tanpa fetch ulang |
+- Modal konfirmasi hapus **tetap** menggunakan `ConfirmDeleteModal` (tidak diubah).
+- Tidak ada perubahan pada store, firebase, atau file lain — hanya file `AdminLikertScales.vue`.
