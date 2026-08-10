@@ -269,6 +269,63 @@
 			</div>
 		</div>
 
+		<!-- Tambah Kategori -->
+		<div
+			class="bg-surface border border-border rounded-xl overflow-hidden mb-4 md:mb-6"
+		>
+			<button
+				@click="showCategoryForm = !showCategoryForm"
+				class="w-full px-4 md:px-5 py-3 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors flex items-center gap-2 h-10 cursor-pointer"
+			>
+				<font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4 shrink-0" />
+				Tambah Kategori
+			</button>
+
+			<div
+				v-if="showCategoryForm"
+				class="border-t border-border px-4 md:px-5 py-4 bg-surface"
+			>
+				<p class="text-sm font-medium text-text-primary mb-3">
+					Tambah Kategori Baru
+				</p>
+				<div class="flex flex-col sm:flex-row items-start gap-3">
+					<input
+						v-model="categoryForm.name"
+						type="text"
+						class="w-full sm:flex-1 px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+						placeholder="Nama kategori..."
+					/>
+
+					<select
+						v-model="categoryForm.order"
+						class="w-full sm:w-auto px-3 py-2.5 md:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm bg-surface"
+					>
+						<option v-for="i in categories.length + 1" :key="i" :value="i - 1">
+							Posisi {{ i - 1 }}
+						</option>
+					</select>
+
+					<div
+						class="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto"
+					>
+						<button
+							@click="saveCategory"
+							:disabled="!categoryForm.name.trim() || savingCategory"
+							class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:bg-text-muted disabled:cursor-not-allowed whitespace-nowrap h-10 cursor-pointer"
+						>
+							{{ savingCategory ? "Menyimpan..." : "Simpan" }}
+						</button>
+						<button
+							@click="cancelCategoryForm"
+							class="flex-1 sm:flex-none px-4 py-2.5 md:py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors h-10 cursor-pointer"
+						>
+							Batal
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Loading -->
 		<div
 			v-if="catLoading"
@@ -371,6 +428,37 @@ const showGuide = ref(false);
 // ── Scale State (read-only) ────────────────────────────────
 
 const scales = ref([]);
+
+// ── Category Add State ─────────────────────────────────────
+
+const showCategoryForm = ref(false);
+const savingCategory = ref(false);
+const categoryForm = ref({ name: "", order: 0 });
+
+const resetCategoryForm = () => {
+	categoryForm.value = { name: "", order: categories.value.length };
+};
+
+const cancelCategoryForm = () => {
+	resetCategoryForm();
+	showCategoryForm.value = false;
+};
+
+const saveCategory = async () => {
+	if (!categoryForm.value.name.trim()) return;
+	savingCategory.value = true;
+	try {
+		await categoryStore.addCategory(likertId.value, {
+			name: categoryForm.value.name.trim(),
+			order: categoryForm.value.order,
+		});
+		cancelCategoryForm();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		savingCategory.value = false;
+	}
+};
 
 // ── Lifecycle ──────────────────────────────────────────────
 
