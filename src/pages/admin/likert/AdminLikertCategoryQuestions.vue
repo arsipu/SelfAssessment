@@ -134,7 +134,7 @@
 
 			<!-- Inline Add/Edit Form -->
 			<div class="border-t border-border">
-				<div v-if="showQuestionForm" class="px-4 md:px-5 py-4 bg-table-value">
+				<div v-if="showQuestionForm" class="px-4 md:px-5 py-4 bg-surface">
 					<p class="text-sm font-medium text-text-primary mb-3">
 						{{ editingQuestionId ? "Edit Soal" : "Tambah Soal" }}
 					</p>
