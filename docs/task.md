@@ -1,162 +1,128 @@
-# Task: Tampilkan Soal di Dalam Card Kategori (Style Skala)
+# Task: Refactor CRUD Likert Categories ke `src/firebase`
 
 ## Tujuan
 
-Mengubah halaman `src/pages/admin/likert/AdminLikertQuestions.vue` agar:
+Memisahkan logika CRUD (operasi Firestore) untuk subcollection `likert/{likertId}/categories` dari `src/stores/likert/likert-categories.js` ke file terpisah di folder `src/firebase`.
 
-- Kategori tetap ditampilkan sebagai **card** (bukan tabel).
-- Setiap card kategori menampilkan **daftar soal** yang ada di dalam kategori tersebut.
-- Setiap card kategori bisa **dikelola langsung** (tambah/edit/hapus soal, edit nama, hapus kategori).
-- **Style mengikuti skala/scale** (`AdminLikertScales.vue`): `table-content`, `table-header` biru, tabel, inline form, tombol tambah di bawah.
+Store hanya berperan sebagai _state container_ (memanggil fungsi dari `src/firebase` dan mengelola `ref` state), sedangkan semua interaksi Firestore dipindahkan ke fungsi murni di `src/firebase`.
 
----
+## Pola yang Diikuti
 
-## Kondisi Saat Ini
+Mengikuti pola file yang sudah ada di `src/firebase`:
 
-| Aspek                | Kondisi                                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| Kategori             | Card per kategori (`bg-surface border rounded-xl`)                                                        |
-| Header card          | `bg-surface-muted`                                                                                        |
-| Soal                 | Tidak ditampilkan di card — hanya jumlah soal                                                             |
-| Kelola soal          | Navigasi ke halaman terpisah `AdminLikertCategoryQuestions.vue` (route `admin-likert-category-questions`) |
-| Tambah/Edit kategori | Modal dialog (`showCategoryModal`)                                                                        |
-| Tambah/Edit soal     | Di halaman terpisah (`AdminLikertCategoryQuestions.vue`)                                                  |
+| File Existing             | Fungsi                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `add-likert.js`           | `addLikert()`                                                                   |
+| `add-scale.js`            | `addScale()`                                                                    |
+| `fetch-likert.js`         | `fetchLikerts()`, `getLikertById()`, `getLikertBySlug()`, `fetchLikertScales()` |
+| `delete-likert.js`        | `deleteLikert()`                                                                |
+| `delete-scale.js`         | `deleteScale()`                                                                 |
+| `update-likert.js`        | `updateLikert()`                                                                |
+| `update-likert-status.js` | `updateLikertStatus()`                                                          |
+| `update-scale.js`         | `updateScale()`                                                                 |
 
----
+Semua file tersebut:
 
-## Desain Target
+- Import `db` dari `@/firebase/firebase-config`
+- Menyediakan fungsi async yang menerima parameter (id, dll.) dan mengembalikan data hasil operasi
+- Menangani `console.log` / `console.error` untuk debugging
+- **Tidak** mengelola state Vue (`ref`)
 
-### Card Kategori (Style Skala)
+## Rencana File Baru
 
-Setiap kategori dirender sebagai card dengan struktur:
+Buat 4 file baru di `src/firebase`:
 
+### 1. `src/firebase/fetch-categories.js`
+
+Berisi 2 fungsi:
+
+- **`fetchCategories(likertId)`**
+  - Query collection `likert/{likertId}/categories` dengan `orderBy('order')`
+  - Ambil semua dokumen, map ke `{ id, ...data }`
+  - Kembalikan array. Jika error, log error dan kembalikan `[]`.
+
+- **`getCategoryById(likertId, categoryId)`**
+  - `getDoc(doc(db, 'likert', likertId, 'categories', categoryId))`
+  - Kembalikan `{ id, ...data }` jika ada, `null` jika tidak.
+
+### 2. `src/firebase/add-category.js`
+
+Berisi 1 fungsi:
+
+- **`addCategory(likertId, { name, order }, existingCategories)`**
+  - **Catatan:** Karena logika update state bergantung pada data kategori yang sudah ada (untuk menggeser `order` category other), fungsi ini perlu menerima daftar kategori existing sebagai parameter (`existingCategories`). Ini membuat fungsi di `src/firebase` tetap _pure_ terhadap Firestore, dan store cukup meneruskan `categories.value`.
+  - Hitung `toShift` = kategori yang `order >= order` yang baru.
+  - Buat batch: `set` dokumen baru + `update` order kategori yang digeser (+1).
+  - Commit batch.
+  - Kembalikan `{ id, ...payload }` (dokumen baru) agar store bisa mengupdate state lokal tanpa fetch ulang.
+
+### 3. `src/firebase/update-category.js`
+
+Berisi 1 fungsi:
+
+- **`updateCategory(likertId, categoryId, { name, order }, existingCategories)`**
+  - Terima `existingCategories` untuk menghitung pergeseran order kategori lain.
+  - Logic:
+    - Jika `order === undefined` atau sama dengan order lama → `updateDoc` biasa.
+    - Jika order berubah:
+      - Hitung `toShift` (kategori di antara posisi lama & baru)
+      - Batch: update dokumen utama + update order kategori yang digeser sesuai arah (+1 / -1)
+      - Commit
+  - Kembalikan `{ id, name, order }` hasil update (dan info pergeseran bila perlu) agar store bisa sinkron state lokal.
+
+### 4. `src/firebase/delete-category.js`
+
+Berisi 1 fungsi:
+
+- **`deleteCategory(likertId, categoryId)`**
+  - `deleteDoc(doc(db, 'likert', likertId, 'categories', categoryId))`
+  - Kembalikan `categoryId` yang dihapus (atau `void`) agar store bisa menghapus dari state lokal.
+
+## Perubahan pada Store `src/stores/likert/likert-categories.js`
+
+Setelah file `src/firebase` dibuat, store akan:
+
+- **Hapus** semua import Firestore (`collection`, `doc`, `getDocs`, dll.) dan import `db`.
+- **Import** fungsi dari file baru:
+
+```js
+import { fetchCategories, getCategoryById } from "@/firebase/fetch-categories";
+import { addCategory } from "@/firebase/add-category";
+import { updateCategory } from "@/firebase/update-category";
+import { deleteCategory } from "@/firebase/delete-category";
 ```
-┌─────────────────────────────────────────────────────────┐
-│ table-header (biru, teks putih)                         │
-│ Nama Kategori  [Jumlah Soal]  [Edit] [Hapus]            │
-├─────────────────────────────────────────────────────────┤
-│ Tabel Soal (table-content)                              │
-│ ┌────────┬──────────────────┬───────────┬────────────┐  │
-│ │ No     │ Pertanyaan       │ Jenis     │ Aksi       │  │
-│ ├────────┼──────────────────┼───────────┼────────────┤  │
-│ │ 1      │ ...              │ Favorable │ [✏] [🗑]   │  │
-│ │ 2      │ ...              │ Unfav.    │ [✏] [🗑]   │  │
-│ └────────┴──────────────────┴───────────┴────────────┘  │
-├─────────────────────────────────────────────────────────┤
-│ Inline form tambah/edit soal (bg-table-value)           │
-│ [textarea pertanyaan] [radio F/U] [Simpan] [Batal]      │
-│ ATAU tombol "Tambah Soal" (saat form tertutup)          │
-└─────────────────────────────────────────────────────────┘
-```
 
-### Header Card
+- Setiap method store cukup:
+  - Memanggil fungsi `src/firebase` (meneruskan `categories.value` bila diperlukan).
+  - Mengupdate state `categories.value` / `loading.value` sesuai hasil kembalian fungsi.
+  - Menjaga logika penyortiran state lokal setelah operasi add/update.
 
-- Ganti `bg-surface-muted` → `table-header` (biru, teks putih).
-- Berisi: nama kategori, jumlah soal, tombol aksi (Edit nama, Hapus kategori).
+### Rincian per method di store:
 
-### Tabel Soal di Dalam Card
+| Method Store      | Panggil Fungsi                                                 | Update State Lokal                               |
+| ----------------- | -------------------------------------------------------------- | ------------------------------------------------ |
+| `fetchCategories` | `fetchCategories(likertId)`                                    | `loading` true/false, `categories.value = hasil` |
+| `getCategoryById` | `getCategoryById(likertId, categoryId)`                        | tidak ada (return saja)                          |
+| `addCategory`     | `addCategory(likertId, data, categories.value)`                | tambah hasil ke array, sort                      |
+| `updateCategory`  | `updateCategory(likertId, categoryId, data, categories.value)` | update item & pergeseran order, sort             |
+| `deleteCategory`  | `deleteCategory(likertId, categoryId)`                         | filter array                                     |
 
-- Kolom: **No** (8%), **Pertanyaan** (48%), **Jenis** (24%), **Aksi** (20%).
-- Badge jenis: `Favorable` (hijau) / `Unfavorable` (merah).
-- Tombol aksi: Edit (pensil), Hapus (trash).
-- Empty state: "Belum ada soal untuk kategori ini."
+> Catatan: Untuk `addCategory` & `updateCategory`, karena logika pergeseran _order_ kompleks dan bergantung pada data existing, disarankan fungsi `src/firebase` mengembalikan data yang cukup (misalnya hasil dokumen + daftar kategori yang ikut tergeser) sehingga store bisa memperbarui state dengan tepat. Alternatif yang lebih sederhana: store melakukan `fetchCategories` ulang setelah operasi, tapi ini kurang efisien. Rencana default: fungsi mengembalikan objek berisi `{ doc: {...}, shiftedIds: [...] }` atau format serupa agar store bisa sinkron lokal tanpa fetch ulang.
 
-### Inline Form Soal (Tambah/Edit)
+## Isi File `docs/task.md` Ini (Task Plan)
 
-- Satu inline form per card kategori untuk tambah & edit soal.
-- Indikator mode: `"Edit Soal"` / `"Tambah Soal"`.
-- Field: textarea pertanyaan, radio Favorable/Unfavorable.
-- Tombol: Simpan & Batal.
-- Saat form tertutup: tombol "Tambah Soal" (ikon `fa-plus`).
+- [x] Analisis kode store & pola folder `src/firebase`
+- [ ] Buat `src/firebase/fetch-categories.js`
+- [ ] Buat `src/firebase/add-category.js`
+- [ ] Buat `src/firebase/update-category.js`
+- [ ] Buat `src/firebase/delete-category.js`
+- [ ] Refactor `src/stores/likert/likert-categories.js` untuk memanggil fungsi tersebut
+- [ ] Verifikasi tidak ada import Firestore tersisa di store
+- [ ] Uji / jalankan build untuk memastikan tidak error
 
-### Inline Form Kategori (Tambah/Edit Nama)
+## Catatan / Keputusan Desain
 
-- Ganti modal `showCategoryModal` → inline form di bawah daftar card.
-- Indikator mode: `"Edit Kategori"` / `"Tambah Kategori"`.
-- Field: Nama Kategori, Posisi (select).
-- Tombol: Simpan & Batal.
-- Saat form tertutup: tombol "Tambah Kategori" (ikon `fa-plus`).
-
----
-
-## Rencana Perubahan
-
-### 1. Template: Card Kategori
-
-- Pertahankan `v-for="cat in categories"` dengan card `bg-surface border border-border rounded-xl overflow-hidden`.
-- Ganti header card → `table-header` (biru, teks putih).
-- Tambahkan tabel soal di dalam card (mengikuti pola `AdminLikertCategoryQuestions.vue`).
-- Tambahkan inline form soal di bawah tabel dalam card.
-
-### 2. Template: Inline Form Kategori
-
-- Hapus modal `showCategoryModal`.
-- Tambahkan inline form kategori di bawah daftar card (mengikuti pola skala).
-
-### 3. Script: State & Logika Soal
-
-Tambahkan state & fungsi untuk kelola soal per kategori (mengikuti `AdminLikertCategoryQuestions.vue`):
-
-| State/Fungsi                 | Keterangan                                         |
-| ---------------------------- | -------------------------------------------------- |
-| `showQuestionForm` (ref)     | Tampilkan inline form soal                         |
-| `questionForm` (ref)         | `{ id, question, favorable }`                      |
-| `editingQuestionId` (ref)    | ID soal yang sedang diedit                         |
-| `activeCategoryId` (ref)     | Kategori yang form soalnya aktif                   |
-| `savingQuestion` (ref)       | Loading state simpan soal                          |
-| `openAddQuestion(cat)`       | Reset form, set `activeCategoryId`, tampilkan form |
-| `openEditQuestion(cat, q)`   | Isi form, set `editingQuestionId`, tampilkan form  |
-| `closeQuestionForm()`        | Reset form, tutup form                             |
-| `saveQuestion()`             | Tambah/update soal via `likertQuestionsStore`      |
-| `deleteQuestionItem(cat, q)` | Buka modal hapus soal                              |
-| `confirmDeleteQuestion()`    | Hapus soal via `likertQuestionsStore`              |
-
-### 4. Script: State & Logika Kategori (Inline Form)
-
-| State/Fungsi            | Perubahan                                              |
-| ----------------------- | ------------------------------------------------------ |
-| `showCategoryModal`     | Dihapus, diganti `showCategoryForm`                    |
-| `openAddCategoryModal`  | → `openAddCategory`: reset form, tampilkan inline form |
-| `openEditCategoryModal` | → `openEditCategory`: isi form, tampilkan inline form  |
-| `closeCategoryModal`    | → `closeCategoryForm`: reset form, tutup inline form   |
-| `saveCategory`          | Tutup inline form setelah simpan                       |
-
-### 5. Store yang Digunakan
-
-- `useLikertCategoriesStore` — untuk kategori (sudah ada).
-- `useLikertQuestionsStore` — untuk kelola soal (perlu diimpor).
-- `useLikertStore` — untuk likert & skala (sudah ada).
-
-### 6. Modal Hapus
-
-- **Modal Hapus Kategori** — tetap `ConfirmDeleteModal` (tidak diubah).
-- **Modal Hapus Soal** — tambahkan `ConfirmDeleteModal` baru untuk soal.
-
-### 7. Halaman `AdminLikertCategoryQuestions.vue`
-
-- **Tidak dihapus** — tetap ada sebagai halaman terpisah (route tetap berfungsi).
-- Halaman `AdminLikertQuestions.vue` kini juga bisa kelola soal langsung di card.
-
----
-
-## Ringkasan Perubahan Kode
-
-| Bagian                                     | Perubahan                                  |
-| ------------------------------------------ | ------------------------------------------ |
-| Header card kategori                       | `bg-surface-muted` → `table-header` (biru) |
-| Tabel soal di card                         | Ditambahkan (No, Pertanyaan, Jenis, Aksi)  |
-| Inline form soal                           | Ditambahkan per card                       |
-| Modal tambah/edit kategori                 | Dihapus, diganti inline form               |
-| `showCategoryModal`                        | Dihapus, diganti `showCategoryForm`        |
-| `useLikertQuestionsStore`                  | Diimpor & digunakan                        |
-| Modal hapus soal                           | Ditambahkan (`ConfirmDeleteModal`)         |
-| Modal hapus kategori                       | Tetap (`ConfirmDeleteModal`)               |
-| Halaman `AdminLikertCategoryQuestions.vue` | Tidak diubah                               |
-
----
-
-## Catatan
-
-- Hanya file `src/pages/admin/likert/AdminLikertQuestions.vue` yang diubah.
-- Style mengikuti `AdminLikertScales.vue` (table-header biru, inline form, tombol tambah di bawah).
-- Logika kelola soal mengikuti `AdminLikertCategoryQuestions.vue`.
+1. **Konsistensi nama file** mengikuti pola `add-*.js`, `update-*.js`, `delete-*.js`, `fetch-*.js` yang sudah ada.
+2. **Store tetap menangani state** (ref) dan logika penyortiran lokal — hanya interaksi Firestore yang dipindah.
+3. **Fungsi di `src/firebase` menerima data existing** (misal `existingCategories`) untuk operasi yang butuh pergeseran order, sehingga logika bisnis tetap di fungsi murni & mudah diuji.
+4. **Error handling** tetap di dalam fungsi `src/firebase` (console.error + throw), mengikuti pola file lain.
