@@ -1,13 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { db } from "@/firebase/firebase-config";
 import {
-	doc,
-	getDoc,
-	updateDoc,
-	arrayUnion,
-	writeBatch,
-} from "firebase/firestore";
+	fetchQuestions,
+	fetchAllQuestions,
+} from "@/firebase/fetch-likert-questions";
+import { addQuestion } from "@/firebase/add-likert-question";
+import { updateQuestion } from "@/firebase/update-likert-question";
+import { deleteQuestion } from "@/firebase/delete-likert-question";
 
 export const useLikertQuestionsStore = defineStore("likertQuestions", () => {
 	// Flat array across ALL categories:
@@ -15,61 +14,21 @@ export const useLikertQuestionsStore = defineStore("likertQuestions", () => {
 	const questions = ref([]);
 	const loading = ref(false);
 
-	// ── Helper: generate unique ID for each question ──────────
-	function generateId() {
-		return (
-			crypto.randomUUID?.() ??
-			`${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-		);
-	}
-
 	// ── Fetch questions for ONE category ───────────────────────
 	// Questions sekarang adalah array field di dalam document categories/{categoryId}.
 
-	const fetchQuestions = async (likertId, categoryId) => {
-		try {
-			const categoryRef = doc(db, "likert", likertId, "categories", categoryId);
-			const snap = await getDoc(categoryRef);
-			if (!snap.exists()) {
-				questions.value = [];
-				return [];
-			}
-			const data = snap.data();
-			const items = data.questions || [];
-			questions.value = items.map((q) => ({
-				id: q.id,
-				categoryId,
-				question: q.question,
-				favorable: q.favorable,
-			}));
-			return questions.value;
-		} catch (error) {
-			console.error("Error fetching questions:", error);
-			questions.value = [];
-			return [];
-		}
+	const fetchQuestionsByCategory = async (likertId, categoryId) => {
+		questions.value = await fetchQuestions(likertId, categoryId);
+		return questions.value;
 	};
 
 	// ── Fetch ALL questions across every category ─────────────
 	// categoriesData: array dari category doc (sudah include field questions)
-	const fetchAllQuestions = async (categoriesData) => {
+
+	const fetchAll = async (categoriesData) => {
 		loading.value = true;
 		try {
-			const result = [];
-			for (const cat of categoriesData || []) {
-				const items = (cat.questions || []).map((q) => ({
-					id: q.id,
-					categoryId: cat.id,
-					question: q.question,
-					favorable: q.favorable,
-				}));
-				result.push(...items);
-			}
-			questions.value = result;
-			console.log("All questions fetched:", questions.value.length);
-		} catch (error) {
-			console.error("Error fetching all questions:", error);
-			questions.value = [];
+			questions.value = await fetchAllQuestions(categoriesData);
 		} finally {
 			loading.value = false;
 		}
@@ -79,155 +38,53 @@ export const useLikertQuestionsStore = defineStore("likertQuestions", () => {
 	// ── Add question to a specific category ───────────────────
 	// Gunakan arrayUnion untuk append item baru ke array `questions`.
 
-	const addQuestion = async (likertId, categoryId, { question, favorable }) => {
-		const newQuestion = {
-			id: generateId(),
-			question: question.trim(),
+	const add = async (likertId, categoryId, { question, favorable }) => {
+		const newQuestion = await addQuestion(likertId, categoryId, {
+			question,
 			favorable,
-		};
-
-		try {
-			const categoryRef = doc(db, "likert", likertId, "categories", categoryId);
-			await updateDoc(categoryRef, {
-				questions: arrayUnion(newQuestion),
-			});
-			questions.value.push({
-				id: newQuestion.id,
-				categoryId,
-				question: newQuestion.question,
-				favorable: newQuestion.favorable,
-			});
-			console.log("Question added with ID:", newQuestion.id);
-			return newQuestion.id;
-		} catch (error) {
-			console.error("Error adding question:", error);
-			throw error;
-		}
+		});
+		questions.value.push(newQuestion);
+		return newQuestion.id;
 	};
 
 	// ── Update question ────────────────────────────────────────
 	// Baca current array, modify item, lalu overwrite seluruh array.
 
-	const updateQuestion = async (
+	const update = async (
 		likertId,
 		categoryId,
 		questionId,
 		{ question, favorable, newCategoryId },
 	) => {
-		try {
-			const targetCategoryId = newCategoryId || categoryId;
+		const updated = await updateQuestion(likertId, categoryId, questionId, {
+			question,
+			favorable,
+			newCategoryId,
+		});
 
-			if (newCategoryId && newCategoryId !== categoryId) {
-				// ── Move to different category ──
-				const sourceRef = doc(db, "likert", likertId, "categories", categoryId);
-				const sourceSnap = await getDoc(sourceRef);
-				if (!sourceSnap.exists()) throw new Error("Source category not found");
-				const sourceQuestions = sourceSnap.data().questions || [];
-				const movedItem = sourceQuestions.find((q) => q.id === questionId);
-				if (!movedItem)
-					throw new Error("Question not found in source category");
-
-				const updatedSource = sourceQuestions.filter(
-					(q) => q.id !== questionId,
-				);
-				const updatedTarget = [
-					...(await getQuestionsArray(likertId, targetCategoryId)),
-					{ ...movedItem, question: question.trim(), favorable },
-				];
-
-				const batch = writeBatch(db);
-				batch.update(sourceRef, { questions: updatedSource });
-				batch.update(
-					doc(db, "likert", likertId, "categories", targetCategoryId),
-					{ questions: updatedTarget },
-				);
-				await batch.commit();
-
-				const idx = questions.value.findIndex(
-					(q) => q.id === questionId && q.categoryId === categoryId,
-				);
-				if (idx !== -1) {
-					questions.value[idx] = {
-						id: questionId,
-						categoryId: targetCategoryId,
-						question: question.trim(),
-						favorable,
-					};
-				}
-				console.log("Question moved to new category:", questionId);
-				return;
-			}
-
-			// ── Update in same category ──
-			const categoryRef = doc(
-				db,
-				"likert",
-				likertId,
-				"categories",
-				targetCategoryId,
-			);
-			const snap = await getDoc(categoryRef);
-			if (!snap.exists()) throw new Error("Category not found");
-			const currentQuestions = snap.data().questions || [];
-			const updatedQuestions = currentQuestions.map((q) =>
-				q.id === questionId
-					? { ...q, question: question.trim(), favorable }
-					: q,
-			);
-			await updateDoc(categoryRef, { questions: updatedQuestions });
-
-			const idx = questions.value.findIndex(
-				(q) => q.id === questionId && q.categoryId === targetCategoryId,
-			);
-			if (idx !== -1) {
-				questions.value[idx] = {
-					...questions.value[idx],
-					question: question.trim(),
-					favorable,
-				};
-			}
-			console.log("Question updated:", questionId);
-		} catch (error) {
-			console.error("Error updating question:", error);
-			throw error;
+		// Sinkronisasi state lokal
+		const idx = questions.value.findIndex(
+			(q) => q.id === questionId && q.categoryId === categoryId,
+		);
+		if (idx !== -1) {
+			questions.value[idx] = updated;
 		}
 	};
 
-	// ── Helper: get questions array from a category doc ───────
-	async function getQuestionsArray(likertId, categoryId) {
-		const ref = doc(db, "likert", likertId, "categories", categoryId);
-		const snap = await getDoc(ref);
-		if (!snap.exists()) return [];
-		return snap.data().questions || [];
-	}
-
 	// ── Delete question ────────────────────────────────────────
-	const deleteQuestion = async (likertId, categoryId, questionId) => {
-		try {
-			const categoryRef = doc(db, "likert", likertId, "categories", categoryId);
-			const snap = await getDoc(categoryRef);
-			if (!snap.exists()) throw new Error("Category not found");
-			const currentQuestions = snap.data().questions || [];
-			const updatedQuestions = currentQuestions.filter(
-				(q) => q.id !== questionId,
-			);
-			await updateDoc(categoryRef, { questions: updatedQuestions });
 
-			questions.value = questions.value.filter((q) => q.id !== questionId);
-			console.log("Question deleted:", questionId);
-		} catch (error) {
-			console.error("Error deleting question:", error);
-			throw error;
-		}
+	const remove = async (likertId, categoryId, questionId) => {
+		await deleteQuestion(likertId, categoryId, questionId);
+		questions.value = questions.value.filter((q) => q.id !== questionId);
 	};
 
 	return {
 		questions,
 		loading,
-		fetchQuestions,
-		fetchAllQuestions,
-		addQuestion,
-		updateQuestion,
-		deleteQuestion,
+		fetchQuestions: fetchQuestionsByCategory,
+		fetchAllQuestions: fetchAll,
+		addQuestion: add,
+		updateQuestion: update,
+		deleteQuestion: remove,
 	};
 });
