@@ -428,7 +428,7 @@
 									:key="i"
 									:value="i - 1"
 								>
-									Posisi {{ i - 1 }}
+									Posisi {{ i }}
 								</option>
 							</select>
 						</div>
