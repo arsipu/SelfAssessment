@@ -166,6 +166,30 @@ export const useLikertQuestionsStore = defineStore("likertQuestions", () => {
 4. **Error handling** dipindah ke file `src/firebase/*` (console.error + throw), store cukup `await` dan biarkan error mengalir ke pemanggil.
 5. **State `questions` & `loading`** tetap di store, di-update setelah operasi CRUD selesai.
 
+## Dokumentasi & Komentar
+
+Seluruh file yang dibuat/diubah dilengkapi dengan:
+
+- **JSDoc lengkap** pada setiap fungsi:
+  - Deskripsi fungsi.
+  - `@param` untuk setiap parameter (dengan penjelasan singkat).
+  - `@returns` yang menjelaskan bentuk data yang dikembalikan.
+- **Komentar inline** (`//`) untuk menjelaskan alur logika penting, seperti:
+  - Transformasi data (misal menambah `categoryId` ke setiap item).
+  - Alasan penggunaan `arrayUnion`, `writeBatch`, dll.
+  - Sinkronisasi state setelah operasi CRUD.
+- **Komentar bagian** (`// ──`) untuk memisahkan blok logika (fetch, add, update, delete).
+
+File yang sudah didokumentasi:
+
+| File                                     | Dokumentasi                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/firebase/fetch-likert-questions.js` | JSDoc `fetchQuestions` & `fetchAllQuestions`, komentar transformasi data       |
+| `src/firebase/add-likert-question.js`    | JSDoc `generateId` & `addQuestion`, komentar `arrayUnion`                      |
+| `src/firebase/update-likert-question.js` | JSDoc `getQuestionsArray` & `updateQuestion`, komentar batch & pindah kategori |
+| `src/firebase/delete-likert-question.js` | JSDoc `deleteQuestion`, komentar filter & overwrite array                      |
+| `src/stores/likert/likert-questions.js`  | JSDoc store & setiap method, komentar sinkronisasi state                       |
+
 ## File yang Tidak Berubah
 
 - `src/firebase/firebase-config.js` — tetap sebagai konfigurasi.
