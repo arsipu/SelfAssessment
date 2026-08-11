@@ -33,28 +33,29 @@
 						Kelola kategori dan pertanyaan langsung di setiap kartu kategori.
 					</p>
 				</div>
-				<div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-					<button
-						@click="
-							router.push({
-								name: 'admin-likert-submissions',
-								params: { slug: likertSlug },
-							})
-						"
-						class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap w-full md:w-auto h-10 cursor-pointer"
-					>
-						<font-awesome-icon
-							icon="fa-solid fa-right-to-bracket"
-							class="w-4 h-4 shrink-0"
-						/>
-						Lihat Submissions
-					</button>
-				</div>
 			</div>
 		</div>
 
-		<!-- Tombol Panduan Penilaian Skala Likert -->
-		<div class="flex justify-end mb-4 md:mb-6">
+		<!-- Tombol Aksi (Submissions + Panduan) -->
+		<div class="flex flex-wrap justify-end gap-2 mb-4 md:mb-6">
+			<!-- Tombol Lihat Submissions (primary) -->
+			<button
+				@click="
+					router.push({
+						name: 'admin-likert-submissions',
+						params: { slug: likertSlug },
+					})
+				"
+				class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap h-10 cursor-pointer"
+			>
+				<font-awesome-icon
+					icon="fa-solid fa-right-to-bracket"
+					class="w-4 h-4 shrink-0"
+				/>
+				Lihat Submissions
+			</button>
+
+			<!-- Tombol "Cara Penilaian Skala Likert" (outline) -->
 			<button
 				@click="openGuideDialog"
 				class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg hover:bg-surface-muted transition-colors whitespace-nowrap cursor-pointer"
