@@ -1,6 +1,8 @@
 <template>
-	<div class="min-h-screen bg-bg">
-		<div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
+	<div :class="embedded ? '' : 'min-h-screen bg-bg'">
+		<div
+			:class="embedded ? '' : 'max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10'"
+		>
 			<div
 				v-if="!result || loading"
 				class="text-center text-sm text-black-secondary py-20"
@@ -111,7 +113,10 @@
 					</div>
 
 					<!-- Ringkasan: total skor + badge + deskripsi -->
-					<div class="p-5 md:p-8 border-b border-border">
+					<div
+						v-if="showScoreSummary"
+						class="p-5 md:p-8 border-b border-border"
+					>
 						<LikertScoreSummary
 							:total-score="computedScore"
 							:scale-label="category?.label"
@@ -147,7 +152,10 @@
 				</div>
 
 				<!-- Tombol aksi -->
-				<div class="print:hidden flex flex-col md:flex-row gap-3">
+				<div
+					v-if="!embedded"
+					class="print:hidden flex flex-col md:flex-row gap-3"
+				>
 					<button
 						@click="showExportPDFModal = true"
 						class="w-full md:flex-1 py-3 h-10 border border-black-secondary text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition cursor-pointer"
@@ -168,7 +176,7 @@
 	<!-- Modal konfirmasi export PDF -->
 	<Transition name="fade">
 		<div
-			v-if="showExportPDFModal"
+			v-if="showExportPDFModal && !embedded"
 			class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
 			@click.self="showExportPDFModal = false"
 		>
@@ -213,6 +221,12 @@ import { useLikertCategoriesStore } from "@/stores/likert/likert-categories";
 import { LIKERT_SCALE_OPTIONS } from "@/apps/likert";
 import { computeTotalScore } from "@/utils/likert-scoring";
 
+const props = defineProps({
+	result: { type: Object, default: null }, // data hasil (dipakai mode admin/embedded)
+	embedded: { type: Boolean, default: false }, // true = hanya render card, tanpa layout halaman
+	showScoreSummary: { type: Boolean, default: true }, // false = sembunyikan ringkasan skor (submission belum selesai)
+});
+
 const route = useRoute();
 const router = useRouter();
 const likertSlug = route.params.slug;
@@ -227,7 +241,7 @@ const categories = ref([]);
 const loading = ref(true);
 
 const showExportPDFModal = ref(false);
-const showDetails = ref(false);
+const showDetails = ref(props.embedded);
 const codeCopied = ref(false);
 
 async function copyCode() {
@@ -270,7 +284,9 @@ const genderLabel = computed(() => {
 	return g === "L" ? "Laki-laki" : g === "P" ? "Perempuan" : g || "-";
 });
 
-const result = computed(() => likertSessionStore.getResult(likertId.value));
+const result = computed(
+	() => props.result ?? likertSessionStore.getResult(likertId.value),
+);
 const respondentName = computed(() => result.value?.respondentName || "-");
 const maxScore = computed(
 	() => categories.value[0]?.max ?? categories.value[0]?.min ?? "-",
@@ -343,26 +359,29 @@ onMounted(async () => {
 
 		await categoryStore.fetchCategories(likertId.value);
 
-		const code = route.query.code;
+		// Mode publik saja: muat hasil dari kode/sesi
+		if (!props.result) {
+			const code = route.query.code;
 
-		if (code) {
-			const fetched = await likertSessionStore.loadResultByCode(
-				likertId.value,
-				code,
-			);
-			if (!fetched) {
-				router.replace({
-					name: "not-available",
-					query: {
-						title: "Hasil Tidak Ditemukan",
-						message: "Kode tidak valid atau hasil tidak ditemukan.",
-					},
-				});
+			if (code) {
+				const fetched = await likertSessionStore.loadResultByCode(
+					likertId.value,
+					code,
+				);
+				if (!fetched) {
+					router.replace({
+						name: "not-available",
+						query: {
+							title: "Hasil Tidak Ditemukan",
+							message: "Kode tidak valid atau hasil tidak ditemukan.",
+						},
+					});
+					return;
+				}
+			} else if (!result.value) {
+				router.replace({ name: "likert-form", params: { slug: likertSlug } });
 				return;
 			}
-		} else if (!result.value) {
-			router.replace({ name: "likert-form", params: { slug: likertSlug } });
-			return;
 		}
 
 		await likertQuestionsStore.fetchAllQuestions(categoryStore.categories);
