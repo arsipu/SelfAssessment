@@ -1,57 +1,38 @@
 <template>
 	<div class="overflow-x-hidden max-w-full">
-		<!-- Loading State -->
-		<div v-if="loading" class="flex items-center justify-center min-h-[400px]">
-			<div class="flex flex-col items-center gap-3">
-				<svg
-					class="animate-spin h-10 w-10 text-primary"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-				>
-					<circle
-						class="opacity-25"
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
-					/>
-					<path
-						class="opacity-75"
-						fill="currentColor"
-						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-					/>
-				</svg>
-				<p class="text-sm text-text-muted">Memuat dashboard...</p>
+		<!-- Header -->
+		<div class="bg-surface mb-2">
+			<div>
+				<h1 class="text-lg md:text-xl font-semibold text-text-primary mb-1">
+					Dashboard
+				</h1>
+				<p class="text-sm text-text-secondary max-w-3xl mb-3">
+					Ringkasan aktivitas asesmen dan responden
+				</p>
 			</div>
+		</div>
+
+		<!-- Loading -->
+		<div
+			v-if="loading"
+			class="bg-surface border border-primary-soft rounded-xl p-8 md:p-12 text-center"
+		>
+			<p class="text-sm text-text-muted">Memuat data...</p>
 		</div>
 
 		<!-- Dashboard Content -->
 		<div v-else class="space-y-8 max-w-full">
-			<!-- Header -->
-			<div
-				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-			>
-				<div>
-					<h1 class="text-2xl font-bold text-text-primary">Dashboard</h1>
-					<p class="text-sm text-text-secondary mt-1">
-						Ringkasan aktivitas asesmen dan responden
-					</p>
-				</div>
-			</div>
-
 			<!-- Likert & Holland Sections -->
 			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
 				<!-- Likert Card -->
 				<div
-					class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md min-w-0"
+					class="bg-surface border border-black/30 rounded-md overflow-hidden min-w-0"
 				>
-					<div class="p-5 border-b border-border">
+					<div class="p-4 md:p-5 border-b border-black/30">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<div
-									class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center shrink-0"
+									class="w-10 h-10 rounded-md bg-primary-soft flex items-center justify-center shrink-0"
 								>
 									<svg
 										class="w-5 h-5 text-primary"
@@ -71,11 +52,8 @@
 									<h2
 										class="text-base font-semibold text-text-primary truncate"
 									>
-										Survei
+										Likert
 									</h2>
-									<p class="text-xs text-text-muted truncate">
-										Instrumen penilaian sikap & persepsi
-									</p>
 								</div>
 							</div>
 							<router-link
@@ -100,11 +78,11 @@
 						</div>
 					</div>
 
-					<div class="p-5 space-y-4">
+					<div class="p-4 md:p-5 space-y-4">
 						<!-- Likert Mini Stats -->
 						<div class="grid grid-cols-3 gap-2 sm:gap-3">
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-surface-muted min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-surface-muted min-w-0"
 							>
 								<p
 									class="text-base sm:text-lg font-bold text-text-primary truncate"
@@ -114,7 +92,7 @@
 								<p class="text-xs text-text-secondary mt-0.5">Total</p>
 							</div>
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-success-soft min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-success-soft min-w-0"
 							>
 								<p class="text-base sm:text-lg font-bold text-success truncate">
 									{{ likertStats[1]?.value ?? 0 }}
@@ -122,7 +100,7 @@
 								<p class="text-xs text-success mt-0.5">Selesai</p>
 							</div>
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-warning-soft min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-warning-soft min-w-0"
 							>
 								<p class="text-base sm:text-lg font-bold text-warning truncate">
 									{{ likertStats[2]?.value ?? 0 }}
@@ -140,7 +118,7 @@
 							</h3>
 							<div
 								v-if="likertRecentRespondents.length === 0"
-								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-xl"
+								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-md"
 							>
 								Belum ada responden.
 							</div>
@@ -148,7 +126,7 @@
 								<div
 									v-for="r in likertRecentRespondents.slice(0, 3)"
 									:key="r.key"
-									class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
+									class="flex items-center gap-3 p-2 rounded-md hover:bg-surface-muted transition-colors cursor-pointer"
 									@click="
 										$router.push({
 											name: 'admin-likert-submissions',
@@ -189,18 +167,57 @@
 						</div>
 
 						<!-- Likert Progress Bars -->
+						<div>
+							<h3
+								class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2"
+							>
+								Progress per Instrumen
+							</h3>
+							<div
+								v-if="likertProgress.length === 0"
+								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-md"
+							>
+								Belum ada instrumen yang dipublikasikan.
+							</div>
+							<div v-else class="space-y-3">
+								<div v-for="ins in likertProgress" :key="ins.key">
+									<div class="flex items-center justify-between mb-1.5">
+										<p class="text-sm text-text-primary truncate">
+											{{ ins.name }}
+										</p>
+										<p class="text-xs text-text-muted shrink-0 ml-2">
+											{{ ins.done }}/{{ ins.total }}
+										</p>
+									</div>
+									<div
+										class="h-1.5 bg-surface-muted rounded-full overflow-hidden"
+									>
+										<div
+											class="h-full rounded-full transition-all duration-700"
+											:style="{
+												width:
+													(ins.total
+														? Math.round((ins.done / ins.total) * 100)
+														: 0) + '%',
+												background: ins.color,
+											}"
+										></div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
 				<!-- Holland Card -->
 				<div
-					class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md min-w-0"
+					class="bg-surface border border-black/30 rounded-md overflow-hidden min-w-0"
 				>
-					<div class="p-5 border-b border-border">
+					<div class="p-4 md:p-5 border-b border-black/30">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<div
-									class="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center shrink-0"
+									class="w-10 h-10 rounded-md bg-primary-soft flex items-center justify-center shrink-0"
 								>
 									<svg
 										class="w-5 h-5 text-primary"
@@ -226,11 +243,8 @@
 									<h2
 										class="text-base font-semibold text-text-primary truncate"
 									>
-										Holland RIASEC
+										RIASEC
 									</h2>
-									<p class="text-xs text-text-muted truncate">
-										Instrumen minat karier & kepribadian
-									</p>
 								</div>
 							</div>
 							<router-link
@@ -255,11 +269,11 @@
 						</div>
 					</div>
 
-					<div class="p-5 space-y-4">
+					<div class="p-4 md:p-5 space-y-4">
 						<!-- Holland Mini Stats -->
 						<div class="grid grid-cols-3 gap-2 sm:gap-3">
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-surface-muted min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-surface-muted min-w-0"
 							>
 								<p
 									class="text-base sm:text-lg font-bold text-text-primary truncate"
@@ -269,7 +283,7 @@
 								<p class="text-xs text-text-secondary mt-0.5">Total</p>
 							</div>
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-success-soft min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-success-soft min-w-0"
 							>
 								<p class="text-base sm:text-lg font-bold text-success truncate">
 									{{ hollandStats[1]?.value ?? 0 }}
@@ -277,7 +291,7 @@
 								<p class="text-xs text-success mt-0.5">Selesai</p>
 							</div>
 							<div
-								class="text-center p-2 sm:p-3 rounded-xl bg-warning-soft min-w-0"
+								class="text-center p-2 sm:p-3 rounded-md bg-warning-soft min-w-0"
 							>
 								<p class="text-base sm:text-lg font-bold text-warning truncate">
 									{{ hollandStats[2]?.value ?? 0 }}
@@ -295,7 +309,7 @@
 							</h3>
 							<div
 								v-if="hollandRecentRespondents.length === 0"
-								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-xl"
+								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-md"
 							>
 								Belum ada responden.
 							</div>
@@ -303,7 +317,7 @@
 								<div
 									v-for="r in hollandRecentRespondents.slice(0, 3)"
 									:key="r.key"
-									class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
+									class="flex items-center gap-3 p-2 rounded-md hover:bg-surface-muted transition-colors cursor-pointer"
 									@click="
 										$router.push({
 											name: 'admin-holland-submissions',
@@ -344,6 +358,45 @@
 						</div>
 
 						<!-- Holland Progress Bars -->
+						<div>
+							<h3
+								class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2"
+							>
+								Progress per Instrumen
+							</h3>
+							<div
+								v-if="hollandProgress.length === 0"
+								class="text-xs text-text-muted py-3 text-center bg-surface-muted rounded-md"
+							>
+								Belum ada instrumen yang dipublikasikan.
+							</div>
+							<div v-else class="space-y-3">
+								<div v-for="ins in hollandProgress" :key="ins.key">
+									<div class="flex items-center justify-between mb-1.5">
+										<p class="text-sm text-text-primary truncate">
+											{{ ins.name }}
+										</p>
+										<p class="text-xs text-text-muted shrink-0 ml-2">
+											{{ ins.done }}/{{ ins.total }}
+										</p>
+									</div>
+									<div
+										class="h-1.5 bg-surface-muted rounded-full overflow-hidden"
+									>
+										<div
+											class="h-full rounded-full transition-all duration-700"
+											:style="{
+												width:
+													(ins.total
+														? Math.round((ins.done / ins.total) * 100)
+														: 0) + '%',
+												background: ins.color,
+											}"
+										></div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
