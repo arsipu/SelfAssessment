@@ -67,17 +67,17 @@
 			<p class="text-sm text-text-muted">Memuat pertanyaan...</p>
 		</div>
 
-		<!-- Kartu Kelola Soal -->
-		<div v-else class="table-content mb-4 md:mb-6">
+		<!-- Judul & Tombol Aksi -->
+		<div v-else>
 			<div
-				class="table-header px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+				class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6"
 			>
-				<h2 class="text-sm font-medium text-white">
+				<h2 class="text-lg font-semibold text-text-primary">
 					Soal ({{ totalQuestions }})
 				</h2>
 				<button
 					@click="openAddColumnModal"
-					class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white border border-border rounded-lg hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer"
+					class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg hover:bg-surface-muted transition-colors whitespace-nowrap cursor-pointer"
 					title="Tambah kolom baru"
 				>
 					<font-awesome-icon
@@ -88,39 +88,40 @@
 				</button>
 			</div>
 
-			<!-- Tabel per Kolom -->
-			<div v-if="columns.length > 0" class="space-y-3 p-3 md:p-4">
-				<div
-					v-for="col in columns"
-					:key="col.id"
-					class="border border-border rounded-lg overflow-hidden"
-				>
-					<!-- Sub-header Kolom -->
+			<!-- Daftar Card per Kolom -->
+			<div v-if="columns.length > 0" class="space-y-4 md:space-y-6">
+				<div v-for="col in columns" :key="col.id" class="table-content">
+					<!-- Header Kolom -->
 					<div
-						class="px-4 md:px-5 py-2.5 bg-primary-soft flex items-center justify-between gap-3 border-b border-border"
+						class="table-header px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
 					>
-						<span
-							class="min-w-0 text-xs md:text-sm font-medium text-text-primary whitespace-normal break-words"
+						<h2
+							class="min-w-0 text-sm font-medium text-white whitespace-normal break-words"
 						>
 							{{ col.name }}
-						</span>
-						<div class="flex items-center gap-1 shrink-0">
+						</h2>
+						<div class="flex items-center gap-2 shrink-0">
 							<button
 								@click="openEditColumnModal(col)"
-								class="p-1.5 rounded-md text-text-secondary hover:text-primary transition-colors cursor-pointer"
+								class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white border border-border rounded-lg hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer"
 								title="Ubah nama / urutan kolom"
 							>
-								<font-awesome-icon icon="fa-solid fa-pen" class="w-3.5 h-3.5" />
+								<font-awesome-icon
+									icon="fa-solid fa-pen"
+									class="w-3.5 h-3.5 shrink-0"
+								/>
+								Edit
 							</button>
 							<button
 								@click="openDeleteColumnModal(col)"
-								class="p-1.5 rounded-md text-danger hover:bg-danger-soft transition-colors cursor-pointer"
+								class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white border border-border rounded-lg hover:bg-danger hover:border-danger transition-colors whitespace-nowrap cursor-pointer"
 								title="Hapus kolom"
 							>
 								<font-awesome-icon
 									icon="fa-solid fa-trash"
-									class="w-3.5 h-3.5"
+									class="w-3.5 h-3.5 shrink-0"
 								/>
+								Hapus
 							</button>
 						</div>
 					</div>
