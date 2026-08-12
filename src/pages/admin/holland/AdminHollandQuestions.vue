@@ -29,9 +29,6 @@
 					<p class="text-sm text-text-secondary max-w-3xl">
 						{{ hollandDescription }}
 					</p>
-					<p class="text-xs text-text-muted mt-1">
-						Kelola pertanyaan di setiap kolom RIASEC.
-					</p>
 				</div>
 			</div>
 		</div>
