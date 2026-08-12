@@ -23,6 +23,11 @@
 				</div>
 
 				<div class="p-3 md:p-6">
+					<p
+						class="text-xs md:text-sm mb-4 md:mb-6 text-black-secondary justify"
+					>
+						{{ hollandStore.currentHolland?.direction }}
+					</p>
 					<!-- Category sections — grouped by riasecId from riasecList -->
 					<div v-for="section in sections" :key="section.key" class="mb-6">
 						<!-- Section header -->
