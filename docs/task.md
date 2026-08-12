@@ -1,206 +1,164 @@
-# Task: Refactoring Desain AdminHollandQuestions agar Selaras dengan AdminLikertQuestions
+# Task: Kelola Soal Holland per Kategori RIASEC
 
-**File yang diubah:** `src/pages/admin/holland/AdminHollandQuestions.vue`
-**Acuan desain:** `src/pages/admin/likert/AdminLikertQuestions.vue`
+## Ringkasan
 
-## Tujuan
-
-Menyelaraskan desain halaman **AdminHollandQuestions** agar mengikuti pola desain **AdminLikertQuestions**. Fokus utama: bagian **tiap kolom pernyataan** yang saat ini berbentuk **card/grid** diubah menjadi **table** (mengikuti pola tabel soal kategori di Likert).
-
----
-
-## Rencana Perubahan
-
-### 1. Breadcrumb
-
-**Kondisi saat ini (Holland):**
-
-- Teks breadcrumb: `Holland RIASEC / Pertanyaan`
-
-**Perubahan (mengikuti pola Likert):**
-
-- Tampilkan nama instrumen Holland pada breadcrumb alih-alih teks statis "Pertanyaan":
-  - Teks akhir: `Holland RIASEC / {nama instrumen}`
-  - Tambahkan `truncate max-w-[200px] md:max-w-none` pada span nama instrumen.
-  - Ganti teks "Pertanyaan" → `{{ hollandName }}` (perlu state `hollandName` yang diisi dari hasil `getHollandBySlug`).
-
-### 2. Header
-
-**Kondisi saat ini (Holland):**
-
-- Header card berisi judul "Kelola Pertanyaan RIASEC", deskripsi, dan tombol "Lihat Submissions" di dalam card.
-
-**Perubahan (mengikuti pola Likert):**
-
-- Pertahankan card header `bg-surface border border-border rounded-xl p-4 md:p-6 mb-4 md:mb-6`.
-- Judul: ganti menjadi nama instrumen → `{{ hollandName ?? "Memuat..." }}` (mengikuti pola `currentLikert?.name` di Likert).
-- Deskripsi: gunakan deskripsi instrumen → `{{ hollandDescription }}` (optional, jika tersedia di data store).
-- Tambahkan baris teks bantu `text-xs text-text-muted mt-1` (mengikuti pola Likert), contoh: "Kelola pertanyaan di setiap kolom RIASEC."
-- Hapus tombol "Lihat Submissions" dari dalam header (dipindah ke baris aksi terpisah, lihat poin 3).
-
-### 3. Tombol Aksi "Lihat Submissions"
-
-**Kondisi saat ini (Holland):**
-
-- Tombol "Lihat Submissions" di dalam card header.
-
-**Perubahan (mengikuti pola Likert):**
-
-- Pindahkan tombol ke baris aksi terpisah di atas konten, rata kanan:
-  ```
-  <div class="flex flex-wrap justify-end gap-2 mb-4 md:mb-6">
-    <button ...>Lihat Submissions</button>
-  </div>
-  ```
-- Ganti styling mengikuti tombol "Lihat Submissions" di Likert:
-  - Class: `inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium bg-primary rounded-sm border border-black secondary text-white hover:bg-primary/80 transition-colors whitespace-nowrap h-10 cursor-pointer`
-  - Ikon `fa-solid fa-right-to-bracket` tetap.
-
-### 4. Loading State
-
-**Perubahan:**
-
-- Tetap menggunakan card loading `bg-surface border border-border rounded-xl p-8 md:p-12 text-center`, sesuaikan padding ke `p-8 md:p-12` (mengikuti Likert).
-
-### 5. Konten per Kategori — Konversi Card → Table (FOKUS UTAMA)
-
-**Kondisi saat ini (Holland):**
-
-- Setiap kategori RIASEC dirender sebagai card:
-  - Header kategori: `bg-surface-muted` dengan judul + badge jumlah soal + tombol aksi (tambah kolom, edit kategori).
-  - Isi: grid/flex kolom, di mana **setiap kolom adalah card** (`border rounded-lg`) berisi:
-    - Column header
-    - Daftar pertanyaan
-    - Inline add form / tombol "Tambah Pernyataan"
-
-**Perubahan (mengikuti pola tabel kategori di Likert — `table-content`):**
-
-#### a. Card Kategori → `table-content`
-
-- Ganti class card kategori dari `bg-surface border border-border rounded-xl overflow-hidden` menjadi `table-content` (class yang dipakai Likert pada daftar kategori).
-
-#### b. Header Kategori → `table-header`
-
-- Ganti stlyling header kategori menjadi mengikuti pola Likert (`table-header`):
-  - Class: `table-header px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2`
-  - Background jadi `bg-primary`, teks judul jadi `text-white`.
-- Ganti badge "{{ n }} Soal" menjadi tombol/teks putih `text-white` (atau pertahankan logika jumlah soal, tapi style disesuaikan).
-- Ubah tombol ikon (tambah kolom, edit kategori) menjadi tombol teks putih bertulisan, mengikuti pola tombol di header kategori Likert:
-  - Tombol ikon `fa-table-columns` → tombol teks "Tambah Kolom" berstyle `text-white border border-border`.
-  - Tombol ikon `fa-pen` → tombol teks "Edit" berstyle `text-white border border-border`.
-
-#### c. Kolom (card → table)
-
-- **Hapus** layout grid/flex kolom (`flex flex-col lg:grid`).
-- **Ubah** setiap kolom dari **card** menjadi **table** (inilah fokus utama):
-  ```
-  <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse table-fixed">
-      <thead class="border-b border-black-secondary">
-        <tr>
-          <th class="w-[8%]">No</th>
-          <th class="w-[68%]">Nama Kolom</th>        <!-- header kolom -->
-          <th class="w-[24%]">Aksi</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-border">
-        <tr v-for="(q, index) in questionsByRiasecAndColumn(cat.id, col.id)" :key="q.id">
-          <td>{{ index + 1 }}</td>
-          <td>{{ q.question }}</td>
-          <td> <!-- tombol edit/hapus soal --> </td>
-        </tr>
-        <!-- Empty state -->
-        <tr v-if="questionsByRiasecAndColumn(cat.id, col.id).length === 0">
-          <td colspan="3" class="text-center py-6 text-text-muted">Belum ada pernyataan di kolom ini.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  ```
-- **Judul kolom:** Letakkan nama kolom di dalam `thead` (bukan header card). Jika ingin lebih jelas, gunakan `colspan` dinamis atau tetap satu baris header dengan nama kolom sebagai label.
-  - Alternatif: tampilkan nama kolom pada baris `thead` sebagai `<th>` teks biasa, atau tambahkan sub-header di atas tabel kolom dengan nama kolom (style `bg-primary`).
-  - **Keputusan desain disarankan:** Pisahkan setiap kolom menjadi blok tabel sendiri di dalam kategori, dengan:
-    - Sub-header kolom: baris kecil bertuliskan `{{ col.name }}` style `bg-primary-soft text-text-primary font-medium`.
-    - Tabel: header `No | Pernyataan | Aksi`, tbody berisi pertanyaan.
-- **Ke atas setiap tabel kolom**: pertahankan tombol aksi kolom (Edit & Hapus kolom) dan inline add, tetapi tampilkan dalam format tombol teks/table-friendly mengikuti Likert.
-
-#### d. Inline Add Form
-
-- Pertahankan logika inline add (`openInlineAdd`, `saveInline`, `cancelInline`).
-- Tambahkan tombol "Tambah Pernyataan" dengan style mengikuti pola tombol kecil Likert:
-  - Class: `inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg hover:bg-surface-muted transition-colors whitespace-nowrap cursor-pointer`
-  - Letakkan di bawah tabel kolom (rata kanan atau kiri).
-
-#### e. Empty State Kategori (tanpa kolom)
-
-- Pertahankan empty state "Kategori ini belum punya kolom pernyataan." dengan tombol "Tambah Kolom Pertama", namun samakan style tombol dengan tombol kecil Likert (outline).
-
-### 6. Modal Edit Soal
-
-**Perubahan (mengikuti pola modal Likert):**
-
-- Header modal: ganti `border-b border-border` → tetap, samakan dengan gaya Likert (banyak modal Likert memakai `border-t border-border` di footer tanpa border header).
-- Judul modal: `text-text-primary` tetap.
-- Label form: `text-text-primary` tetap.
-- Input/select/textarea: `border-border` tetap (konsisten dengan modal Likert).
-- Footer modal: samakan `px-6 py-4 border-t border-border flex justify-end gap-3` (hapus `bg-surface` jika mengikuti Likert).
-- Tombol Batal: `px-4 py-2 border border-border rounded-lg text-text-primary hover:bg-surface-muted text-sm cursor-pointer`.
-- Tombol Simpan: `px-4 py-2 bg-primary text-text-on-primary rounded-lg hover:bg-primary-hover text-sm disabled:opacity-60 cursor-pointer`.
-- Field kategori & kolom tetap dipertahankan.
-
-### 7. Modal Edit Kategori RIASEC (deskripsi & rekomendasi)
-
-**Perubahan:**
-
-- Ikuti pola modal yang sama (footer `border-t border-border flex justify-end gap-3`, button style disamakan dengan poin 6).
-- Konten (kode, label, deskripsi, keterampilan, pekerjaan, subjek) tetap dipertahankan.
-
-### 8. Modal Tambah/Edit Kolom
-
-**Perubahan:**
-
-- Judul modal `text-text-primary` tetap.
-- Input/select `border-border` tetap.
-- Footer & tombol disamakan dengan pola poin 6.
-
-### 9. Alert Maksimal 4 Kolom
-
-**Perubahan:**
-
-- Pertahankan struktur alert, samakan tombol "Mengerti" dengan style tombol Batal (outline) di poin 6.
-
-### 10. Modal Hapus (Soal & Kolom)
-
-**Perubahan:**
-
-- Pertahankan penggunaan `ConfirmDeleteModal`, hanya pastikan konsisten dengan halaman lain (tidak ada perubahan besar).
-
-### 11. Script (`<script setup>`)
-
-**Catatan:**
-
-- Tidak ada perubahan logika utama.
-- Tambah state `hollandName` (dan opsional `hollandDescription`) yang diisi saat `getHollandBySlug` berhasil.
-- Semua fungsi CRUD, inline add, kolom, kategori, dan hapus tetap dipertahankan.
-- Opsional: samakan gaya penulisan (indentasi tab, tanda kutip ganda) mengikuti Likert.
+Mengubah halaman `AdminHollandQuestions.vue` agar setiap kartu kategori RIASEC
+menampilkan **tabel read-only** (mirip tampilan front-end `HollandQuestions.vue`)
+dan memiliki tombol **Kelola** yang mengarah ke **halaman baru** untuk mengelola
+soal & kolom pada kategori tersebut. Pola ini meniru alur yang sudah ada pada
+modul Likert (`AdminLikertQuestions.vue` → `AdminLikertCategoryQuestions.vue`).
 
 ---
 
-## Langkah Implementasi
+## 1. Perubahan pada `src/pages/admin/holland/AdminHollandQuestions.vue`
 
-1. Edit `src/pages/admin/holland/AdminHollandQuestions.vue`:
-   - Breadcrumb: tampilkan nama instrumen.
-   - Header: tampilkan judul & deskripsi instrumen, pindahkan tombol "Lihat Submissions" ke baris aksi terpisah.
-   - **Konversi bagian tiap kolom dari card/grid menjadi table** (fokus utama): setiap kolom dirender sebagai tabel dengan header `No | Pernyataan | Aksi`, mengikuti pola tabel kategori di Likert.
-   - Sesuaikan header kategori menjadi `table-header` (bg-primary, teks putih).
-   - Sesuaikan semua modal (footer, tombol, style) mengikuti pola modal Likert.
-2. Verifikasi hasil di browser (mode admin, halaman Pertanyaan Holland RIASEC).
+### 1.1 Header Kartu Kategori (tambah tombol Kelola)
+
+Pada header tiap kartu kategori (bagian `table-header`), tambahkan tombol
+**Kelola** di samping tombol "Edit" yang sudah ada, dengan gaya mirip tombol
+"Kelola Kategori" di `AdminLikertQuestions.vue`:
+
+- Ikon: `fa-solid fa-gear`
+- Teks: `Kelola`
+- Aksi: `router.push({ name: 'admin-holland-category-questions', params: { slug: hollandSlug, riasecId: cat.id } })`
+- Gaya: `text-white border border-border rounded-lg hover:bg-white/10`
+
+### 1.2 Isi Kartu Kategori → Tabel Read-Only (gaya front-end)
+
+Ganti isi kartu (yang sekarang berupa sub-kartu per kolom dengan CRUD) menjadi
+**satu tabel read-only per kategori**, meniru layout `HollandQuestions.vue`:
+
+- **Header tabel**: setiap kolom (dari `columnsFor(cat.id)`) menjadi satu `<th>`.
+- **Baris tabel**: dihitung dari jumlah soal terbanyak di antara kolom-kolom
+  kategori tersebut (`Math.max(...columns.map(c => c.questions.length))`).
+- **Sel**: menampilkan teks soal (`q.question`) tanpa checkbox (read-only).
+- **Empty state**: jika kategori belum punya kolom/soal, tampilkan pesan
+  "Belum ada pernyataan di kategori ini."
+
+Struktur tabel (desktop):
+
+```
+| Kolom A        | Kolom B        | Kolom C        |
+|----------------|----------------|----------------|
+| Soal 1 (A)     | Soal 1 (B)     | Soal 1 (C)     |
+| Soal 2 (A)     | Soal 2 (B)     |                |
+| Soal 3 (A)     |                |                |
+```
+
+### 1.3 Hapus CRUD dari halaman ini
+
+Karena penambahan/editing/hapus soal & kolom pindah ke halaman baru, hapus dari
+`AdminHollandQuestions.vue`:
+
+- Form inline tambah pernyataan (`openInlineAdd`, `saveInline`, `cancelInline`)
+- Modal edit soal (`openEditModal`, `saveEdit`, `closeEditModal`)
+- Modal hapus soal (`openDeleteModal`, `confirmDelete`)
+- Modal tambah/edit kolom (`openAddColumnModal`, `openEditColumnModal`, `saveColumn`)
+- Modal hapus kolom (`openDeleteColumnModal`, `confirmDeleteColumn`)
+- Alert batasan 4 kolom (`showMaxColumnsAlert`)
+- State & helper terkait CRUD di atas
+
+### 1.4 Yang TETAP di halaman ini
+
+- Breadcrumb & header instrumen
+- Tombol "Lihat Submissions"
+- Tombol **Edit** kategori (deskripsi, skills, careers, subjects) — `openRiasecEditModal`
+- Badge jumlah soal per kategori
+- Loading state
 
 ---
 
-## Catatan
+## 2. Halaman Baru: `src/pages/admin/holland/AdminHollandCategoryQuestions.vue`
 
-- Perubahan bersifat tata letak (layout) dan styling saja.
-- Logika CRUD (pertanyaan, kolom, kategori RIASEC), inline add, dan batas maksimal 4 kolom tidak diubah.
-- Fokus utama: bagian **tiap kolom** yang tadinya **card** diubah menjadi **table**.
-- Field khusus Holland (kode RIASEC, skills, careers, subjects pada modal edit kategori) tetap dipertahankan.
+Halaman untuk mengelola soal & kolom pada **satu kategori RIASEC** tertentu.
+Gaya mengikuti `AdminLikertScales.vue` / `AdminLikertCategoryQuestions.vue`.
+
+### 2.1 Struktur Halaman
+
+1. **Breadcrumb** (3 level):
+   - `Holland RIASEC` → `admin-holland`
+   - `{nama instrumen}` → `admin-holland-questions`
+   - `{label kategori}` (aktif)
+
+2. **Header**: judul `{label kategori}` + deskripsi singkat
+   "Kelola pertanyaan dan kolom pada kategori ini."
+
+3. **Tombol Kembali** → `admin-holland-questions`
+
+4. **Kartu Kelola Soal** (`table-content`):
+   - Header kartu: `Soal ({jumlah})` + tombol **Tambah Kolom** (jika < 4 kolom)
+   - Untuk tiap kolom: sub-header nama kolom + tombol edit/hapus kolom
+   - Tabel per kolom: `No | Pernyataan | Aksi` (edit/hapus soal)
+   - Form inline tambah/edit soal (textarea + tombol Simpan/Batal)
+   - Tombol "Tambah Pernyataan" per kolom
+
+5. **Modal**:
+   - Modal tambah/edit kolom (nama + posisi)
+   - Modal hapus kolom (konfirmasi, termasuk jumlah soal yang ikut terhapus)
+   - `ConfirmDeleteModal` untuk hapus soal
+   - Alert batasan maksimal 4 kolom
+
+### 2.2 Logika (script)
+
+- Ambil `slug` & `riasecId` dari `route.params`
+- `onMounted`:
+  1. `hollandStore.getHollandBySlug(slug)` → jika tidak ada, redirect ke `admin-holland`
+  2. `riasecStore.fetchRiasecList(hollandId)` → cari kategori; jika tidak ada, redirect ke `admin-holland-questions`
+  3. `columnsStore.fetchColumns(hollandId, riasecId)`
+  4. `questionsStore.fetchQuestions(hollandId, riasecId, columnId)` per kolom (atau pakai `fetchAllQuestions` dengan map 1 kategori)
+- Reuse helper dari `AdminHollandQuestions.vue` yang lama:
+  - `columnsFor`, `questionsByRiasecAndColumn`, `keyOf`
+  - `openInlineAdd`, `saveInline`, `cancelInline`
+  - `openEditModal`, `saveEdit`, `closeEditModal`
+  - `openDeleteModal`, `confirmDelete`
+  - `openAddColumnModal`, `openEditColumnModal`, `saveColumn`, `closeColumnModal`
+  - `openDeleteColumnModal`, `confirmDeleteColumn`, `closeDeleteColumnModal`
+  - `orderOptions`, `showMaxColumnsAlert`
+
+---
+
+## 3. Routing Baru (`src/router/index.js`)
+
+Tambahkan route admin Holland baru di dalam `children`:
+
+```js
+{
+  path: "holland/:slug/riasec/:riasecId",
+  name: "admin-holland-category-questions",
+  component: AdminHollandCategoryQuestions,
+},
+```
+
+Import komponen baru di bagian atas file:
+
+```js
+import AdminHollandCategoryQuestions from "@/pages/admin/holland/AdminHollandCategoryQuestions.vue";
+```
+
+---
+
+## 4. Referensi Gaya
+
+- **Tabel read-only kartu kategori** → `src/pages/holland/HollandQuestions.vue`
+  (layout kolom-sebagai-header, soal-sebagai-baris)
+- **Tombol Kelola di header kartu** → tombol "Kelola Kategori" di
+  `src/pages/admin/likert/AdminLikertQuestions.vue`
+- **Halaman kelola soal** → `src/pages/admin/likert/AdminLikertCategoryQuestions.vue`
+  dan `src/pages/admin/likert/AdminLikertScales.vue`
+- **Kelas CSS yang dipakai**: `table-content`, `table-header`, `table-fixed`,
+  `divide-y divide-border`, `border-black-secondary`, `text-table-value-text`,
+  `bg-primary`, `bg-primary-soft`, `text-text-primary/secondary/muted`,
+  `bg-surface`, `border-border`, `rounded-lg/xl`
+
+---
+
+## 5. Langkah Implementasi
+
+1. Buat file baru `src/pages/admin/holland/AdminHollandCategoryQuestions.vue`
+   (pindahkan logika CRUD soal & kolom dari `AdminHollandQuestions.vue`).
+2. Tambahkan route `admin-holland-category-questions` di `src/router/index.js`.
+3. Ubah `AdminHollandQuestions.vue`:
+   - Tambah tombol **Kelola** di header tiap kartu kategori.
+   - Ganti isi kartu menjadi tabel read-only gaya front-end.
+   - Hapus semua CRUD soal & kolom (pindah ke halaman baru).
+4. Uji alur: daftar kategori → klik Kelola → kelola soal/kolom → kembali.

@@ -30,6 +30,7 @@ import AdminLikertSubmissionDetail from "@/pages/admin/likert/AdminLikertSubmiss
 
 import AdminHolland from "@/pages/admin/holland/AdminHolland.vue";
 import AdminHollandQuestions from "@/pages/admin/holland/AdminHollandQuestions.vue";
+import AdminHollandCategoryQuestions from "@/pages/admin/holland/AdminHollandCategoryQuestions.vue";
 import AdminHollandSubmissions from "@/pages/admin/holland/AdminHollandSubmissions.vue";
 import AdminHollandSubmissionDetail from "@/pages/admin/holland/AdminHollandSubmissionDetail.vue";
 
@@ -144,6 +145,11 @@ const routes = [
 				path: "holland/:slug",
 				name: "admin-holland-questions",
 				component: AdminHollandQuestions,
+			},
+			{
+				path: "holland/:slug/riasec/:riasecId",
+				name: "admin-holland-category-questions",
+				component: AdminHollandCategoryQuestions,
 			},
 			{
 				path: "holland/:slug/submissions",
