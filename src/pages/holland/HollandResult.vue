@@ -1,6 +1,8 @@
 <template>
-	<div class="min-h-screen bg-bg">
-		<div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
+	<div :class="embedded ? '' : 'min-h-screen bg-bg'">
+		<div
+			:class="embedded ? '' : 'max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10'"
+		>
 			<div
 				v-if="!result || loading"
 				class="text-center text-sm text-black-secondary py-20"
@@ -112,9 +114,12 @@
 					</div>
 
 					<!-- Ringkasan: hex chart + kode dominan -->
-					<div class="p-5 md:p-8 border-b border-border">
+					<div
+						v-if="showScoreSummary"
+						class="p-5 md:p-8 border-b border-border"
+					>
 						<RiasecSummaryHeader
-							:top-code="result.topCode"
+							:top-code="computedTopCode"
 							:top-code-info="topCodeInfo"
 							:score-percent-map="scorePercentMap"
 							:top-codes-info="topCodesInfo"
@@ -122,7 +127,10 @@
 					</div>
 
 					<!-- Tabel skor -->
-					<div class="p-5 md:p-6 border-b border-border">
+					<div
+						v-if="showScoreSummary"
+						class="p-5 md:p-6 border-b border-border"
+					>
 						<RiasecScoreBreakdown
 							:score-breakdown="scoreBreakdown"
 							:get-label="riasecLabel"
@@ -131,7 +139,10 @@
 					</div>
 
 					<!-- Catatan -->
-					<div class="p-5 md:p-6 border-b border-border">
+					<div
+						v-if="showScoreSummary"
+						class="p-5 md:p-6 border-b border-border"
+					>
 						<p class="text-xs font-medium text-black-secondary mb-3">Catatan</p>
 						<RiasecNotes :top-code-info="topCodeInfo" />
 					</div>
@@ -157,6 +168,8 @@
 									:detail-sections="detailSections"
 									:answered-ids="answeredIds"
 									bare
+									avoid-break
+									unanswered-class="border-border bg-surface-muted-40"
 								/>
 							</div>
 						</Transition>
@@ -164,7 +177,10 @@
 				</div>
 
 				<!-- Tombol aksi -->
-				<div class="print:hidden flex flex-col md:flex-row gap-3">
+				<div
+					v-if="!embedded"
+					class="print:hidden flex flex-col md:flex-row gap-3"
+				>
 					<button
 						@click="showExportPDFModal = true"
 						class="w-full md:flex-1 py-3 h-10 border border-black-secondary text-text-primary text-sm font-semibold rounded-xl hover:bg-surface-muted transition cursor-pointer"
@@ -184,7 +200,7 @@
 	<!-- Modal konfirmasi export PDF -->
 	<Transition name="fade">
 		<div
-			v-if="showExportPDFModal"
+			v-if="showExportPDFModal && !embedded"
 			class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
 			@click.self="showExportPDFModal = false"
 		>
@@ -205,7 +221,7 @@
 						Batal
 					</button>
 					<button
-						@click="handlePrint()"
+						@click="handleExportPDF()"
 						:disabled="exportingPDF"
 						class="flex-1 py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
 					>
@@ -218,7 +234,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import {
+	ref,
+	computed,
+	onMounted,
+	onBeforeUnmount,
+	nextTick,
+	watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useHollandStore } from "@/stores/holland/holland";
@@ -231,10 +254,20 @@ import {
 	buildScoreBreakdown,
 	buildDetailSections,
 } from "@/utils/holland-result";
+import {
+	computeScoreBreakdownFromAnswers,
+	computeTopCode,
+} from "@/utils/holland-scoring";
 import RiasecSummaryHeader from "@/components/holland/RiasecSummaryHeader.vue";
 import RiasecScoreBreakdown from "@/components/holland/RiasecScoreBreakdown.vue";
 import RiasecNotes from "@/components/holland/RiasecNotes.vue";
 import RiasecAnswerDetails from "@/components/holland/RiasecAnswerDetails.vue";
+
+const props = defineProps({
+	result: { type: Object, default: null }, // data hasil (dipakai mode admin/embedded)
+	embedded: { type: Boolean, default: false }, // true = hanya render card, tanpa layout halaman
+	showScoreSummary: { type: Boolean, default: true }, // false = sembunyikan ringkasan skor (submission belum selesai)
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -251,8 +284,10 @@ const showExportPDFModal = ref(false);
 const exportingPDF = ref(false);
 
 const hollandId = computed(() => hollandStore?.currentHolland?.id || null);
-const loading = ref(true);
-const showDetails = ref(false);
+// Mode embedded (admin): data sudah di-pass via props, jadi tidak perlu
+// menampilkan loading state di awal.
+const loading = ref(!props.embedded);
+const showDetails = ref(props.embedded);
 const codeCopied = ref(false);
 
 async function copyCode() {
@@ -268,7 +303,9 @@ async function copyCode() {
 	}
 }
 
-const result = computed(() => sessionStore.getResult(hollandId.value));
+const result = computed(
+	() => props.result ?? sessionStore.getResult(hollandId.value),
+);
 
 const scorePercentMap = computed(() => {
 	const map = {};
@@ -290,9 +327,23 @@ const formattedBirthDateAge = computed(() =>
 	formatBirthDateAge(result.value?.respondent),
 );
 
+// `scores` dan `topCode` TIDAK disimpan di Firestore — selalu dihitung
+// ulang dari `answers` (lihat holland-scoring.js). Di mode publik,
+// `result.scores` sudah dihitung oleh session store; di mode embedded
+// (admin), `mappedResult` hanya berisi `answers`, jadi dihitung di sini.
+const computedScores = computed(() => {
+	if (result.value?.scores) return result.value.scores;
+	const riasecIds = riasecStore.riasecList.map((c) => c.id);
+	return computeScoreBreakdownFromAnswers(result.value?.answers, riasecIds);
+});
+
+const computedTopCode = computed(() => {
+	if (result.value?.topCode) return result.value.topCode;
+	return computeTopCode(computedScores.value);
+});
+
 const scoreBreakdown = computed(() => {
-	const scores = result.value?.scores || {};
-	return buildScoreBreakdown(scores, result.value?.topCode);
+	return buildScoreBreakdown(computedScores.value, computedTopCode.value);
 });
 
 // 3 kode tertinggi dari scoreBreakdown (sudah urut menurun by percentage)
@@ -329,6 +380,41 @@ const detailSections = computed(() => {
 onMounted(async () => {
 	loading.value = true;
 	try {
+		// Mode embedded (admin): data sudah di-pass via props, tidak perlu
+		// fetch session/result dari store.
+		if (props.embedded) {
+			// Tetap perlu fetch riasec, columns, dan questions untuk
+			// menampilkan detailSections & label kategori.
+			if (
+				!hollandStore.currentHolland ||
+				hollandStore.currentHolland.slug !== hollandSlug
+			) {
+				await hollandStore.getHollandBySlug(hollandSlug);
+			}
+
+			if (!hollandStore.currentHolland) {
+				router.replace({
+					name: "not-available",
+					query: {
+						title: "Instrumen Tidak Ditemukan",
+						message:
+							"Instrumen yang kamu cari mungkin sudah dihapus atau link tidak valid.",
+					},
+				});
+				return;
+			}
+
+			await riasecStore.fetchRiasecList(hollandId.value);
+			const riasecIds = riasecStore.riasecList.map((c) => c.id);
+
+			await columnsStore.fetchAllColumns(hollandId.value, riasecIds);
+			await questionsStore.fetchAllQuestions(
+				hollandId.value,
+				columnsByRiasec.value,
+			);
+			return;
+		}
+
 		if (
 			!hollandStore.currentHolland ||
 			hollandStore.currentHolland.slug !== hollandSlug
@@ -426,12 +512,52 @@ watch(
 	},
 );
 
-function handleExportPDF() {
-	// TODO: Implement PDF export functionality
+const wasDetailsExpandedBeforePrint = ref(false);
+const exportingFromButton = ref(false);
+
+// Fallback untuk Ctrl+P / print manual: paksa rincian jawaban terbuka
+function handleBeforePrint() {
+	// Jangan timpa state saat proses export dari tombol — sudah ditangani handleExportPDF
+	if (exportingFromButton.value) return;
+	wasDetailsExpandedBeforePrint.value = showDetails.value;
+	showDetails.value = true;
 }
 
-function handlePrint() {
+// Fallback setelah print manual selesai: kembalikan state semula
+function handleAfterPrint() {
+	if (exportingFromButton.value) return;
+	if (!wasDetailsExpandedBeforePrint.value) {
+		showDetails.value = false;
+	}
+}
+
+onMounted(() => {
+	window.addEventListener("beforeprint", handleBeforePrint);
+	window.addEventListener("afterprint", handleAfterPrint);
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("beforeprint", handleBeforePrint);
+	window.removeEventListener("afterprint", handleAfterPrint);
+});
+
+async function handleExportPDF() {
+	exportingFromButton.value = true;
+
+	// Simpan state asli, lalu paksa rincian jawaban terbuka agar ikut tercetak
+	wasDetailsExpandedBeforePrint.value = showDetails.value;
+	showDetails.value = true;
+
+	// Tunggu Vue me-render konten yang di-expand sebelum dialog print dibuka
+	await nextTick();
+
 	window.print();
+
+	// Kembalikan state semula setelah dialog print ditutup (jika tadinya tertutup)
+	if (!wasDetailsExpandedBeforePrint.value) {
+		showDetails.value = false;
+	}
+	exportingFromButton.value = false;
 	showExportPDFModal.value = false;
 }
 </script>
@@ -480,9 +606,12 @@ function handlePrint() {
 	/* Buang padding/margin kontainer luar agar .print-area memenuhi lebar
      page area dan jarak dari tepi kertas murni berasal dari @page margin.
      Padding kecil 5mm dipertahankan sebagai fallback visual tambahan di
-     halaman pertama bila @page margin tidak dihormati browser. */
+     halaman pertama bila @page margin tidak dihormati browser.
+     Selektor mencakup mode publik (.min-h-screen, .max-w-3xl, .space-y-6)
+     dan mode embedded (admin) yang tidak punya wrapper class tersebut. */
 	.min-h-screen,
 	.max-w-3xl,
+	.max-w-4xl,
 	.space-y-6 {
 		margin: 0 !important;
 		padding-left: 5mm !important;
