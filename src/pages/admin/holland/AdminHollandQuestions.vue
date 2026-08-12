@@ -124,11 +124,11 @@
 								</th>
 							</tr>
 						</thead>
-						<tbody class="divide-y divide-border">
+						<tbody class="divide-y divide-none">
 							<tr
 								v-for="i in maxQuestionsInCategory(cat.id)"
 								:key="i"
-								class="divide-x divide-border"
+								class="divide-x divide-black-secondary"
 							>
 								<td
 									v-for="col in columnsFor(cat.id)"
