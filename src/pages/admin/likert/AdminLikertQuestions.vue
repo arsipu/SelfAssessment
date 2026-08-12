@@ -46,7 +46,7 @@
 						params: { slug: likertSlug },
 					})
 				"
-				class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium text-text-on-primary bg-primary rounded-lg hover:bg-primary-hover transition-colors whitespace-nowrap h-10 cursor-pointer"
+				class="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 text-sm font-medium bg-primary rounded-sm border border-black secondary text-white hover:bg-primary/80 transition-colors whitespace-nowrap h-10 cursor-pointer"
 			>
 				<font-awesome-icon
 					icon="fa-solid fa-right-to-bracket"
