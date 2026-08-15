@@ -189,7 +189,7 @@
 		<footer
 			class="text-center py-10 px-4 text-sm text-text-secondary border-t border-border bg-surface-muted"
 		>
-			<p>Self Assessment — dibuat untuk membantu proses eksplorasi karier.</p>
+			<p>&copy; {{ new Date().getFullYear() }} persiapankarir.com</p>
 		</footer>
 	</div>
 </template>

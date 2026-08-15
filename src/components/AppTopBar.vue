@@ -3,8 +3,10 @@
 		class="w-full bg-surface border-b border-border px-4 md:px-6 py-3 relative"
 	>
 		<div class="flex items-center gap-4">
-			<span class="text-base font-medium text-text-primary tracking-tight"
-				>persiapankarir.com</span
+			<router-link
+				to="/"
+				class="text-base font-medium text-text-primary tracking-tight hover:text-primary transition-colors"
+				>persiapankarir.com</router-link
 			>
 
 			<div class="hidden md:flex md:flex-row items-start gap-1 md:ml-8">
