@@ -262,6 +262,7 @@ import RiasecSummaryHeader from "@/components/holland/RiasecSummaryHeader.vue";
 import RiasecScoreBreakdown from "@/components/holland/RiasecScoreBreakdown.vue";
 import RiasecNotes from "@/components/holland/RiasecNotes.vue";
 import RiasecAnswerDetails from "@/components/holland/RiasecAnswerDetails.vue";
+import { getPdfDownloadUrl } from "@/apps/pdf";
 
 const props = defineProps({
 	result: { type: Object, default: null }, // data hasil (dipakai mode admin/embedded)
@@ -546,7 +547,8 @@ async function handleExportPDF() {
 
 	exportingPDF.value = true;
 	try {
-		const url = `http://localhost:8000/api/create-pdf/${hollandId.value}?code=${result.value.code}`;
+		// const url = `http://localhost:8000/api/create-pdf/${hollandId.value}?code=${result.value.code}`;
+		const url = getPdfDownloadUrl(hollandId.value, result.value.code);
 		window.open(url, "_blank");
 	} finally {
 		exportingPDF.value = false;
