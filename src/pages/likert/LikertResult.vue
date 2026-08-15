@@ -427,23 +427,14 @@ onBeforeUnmount(() => {
 });
 
 async function handleExportPDF() {
-	exportingFromButton.value = true;
+	if (!likertId.value || !result.value?.code) return;
 
-	// Simpan state asli, lalu paksa rincian jawaban terbuka agar ikut tercetak
-	wasDetailsExpandedBeforePrint.value = showDetails.value;
-	showDetails.value = true;
-
-	// Tunggu Vue me-render konten yang di-expand sebelum dialog print dibuka
-	await nextTick();
-
-	window.print();
-
-	// Kembalikan state semula setelah dialog print ditutup (jika tadinya tertutup)
-	if (!wasDetailsExpandedBeforePrint.value) {
-		showDetails.value = false;
+	try {
+		const url = `http://localhost:8000/api/create-pdf/${likertId.value}?code=${result.value.code}`;
+		window.open(url, "_blank");
+	} finally {
+		showExportPDFModal.value = false;
 	}
-	exportingFromButton.value = false;
-	showExportPDFModal.value = false;
 }
 </script>
 
