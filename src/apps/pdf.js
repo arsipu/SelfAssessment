@@ -1,3 +1,3 @@
 export const getPdfDownloadUrl = (docId, code) => {
-	return `http://localhost:8000/api/create-pdf/${docId}?code=${code}`;
+	return `https://pdf-persiapankarir.ogestudio.com/api/create-pdf/${docId}?code=${code}`;
 };
