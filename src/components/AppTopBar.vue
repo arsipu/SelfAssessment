@@ -1,6 +1,6 @@
 <template>
 	<nav
-		class="w-full bg-surface border-b border-border px-4 md:px-6 py-3 relative"
+		class="w-full bg-surface border-b border-border px-4 md:px-6 py-3 relative sticky top-0 z-50"
 	>
 		<div class="flex items-center gap-4">
 			<router-link
