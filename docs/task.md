@@ -25,6 +25,18 @@ Implement functional PDF download buttons in `HollandResult.vue` and `LikertResu
 - [x] Open the URL in a new tab or trigger a direct download.
 - [x] Remove existing `window.print()` logic in favor of the API call.
 
+### 3. Admin Holland Submission Detail (`src/pages/admin/holland/AdminHollandSubmissionDetail.vue`)
+
+- [ ] Update `handlePrint` function (or rename to `handleExportPDF`).
+- [ ] Use `hollandId.value` and `submission.value.code` for the API URL.
+- [ ] Implement the same redirection logic.
+
+### 4. Admin Likert Submission Detail (`src/pages/admin/likert/AdminLikertSubmissionDetail.vue`)
+
+- [ ] Update `handlePrint` function (or rename to `handleExportPDF`).
+- [ ] Use `likertId.value` and `submission.value.code` for the API URL.
+- [ ] Implement the same redirection logic.
+
 ## Technical Considerations
 
 - Ensure `testId` and `code` are available before triggering the download.

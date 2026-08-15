@@ -135,7 +135,7 @@
 						Batal
 					</button>
 					<button
-						@click="handlePrint()"
+						@click="handleExportPDF()"
 						:disabled="false"
 						class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
 					>
@@ -154,6 +154,7 @@ import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useLikertStore } from "@/stores/likert/likert";
 import { useLikertSubmissionsStore } from "@/stores/likert/likert-submissions";
+import { getPdfDownloadUrl } from "@/apps/pdf";
 
 const route = useRoute();
 const router = useRouter();
@@ -198,10 +199,14 @@ const mappedResult = computed(() => {
 // ── Print Action ────────────────────────────────────────────
 
 /**
- * Menampilkan dialog cetak window untuk mencetak hasil.
+ * Mengunduh hasil PDF melalui API.
  */
-function handlePrint() {
-	window.print();
+function handleExportPDF() {
+	if (!likertId.value || !submission.value?.code) return;
+
+	// const url = `http://localhost:8000/api/create-pdf/${likertId.value}?code=${submission.value.code}`;
+	const url = getPdfDownloadUrl(likertId.value, submission.value.code);
+	window.open(url, "_blank");
 	showExportPDFModal.value = false;
 }
 

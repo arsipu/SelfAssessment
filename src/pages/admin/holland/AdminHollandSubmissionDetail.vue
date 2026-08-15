@@ -148,7 +148,7 @@
 						Batal
 					</button>
 					<button
-						@click="handlePrint()"
+						@click="handleExportPDF()"
 						:disabled="false"
 						class="w-full sm:flex-1 py-2.5 md:py-2.5 rounded-lg text-sm font-medium text-text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 transition-colors h-10 cursor-pointer"
 					>
@@ -170,6 +170,7 @@ import { useHollandSubmissionsStore } from "@/stores/holland/holland-submissions
 import { useHollandQuestionsStore } from "@/stores/holland/holland-questions";
 import { useHollandColumnsStore } from "@/stores/holland/holland-columns";
 import { useHollandRiasecStore } from "@/stores/holland/holland-riasec";
+import { getPdfDownloadUrl } from "@/apps/pdf";
 
 const route = useRoute();
 const router = useRouter();
@@ -218,10 +219,14 @@ const mappedResult = computed(() => {
 // ── Print Action ────────────────────────────────────────────
 
 /**
- * Menampilkan dialog cetak window untuk mencetak hasil.
+ * Mengunduh hasil PDF melalui API.
  */
-function handlePrint() {
-	window.print();
+function handleExportPDF() {
+	if (!hollandId.value || !submission.value?.code) return;
+
+	// const url = `http://localhost:8000/api/create-pdf/${}?code=${submission.value.code}`;
+	const url = getPdfDownloadUrl(hollandId.value, submission.value.code);
+	window.open(url, "_blank");
 	showExportPDFModal.value = false;
 }
 
