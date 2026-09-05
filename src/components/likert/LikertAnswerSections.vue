@@ -1,12 +1,6 @@
 <template>
 	<div v-if="variant === 'list'" class="space-y-5">
 		<div v-for="section in sectionsWithGlobalIndex" :key="section.key">
-			<div class="flex items-center gap-2 mb-2.5">
-				<span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
-				<span class="text-xs font-medium text-black-secondary">{{
-					section.label
-				}}</span>
-			</div>
 			<div class="space-y-2">
 				<div
 					v-for="(item, i) in section.items"
@@ -28,42 +22,35 @@
 	</div>
 
 	<div v-else>
-		<div
-			v-for="(section, index) in sectionsWithGlobalIndex"
-			:key="section.key"
-			class="avoid-break"
-			:class="index < sectionsWithGlobalIndex.length - 1 ? 'border-b border-border' : ''"
-		>
-			<div class="pt-4 md:pt-6 pb-2 flex items-center gap-2">
-				<h2 class="text-xs md:text-sm font-medium text-black">
-					{{ section.label }}
-				</h2>
-			</div>
-			<div class="overflow-x-auto pb-4 md:pb-6">
-				<table
-					class="w-full text-left border-collapse table-fixed text-xs md:text-sm"
-				>
-					<thead>
-						<tr>
-							<th
-								class="w-[10%] md:w-[8%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
-							>
-								No
-							</th>
-							<th
-								class="w-[60%] md:w-[50%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
-							>
-								Pertanyaan
-							</th>
-							<th
-								class="w-[30%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
-							>
-								Jawaban
-							</th>
-						</tr>
-					</thead>
+		<div class="overflow-x-auto pb-4 md:pb-6">
+			<table
+				class="w-full text-left border-collapse table-fixed text-xs md:text-sm"
+			>
+				<thead>
+					<tr>
+						<th
+							class="w-[10%] md:w-[8%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
+						>
+							No
+						</th>
+						<th
+							class="w-[60%] md:w-[50%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
+						>
+							Pertanyaan
+						</th>
+						<th
+							class="w-[30%] px-3 py-2 text-xs md:text-sm font-normal text-black-secondary"
+						>
+							Jawaban
+						</th>
+					</tr>
+				</thead>
 
-					<tbody class="bg-surface">
+				<tbody class="bg-surface">
+					<template
+						v-for="section in sectionsWithGlobalIndex"
+						:key="section.key"
+					>
 						<tr
 							v-for="(item, itemIndex) in section.items"
 							:key="item.questionId"
@@ -78,9 +65,9 @@
 								{{ item.answerLabel }}
 							</td>
 						</tr>
-					</tbody>
-				</table>
-			</div>
+					</template>
+				</tbody>
+			</table>
 		</div>
 	</div>
 </template>
