@@ -58,7 +58,7 @@
 								v-for="(q, i) in section.questions"
 								:key="q.id"
 								class="rounded-xl p-1 md:p-4 transition-colors"
-								:class="{ 'border-l-2 border-red-400 bg-red-50': !answers[q.id] }"
+								:class="{ 'border-l-2 border-red-400 bg-red-50': showUnansweredList && !answers[q.id] }"
 							>
 								<div class="flex items-start gap-3 mb-3">
 									<span
