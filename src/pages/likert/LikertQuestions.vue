@@ -5,7 +5,7 @@
 		<div class="max-w-4xl mx-auto px-4 py-6 pb-20 sm:py-10">
 			<!-- tombol kembali -->
 			<button
-				@click="$router.push('/')"
+				@click="goBack"
 				class="flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer"
 			>
 				<font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
@@ -200,6 +200,11 @@ const answers = ref({});
 let session = null;
 
 const scaleOptions = LIKERT_SCALE_OPTIONS;
+
+function goBack() {
+	likertSessionStore.clearSession(likertId.value);
+	router.push({ name: "likert-form", params: { slug: likertSlug } });
+}
 
 onMounted(async () => {
 	// Pastikan currentLikert terisi

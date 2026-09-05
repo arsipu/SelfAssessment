@@ -5,7 +5,7 @@
 		<div class="max-w-4xl mx-auto px-4 py-6 pb-20 sm:py-10">
 			<!-- tombol kembali -->
 			<button
-				@click="$router.push('/')"
+				@click="goBack"
 				class="flex items-center gap-2 text-sm text-text-secondary mb-5 sm:mb-6 cursor-pointer"
 			>
 				<font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
@@ -213,6 +213,11 @@ const sessionStore = useHollandSessionStore();
 // bukan cuma soal yang kepilih seperti sebelumnya.
 const checkedMap = reactive({});
 let session = null;
+
+function goBack() {
+	sessionStore.clearSession(hollandId.value);
+	router.push({ name: "holland-form", params: { slug: hollandSlug } });
+}
 
 onMounted(async () => {
 	// Pastikan currentHolland terisi (mungkin dari halaman sebelumnya)
