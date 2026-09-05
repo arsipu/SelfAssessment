@@ -6,7 +6,7 @@
 			<router-link
 				to="/"
 				class="text-base font-medium text-text-primary tracking-tight hover:text-primary transition-colors"
-				>persiapankarir.com</router-link
+				>kompaskarir.com</router-link
 			>
 
 			<div class="hidden md:flex md:flex-row items-start gap-1 md:ml-8">

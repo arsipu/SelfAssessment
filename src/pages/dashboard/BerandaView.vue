@@ -189,7 +189,8 @@
 		<footer
 			class="text-center py-10 px-4 text-sm text-text-secondary border-t border-border bg-surface-muted"
 		>
-			<p>&copy; {{ new Date().getFullYear() }} persiapankarir.com</p>
+			<p>&copy; {{ new Date().getFullYear() }} kompaskarir.com</p>
+			<p class="text-xs mt-1">Website ini dikembangkan oleh tim Peneliti UM</p>
 		</footer>
 	</div>
 </template>

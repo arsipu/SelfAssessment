@@ -14,7 +14,7 @@
 					persiapankarir.com
 				</p> -->
 				<p class="text-xl text-white">Panel Admin</p>
-				<p class="text-white text-xs">persiapankarir.com</p>
+				<p class="text-white text-xs">kompaskarir.com</p>
 			</div>
 
 			<!-- Close button, mobile only -->
