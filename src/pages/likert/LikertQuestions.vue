@@ -40,14 +40,18 @@
 					</div>
 
 					<!-- Category sections -->
-					<div v-for="section in sections" :key="section.key" class="mb-6">
-						<div class="flex items-center gap-3 mb-3">
+					<div
+						v-for="section in sectionsWithGlobalIndex"
+						:key="section.key"
+						class="mb-6"
+					>
+						<!-- <div class="flex items-center gap-3 mb-3">
 							<div class="flex items-center gap-2 shrink-0">
 								<span class="text-sm md:text-md font-medium text-black">{{
 									section.label
 								}}</span>
 							</div>
-						</div>
+						</div> -->
 
 						<div class="space-y-3">
 							<div
@@ -58,7 +62,7 @@
 								<div class="flex items-start gap-3 mb-3">
 									<span
 										class="text-xs md:text-sm font-medium text-black mt-0.5 w-2 md:w-6 shrink-0"
-										>{{ i + 1 }}.</span
+										>{{ section.globalStartIndex + i + 1 }}.</span
 									>
 									<p class="text-xs md:text-sm text-black">
 										{{ q.question }}
@@ -248,6 +252,22 @@ const sections = computed(() => {
 			label: cat?.name || "Tanpa kategori",
 			questions: grouped[categoryId],
 		};
+	});
+});
+
+/**
+ * `sections` yang diperkaya dengan `globalStartIndex` — yaitu offset
+ * jumlah pertanyaan dari semua section sebelumnya, digunakan untuk
+ * penomoran global (1–N) tanpa restart per section.
+ *
+ * @returns {Array<{ key: string, label: string, questions: Array, globalStartIndex: number }>}
+ */
+const sectionsWithGlobalIndex = computed(() => {
+	let offset = 0;
+	return sections.value.map((section) => {
+		const start = offset;
+		offset += section.questions.length;
+		return { ...section, globalStartIndex: start };
 	});
 });
 
