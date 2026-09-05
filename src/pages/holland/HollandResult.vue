@@ -135,6 +135,7 @@
 							:score-breakdown="scoreBreakdown"
 							:get-label="riasecLabel"
 							variant="table"
+							:limit="3"
 						/>
 					</div>
 

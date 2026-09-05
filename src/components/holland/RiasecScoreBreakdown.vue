@@ -23,7 +23,7 @@
 			<tbody>
 				<tr
 					class="flex items-center"
-					v-for="row in scoreBreakdown"
+					v-for="row in displayBreakdown"
 					:key="row.code"
 				>
 					<td class="w-36 py-2 px-1 font-medium text-black">
@@ -50,7 +50,7 @@
 		</table>
 
 		<div v-else class="space-y-4">
-			<div v-for="row in scoreBreakdown" :key="row.code">
+			<div v-for="row in displayBreakdown" :key="row.code">
 				<div class="flex items-center justify-between mb-1.5">
 					<span class="text-sm font-medium text-black">
 						{{ getLabel(row.code) }} ({{ row.code }})
@@ -83,10 +83,25 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from "vue";
+
+const props = defineProps({
 	scoreBreakdown: { type: Array, required: true },
 	title: { type: String, default: "Rincian skor per kategori" },
 	getLabel: { type: Function, default: (code) => code },
 	variant: { type: String, default: "card" }, // 'card' | 'table'
+	// Jumlah maksimal kategori yang dirender; null = tampilkan semua
+	limit: { type: Number, default: null },
+});
+
+/**
+ * `scoreBreakdown` versi tampilan — dipotong ke `limit` item pertama bila
+ * prop `limit` disediakan; jika `limit` null, semua kategori dirender.
+ *
+ * @returns {Array} item kategori yang akan dirender
+ */
+const displayBreakdown = computed(() => {
+	if (props.limit == null) return props.scoreBreakdown;
+	return props.scoreBreakdown.slice(0, props.limit);
 });
 </script>
