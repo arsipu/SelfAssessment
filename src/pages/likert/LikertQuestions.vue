@@ -40,25 +40,30 @@
 					</div>
 
 					<!-- Category sections -->
-					<div v-for="section in sections" :key="section.key" class="mb-6">
-						<div class="flex items-center gap-3 mb-3">
+					<div
+						v-for="section in sectionsWithGlobalIndex"
+						:key="section.key"
+						class="mb-6"
+					>
+						<!-- <div class="flex items-center gap-3 mb-3">
 							<div class="flex items-center gap-2 shrink-0">
 								<span class="text-sm md:text-md font-medium text-black">{{
 									section.label
 								}}</span>
 							</div>
-						</div>
+						</div> -->
 
 						<div class="space-y-3">
 							<div
 								v-for="(q, i) in section.questions"
 								:key="q.id"
 								class="rounded-xl p-1 md:p-4 transition-colors"
+								:class="{ 'border-l-2 border-red-400 bg-red-50': !answers[q.id] }"
 							>
 								<div class="flex items-start gap-3 mb-3">
 									<span
 										class="text-xs md:text-sm font-medium text-black mt-0.5 w-2 md:w-6 shrink-0"
-										>{{ i + 1 }}.</span
+										>{{ section.globalStartIndex + i + 1 }}.</span
 									>
 									<p class="text-xs md:text-sm text-black">
 										{{ q.question }}
@@ -96,6 +101,23 @@
 									: "Semua soal sudah dijawab ✓"
 							}}
 						</p>
+
+						<template v-if="unansweredCount > 0">
+							<button
+								@click="showUnansweredList = !showUnansweredList"
+								class="text-xs text-primary underline cursor-pointer text-left w-fit"
+							>
+								{{ showUnansweredList ? "Sembunyikan" : "Lihat nomor yang belum dijawab" }}
+							</button>
+							<Transition name="fade">
+								<p
+									v-if="showUnansweredList"
+									class="text-xs text-red-500 mt-1"
+								>
+									Nomor: {{ unansweredNumbers }}
+								</p>
+							</Transition>
+						</template>
 						<button
 							@click="showConfirmModal = true"
 							:disabled="unansweredCount > 0"
@@ -251,6 +273,22 @@ const sections = computed(() => {
 	});
 });
 
+/**
+ * `sections` yang diperkaya dengan `globalStartIndex` — yaitu offset
+ * jumlah pertanyaan dari semua section sebelumnya, digunakan untuk
+ * penomoran global (1–N) tanpa restart per section.
+ *
+ * @returns {Array<{ key: string, label: string, questions: Array, globalStartIndex: number }>}
+ */
+const sectionsWithGlobalIndex = computed(() => {
+	let offset = 0;
+	return sections.value.map((section) => {
+		const start = offset;
+		offset += section.questions.length;
+		return { ...section, globalStartIndex: start };
+	});
+});
+
 const answeredCount = computed(() => Object.keys(answers.value).length);
 const unansweredCount = computed(
 	() => questions.value.length - answeredCount.value,
@@ -259,6 +297,41 @@ const progressPct = computed(() =>
 	questions.value.length
 		? (answeredCount.value / questions.value.length) * 100
 		: 0,
+);
+
+/** Toggle visibility daftar nomor soal yang belum dijawab. */
+const showUnansweredList = ref(false);
+
+/**
+ * Daftar nomor global (1–N) dari soal yang belum dijawab.
+ * Memanfaatkan `sectionsWithGlobalIndex` + `answers` untuk menentukan
+ * nomor global tiap soal yang belum memiliki jawaban.
+ *
+ * @returns {Array<{ globalNumber: number, questionId: string }>}
+ */
+const unansweredQuestions = computed(() => {
+	const result = [];
+	for (const section of sectionsWithGlobalIndex.value) {
+		for (let i = 0; i < section.questions.length; i++) {
+			const q = section.questions[i];
+			if (!answers.value[q.id]) {
+				result.push({
+					globalNumber: section.globalStartIndex + i + 1,
+					questionId: q.id,
+				});
+			}
+		}
+	}
+	return result;
+});
+
+/**
+ * String nomor-nomor yang belum dijawab, dipisah koma.
+ *
+ * @returns {string} Contoh: "3, 5, 7"
+ */
+const unansweredNumbers = computed(() =>
+	unansweredQuestions.value.map((item) => item.globalNumber).join(", "),
 );
 
 const scoreMap = LIKERT_SCORE_MAP;
