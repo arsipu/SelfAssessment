@@ -58,6 +58,7 @@
 								v-for="(q, i) in section.questions"
 								:key="q.id"
 								class="rounded-xl p-1 md:p-4 transition-colors"
+								:class="{ 'border-l-2 border-red-400 bg-red-50': !answers[q.id] }"
 							>
 								<div class="flex items-start gap-3 mb-3">
 									<span
@@ -100,6 +101,23 @@
 									: "Semua soal sudah dijawab ✓"
 							}}
 						</p>
+
+						<template v-if="unansweredCount > 0">
+							<button
+								@click="showUnansweredList = !showUnansweredList"
+								class="text-xs text-primary underline cursor-pointer text-left w-fit"
+							>
+								{{ showUnansweredList ? "Sembunyikan" : "Lihat nomor yang belum dijawab" }}
+							</button>
+							<Transition name="fade">
+								<p
+									v-if="showUnansweredList"
+									class="text-xs text-red-500 mt-1"
+								>
+									Nomor: {{ unansweredNumbers }}
+								</p>
+							</Transition>
+						</template>
 						<button
 							@click="showConfirmModal = true"
 							:disabled="unansweredCount > 0"
@@ -279,6 +297,41 @@ const progressPct = computed(() =>
 	questions.value.length
 		? (answeredCount.value / questions.value.length) * 100
 		: 0,
+);
+
+/** Toggle visibility daftar nomor soal yang belum dijawab. */
+const showUnansweredList = ref(false);
+
+/**
+ * Daftar nomor global (1–N) dari soal yang belum dijawab.
+ * Memanfaatkan `sectionsWithGlobalIndex` + `answers` untuk menentukan
+ * nomor global tiap soal yang belum memiliki jawaban.
+ *
+ * @returns {Array<{ globalNumber: number, questionId: string }>}
+ */
+const unansweredQuestions = computed(() => {
+	const result = [];
+	for (const section of sectionsWithGlobalIndex.value) {
+		for (let i = 0; i < section.questions.length; i++) {
+			const q = section.questions[i];
+			if (!answers.value[q.id]) {
+				result.push({
+					globalNumber: section.globalStartIndex + i + 1,
+					questionId: q.id,
+				});
+			}
+		}
+	}
+	return result;
+});
+
+/**
+ * String nomor-nomor yang belum dijawab, dipisah koma.
+ *
+ * @returns {string} Contoh: "3, 5, 7"
+ */
+const unansweredNumbers = computed(() =>
+	unansweredQuestions.value.map((item) => item.globalNumber).join(", "),
 );
 
 const scoreMap = LIKERT_SCORE_MAP;
